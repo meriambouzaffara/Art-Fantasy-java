@@ -122,7 +122,11 @@ public class Main {
             // =========================
             Categorie c = new Categorie("Peinture", "img.png");
             cs.ajouter(c);
-
+            System.out.println("\n Liste des catégories :");
+            List<Categorie> categories = cs.recuperer();
+            for (Categorie cat : categories) {
+                System.out.println(cat);
+            }
             // =========================
             // OEUVRE
             // =========================
@@ -138,7 +142,11 @@ public class Main {
                     c
             );
             os.ajouter(o);
-
+            System.out.println("\n Liste des œuvres :");
+            List<Oeuvre> oeuvres = os.recuperer();
+            for (Oeuvre oe : oeuvres) {
+                System.out.println(oe);
+            }
             // =========================
             // FAVORIS
             // =========================
