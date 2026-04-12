@@ -7,12 +7,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import tn.rouhfan.entities.Evenement;
 import tn.rouhfan.services.EvenementService;
+import tn.rouhfan.tools.ImageUtils;
 import tn.rouhfan.ui.back.EvenementFormDialog;
 
 import java.net.URL;
@@ -75,9 +78,28 @@ public class EvenementsFrontController implements Initializable {
         VBox card = new VBox(12);
         card.setPadding(new Insets(20));
         card.setPrefWidth(320);
-        card.setPrefHeight(280);
+        card.setPrefHeight(450);
         card.setStyle("-fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-background-color: #ffffff; " +
                       "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 8, 0, 0, 2);");
+
+        // Image
+        ImageView imageView = new ImageView();
+        imageView.setFitWidth(280);
+        imageView.setFitHeight(180);
+        imageView.setPreserveRatio(true);
+        imageView.setStyle("-fx-border-color: #ddd; -fx-border-radius: 5;");
+        
+        if (event.getImage() != null && !event.getImage().isEmpty()) {
+            try {
+                String imageUrl = ImageUtils.getImageUrl(event.getImage());
+                Image img = new Image(imageUrl);
+                imageView.setImage(img);
+            } catch (Exception e) {
+                imageView.setStyle("-fx-border-color: #ddd; -fx-border-radius: 5; -fx-font-size: 50;");
+            }
+        } else {
+            imageView.setStyle("-fx-border-color: #ddd; -fx-border-radius: 5; -fx-background-color: #f5f5f5;");
+        }
 
         // Titre
         Label titleLabel = new Label(event.getTitre());
@@ -118,7 +140,7 @@ public class EvenementsFrontController implements Initializable {
         inscribeBtn.setPrefWidth(Double.MAX_VALUE);
         inscribeBtn.setOnAction(e -> handleInscribe(event));
 
-        card.getChildren().addAll(titleLabel, descLabel, dateLocBox, typeCapBox, statutLabel, spacer, inscribeBtn);
+        card.getChildren().addAll(imageView, titleLabel, descLabel, dateLocBox, typeCapBox, statutLabel, spacer, inscribeBtn);
         return card;
     }
 

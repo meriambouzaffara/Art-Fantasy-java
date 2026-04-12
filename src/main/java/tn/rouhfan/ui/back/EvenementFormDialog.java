@@ -3,16 +3,21 @@ package tn.rouhfan.ui.back;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import tn.rouhfan.entities.Evenement;
 import tn.rouhfan.entities.Sponsor;
 import tn.rouhfan.services.EvenementService;
 import tn.rouhfan.services.SponsorService;
+import tn.rouhfan.tools.ImageUtils;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
@@ -29,7 +34,8 @@ public class EvenementFormDialog {
     // Contrôles du formulaire
     private TextField titreField;
     private TextArea descriptionArea;
-    private TextField imageField;
+    private ImageView imagePreview;
+    private String selectedImagePath = "";
     private TextField typeField;
     private ComboBox<String> statutCombo;
     private DatePicker dateEvenementPicker;
@@ -51,8 +57,8 @@ public class EvenementFormDialog {
         stage = new Stage();
         stage.setTitle(evenement == null || evenement.getId() == 0 ? "Ajouter un événement" : "Modifier l'événement");
         stage.initModality(Modality.APPLICATION_MODAL);
-        stage.setWidth(600);
-        stage.setHeight(700);
+        stage.setWidth(650);
+        stage.setHeight(800);
 
         // Form Content
         GridPane grid = createFormGrid();
@@ -102,57 +108,73 @@ public class EvenementFormDialog {
         grid.add(createLabel("Description"), 0, 1);
         grid.add(descriptionArea, 1, 1);
 
-        // Image URL
-        imageField = new TextField();
-        imageField.setPromptText("URL de l'image");
+        // Image
+        HBox imageBox = new HBox(10);
+        Button browseBtn = new Button("📁 Parcourir");
+        browseBtn.setStyle("-fx-font-size: 11; -fx-padding: 5 10;");
+        browseBtn.setOnAction(e -> handleBrowseImage());
+        
+        Label imagePathLabel = new Label("Aucune image sélectionnée");
+        imagePathLabel.setStyle("-fx-text-fill: #999; -fx-font-size: 10;");
+        
+        imageBox.getChildren().addAll(browseBtn, imagePathLabel);
         grid.add(createLabel("Image"), 0, 2);
-        grid.add(imageField, 1, 2);
+        grid.add(imageBox, 1, 2);
+        
+        // Image Preview
+        imagePreview = new ImageView();
+        imagePreview.setFitWidth(200);
+        imagePreview.setFitHeight(150);
+        imagePreview.setPreserveRatio(true);
+        imagePreview.setStyle("-fx-border-color: #ddd; -fx-border-radius: 5; -fx-background-color: #f5f5f5;");
+        grid.add(createLabel("Aperçu"), 0, 3);
+        grid.add(imagePreview, 1, 3);
 
         // Type
         typeField = new TextField();
         typeField.setPromptText("Ex: CONCERT, EXPOSITION");
-        grid.add(createLabel("Type"), 0, 3);
-        grid.add(typeField, 1, 3);
+        grid.add(createLabel("Type"), 0, 4);
+        grid.add(typeField, 1, 4);
 
         // Statut
         statutCombo = new ComboBox<>();
         statutCombo.getItems().addAll("PLANIFIÉ", "EN COURS", "ANNULÉ", "TERMINÉ");
-        grid.add(createLabel("Statut *"), 0, 4);
-        grid.add(statutCombo, 1, 4);
+        grid.add(createLabel("Statut *"), 0, 5);
+        grid.add(statutCombo, 1, 5);
 
         // Date
         dateEvenementPicker = new DatePicker();
-        grid.add(createLabel("Date *"), 0, 5);
-        grid.add(dateEvenementPicker, 1, 5);
+        grid.add(createLabel("Date *"), 0, 6);
+        grid.add(dateEvenementPicker, 1, 6);
 
         // Lieu
         lieuField = new TextField();
         lieuField.setPromptText("Ex: Palais des congrès");
-        grid.add(createLabel("Lieu *"), 0, 6);
-        grid.add(lieuField, 1, 6);
+        grid.add(createLabel("Lieu *"), 0, 7);
+        grid.add(lieuField, 1, 7);
 
         // Capacité
         capaciteSpinner = new Spinner<>(1, 10000, 100, 10);
         capaciteSpinner.setEditable(true);
-        grid.add(createLabel("Capacité"), 0, 7);
-        grid.add(capaciteSpinner, 1, 7);
+        grid.add(createLabel("Capacité"), 0, 8);
+        grid.add(capaciteSpinner, 1, 8);
 
         // Participants
         participantsSpinner = new Spinner<>(0, 10000, 0, 1);
         participantsSpinner.setEditable(true);
-        grid.add(createLabel("Participants"), 0, 8);
-        grid.add(participantsSpinner, 1, 8);
+        grid.add(createLabel("Participants"), 0, 9);
+        grid.add(participantsSpinner, 1, 9);
 
         // Google Event ID
         googleEventIdField = new TextField();
         googleEventIdField.setPromptText("ID Google Calendar (optionnel)");
-        grid.add(createLabel("Google Event ID"), 0, 9);
-        grid.add(googleEventIdField, 1, 9);
+        grid.add(createLabel("Google Event ID"), 0, 10);
+        grid.add(googleEventIdField, 1, 10);
 
         // Sponsor
         sponsorCombo = new ComboBox<>();
-        grid.add(createLabel("Sponsor"), 0, 10);
-        grid.add(sponsorCombo, 1, 10);
+        grid.add(createLabel("Sponsor"), 0, 11);
+        grid.add(sponsorCombo, 1, 11);
 
         // Load sponsors
         try {
@@ -165,7 +187,7 @@ public class EvenementFormDialog {
         // Error message
         errorLabel = new Label();
         errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 11;");
-        grid.add(errorLabel, 0, 11, 2, 1);
+        grid.add(errorLabel, 0, 12, 2, 1);
 
         // Populate if editing
         if (evenement != null && evenement.getId() > 0) {
@@ -189,7 +211,19 @@ public class EvenementFormDialog {
     private void populateFields() {
         titreField.setText(evenement.getTitre() != null ? evenement.getTitre() : "");
         descriptionArea.setText(evenement.getDescription() != null ? evenement.getDescription() : "");
-        imageField.setText(evenement.getImage() != null ? evenement.getImage() : "");
+        
+        // Load image if exists
+        if (evenement.getImage() != null && !evenement.getImage().isEmpty()) {
+            selectedImagePath = evenement.getImage();
+            try {
+                String imageUrl = ImageUtils.getImageUrl(selectedImagePath);
+                Image img = new Image(imageUrl);
+                imagePreview.setImage(img);
+            } catch (Exception e) {
+                System.err.println("Erreur chargement image: " + e.getMessage());
+            }
+        }
+        
         typeField.setText(evenement.getType() != null ? evenement.getType() : "");
         statutCombo.setValue(evenement.getStatut() != null ? evenement.getStatut() : "PLANIFIÉ");
 
@@ -221,7 +255,7 @@ public class EvenementFormDialog {
 
             evenement.setTitre(titreField.getText());
             evenement.setDescription(descriptionArea.getText());
-            evenement.setImage(imageField.getText());
+            evenement.setImage(selectedImagePath);
             evenement.setType(typeField.getText());
             evenement.setStatut(statutCombo.getValue() != null ? statutCombo.getValue() : "PLANIFIÉ");
 
@@ -252,6 +286,43 @@ public class EvenementFormDialog {
             errorLabel.setText(ex.getMessage());
         } catch (SQLException ex) {
             errorLabel.setText("❌ Erreur BD: " + ex.getMessage());
+        }
+    }
+
+    private void handleBrowseImage() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Sélectionner une image");
+        
+        // Add image file filters
+        fileChooser.getExtensionFilters().addAll(
+            new FileChooser.ExtensionFilter("Images", "*.jpg", "*.jpeg", "*.png", "*.gif", "*.bmp"),
+            new FileChooser.ExtensionFilter("All Files", "*.*")
+        );
+        
+        File selectedFile = fileChooser.showOpenDialog(stage);
+        
+        if (selectedFile != null) {
+            if (ImageUtils.isValidImageFile(selectedFile)) {
+                try {
+                    String relativePath = ImageUtils.copyImage(selectedFile.getAbsolutePath());
+                    selectedImagePath = relativePath;
+                    
+                    // Update preview
+                    String imageUrl = ImageUtils.getImageUrl(relativePath);
+                    Image img = new Image(imageUrl);
+                    imagePreview.setImage(img);
+                    
+                    errorLabel.setText("✓ Image chargée avec succès");
+                    errorLabel.setStyle("-fx-text-fill: green; -fx-font-size: 11;");
+                    
+                } catch (Exception e) {
+                    errorLabel.setText("❌ Erreur lors du chargement: " + e.getMessage());
+                    errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 11;");
+                }
+            } else {
+                errorLabel.setText("❌ Format d'image non valide. Utilisez: JPG, PNG, GIF, BMP");
+                errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 11;");
+            }
         }
     }
 

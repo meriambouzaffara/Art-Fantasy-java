@@ -7,12 +7,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import tn.rouhfan.entities.Sponsor;
 import tn.rouhfan.services.SponsorService;
+import tn.rouhfan.tools.ImageUtils;
 import tn.rouhfan.ui.back.SponsorFormDialog;
 
 import java.net.URL;
@@ -75,12 +78,31 @@ public class SponsorsFrontController implements Initializable {
         VBox card = new VBox(10);
         card.setPadding(new Insets(20));
         card.setPrefWidth(320);
-        card.setPrefHeight(280);
+        card.setPrefHeight(420);
         card.setStyle("-fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-background-color: #ffffff; " +
                       "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 8, 0, 0, 2);");
 
-        // Nom (Logo simulé)
-        Label nameLabel = new Label("🏢 " + sponsor.getNom());
+        // Logo
+        ImageView logoView = new ImageView();
+        logoView.setFitWidth(280);
+        logoView.setFitHeight(120);
+        logoView.setPreserveRatio(true);
+        logoView.setStyle("-fx-border-color: #ddd; -fx-border-radius: 5;");
+        
+        if (sponsor.getLogo() != null && !sponsor.getLogo().isEmpty()) {
+            try {
+                String imageUrl = ImageUtils.getImageUrl(sponsor.getLogo());
+                Image img = new Image(imageUrl);
+                logoView.setImage(img);
+            } catch (Exception e) {
+                logoView.setStyle("-fx-border-color: #ddd; -fx-border-radius: 5; -fx-font-size: 50;");
+            }
+        } else {
+            logoView.setStyle("-fx-border-color: #ddd; -fx-border-radius: 5; -fx-background-color: #f5f5f5;");
+        }
+
+        // Nom
+        Label nameLabel = new Label(sponsor.getNom() != null ? sponsor.getNom() : "");
         nameLabel.setStyle("-fx-font-size: 14; -fx-font-weight: bold; -fx-wrap-text: true;");
 
         // Description
@@ -116,7 +138,7 @@ public class SponsorsFrontController implements Initializable {
         contactBtn.setPrefWidth(Double.MAX_VALUE);
         contactBtn.setOnAction(e -> handleContact(sponsor));
 
-        card.getChildren().addAll(nameLabel, descLabel, emailLabel, telLabel, addressLabel, dateLabel, spacer, contactBtn);
+        card.getChildren().addAll(logoView, nameLabel, descLabel, emailLabel, telLabel, addressLabel, dateLabel, spacer, contactBtn);
         return card;
     }
 
