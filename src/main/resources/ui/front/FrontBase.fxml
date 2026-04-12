@@ -29,6 +29,7 @@
             <HBox alignment="CENTER" spacing="10.0">
                 <Button text="Accueil" mnemonicParsing="false" styleClass="navbar-link" onAction="#goHome" />
                 <Button text="Événements" mnemonicParsing="false" styleClass="navbar-link" onAction="#goEvenements" />
+                <Button text="Sponsors" mnemonicParsing="false" styleClass="navbar-link" onAction="#goSponsors" />
                 <Button text="Cours" mnemonicParsing="false" styleClass="navbar-link" onAction="#goCours" />
                 <Button text="Magasin" mnemonicParsing="false" styleClass="navbar-link" onAction="#goMagasin" />
                 <MenuButton text="Galerie" mnemonicParsing="false" styleClass="navbar-link">

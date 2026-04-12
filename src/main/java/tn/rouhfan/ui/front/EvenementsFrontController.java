@@ -1,29 +1,28 @@
-package tn.rouhfan.ui.back;
+package tn.rouhfan.ui.front;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import tn.rouhfan.entities.Evenement;
 import tn.rouhfan.services.EvenementService;
+import tn.rouhfan.ui.back.EvenementFormDialog;
 
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ResourceBundle;
 
-public class EvenementsController implements Initializable {
+public class EvenementsFrontController implements Initializable {
 
-    @FXML private TableView<Evenement> evenementTable;
-    @FXML private TableColumn<Evenement, Integer> colId;
-    @FXML private TableColumn<Evenement, String> colTitre;
-    @FXML private TableColumn<Evenement, String> colDate;
-    @FXML private TableColumn<Evenement, String> colLieu;
-    @FXML private TableColumn<Evenement, String> colType;
-    @FXML private TableColumn<Evenement, Integer> colCapacite;
-    @FXML private TableColumn<Evenement, String> colStatut;
+    @FXML private FlowPane cardsContainer;
     @FXML private TextField searchField;
     @FXML private ComboBox<String> sortCombo;
 
@@ -34,22 +33,9 @@ public class EvenementsController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         evenementService = new EvenementService();
-        setupColumns();
         setupSortCombo();
         setupSearch();
         loadEvenements();
-    }
-
-    private void setupColumns() {
-        colId.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getId()).asObject());
-        colTitre.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getTitre()));
-        colDate.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
-            cellData.getValue().getDateEvent() != null ? dateFormat.format(cellData.getValue().getDateEvent()) : ""
-        ));
-        colLieu.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getLieu()));
-        colType.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getType() != null ? cellData.getValue().getType() : ""));
-        colCapacite.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getCapacite() != null ? cellData.getValue().getCapacite() : 0).asObject());
-        colStatut.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getStatut() != null ? cellData.getValue().getStatut() : ""));
     }
 
     private void setupSortCombo() {
@@ -69,11 +55,71 @@ public class EvenementsController implements Initializable {
     private void loadEvenements() {
         try {
             evenementsList = FXCollections.observableArrayList(evenementService.recuperer());
-            evenementTable.setItems(evenementsList);
+            displayCards(evenementsList);
         } catch (SQLException e) {
             showAlert("Erreur", "❌ Impossible de charger les événements: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void displayCards(ObservableList<Evenement> events) {
+        cardsContainer.getChildren().clear();
+        
+        for (Evenement event : events) {
+            VBox card = createEventCard(event);
+            cardsContainer.getChildren().add(card);
+        }
+    }
+
+    private VBox createEventCard(Evenement event) {
+        VBox card = new VBox(12);
+        card.setPadding(new Insets(20));
+        card.setPrefWidth(320);
+        card.setPrefHeight(280);
+        card.setStyle("-fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-background-color: #ffffff; " +
+                      "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 8, 0, 0, 2);");
+
+        // Titre
+        Label titleLabel = new Label(event.getTitre());
+        titleLabel.setStyle("-fx-font-size: 14; -fx-font-weight: bold; -fx-wrap-text: true;");
+
+        // Description (max 2 lines)
+        Label descLabel = new Label(event.getDescription() != null ? event.getDescription() : "");
+        descLabel.setStyle("-fx-font-size: 11; -fx-text-fill: #666; -fx-wrap-text: true;");
+        descLabel.setWrapText(true);
+
+        // Date et Lieu
+        HBox dateLocBox = new HBox(15);
+        Label dateLabel = new Label("📅 " + (event.getDateEvent() != null ? dateFormat.format(event.getDateEvent()) : "N/A"));
+        Label lieuLabel = new Label("📍 " + (event.getLieu() != null ? event.getLieu() : "N/A"));
+        dateLabel.setStyle("-fx-font-size: 10;");
+        lieuLabel.setStyle("-fx-font-size: 10;");
+        dateLocBox.getChildren().addAll(dateLabel, lieuLabel);
+
+        // Type et Capacité
+        HBox typeCapBox = new HBox(15);
+        Label typeLabel = new Label("🎭 " + (event.getType() != null ? event.getType() : "N/A"));
+        Label capaciteLabel = new Label("👥 " + (event.getCapacite() != null ? event.getCapacite() : "∞") + " places");
+        typeLabel.setStyle("-fx-font-size: 10;");
+        capaciteLabel.setStyle("-fx-font-size: 10;");
+        typeCapBox.getChildren().addAll(typeLabel, capaciteLabel);
+
+        // Statut
+        Label statutLabel = new Label(event.getStatut() != null ? "📌 " + event.getStatut() : "");
+        statutLabel.setStyle("-fx-font-size: 10; -fx-text-fill: #1976d2;");
+
+        // Spacer
+        VBox spacer = new VBox();
+        VBox.setVgrow(spacer, Priority.ALWAYS);
+
+        // Button S'inscrire
+        Button inscribeBtn = new Button("S'inscrire");
+        inscribeBtn.setStyle("-fx-font-size: 11; -fx-padding: 6 15; -fx-background-color: #1976d2; -fx-text-fill: white; -fx-border-radius: 5;");
+        inscribeBtn.setPrefWidth(Double.MAX_VALUE);
+        inscribeBtn.setOnAction(e -> handleInscribe(event));
+
+        card.getChildren().addAll(titleLabel, descLabel, dateLocBox, typeCapBox, statutLabel, spacer, inscribeBtn);
+        return card;
     }
 
     private void handleSearch() {
@@ -82,7 +128,7 @@ public class EvenementsController implements Initializable {
             ObservableList<Evenement> results = FXCollections.observableArrayList(
                 evenementService.rechercher(keyword)
             );
-            evenementTable.setItems(results);
+            displayCards(results);
         } catch (SQLException e) {
             showAlert("Erreur", "❌ Erreur lors de la recherche: " + e.getMessage());
         }
@@ -129,7 +175,7 @@ public class EvenementsController implements Initializable {
             }
 
             if (results != null) {
-                evenementTable.setItems(results);
+                displayCards(results);
             }
         } catch (SQLException e) {
             showAlert("Erreur", "❌ Erreur lors du tri: " + e.getMessage());
@@ -150,56 +196,16 @@ public class EvenementsController implements Initializable {
         
         if (dialog.isApproved()) {
             loadEvenements();
-            showAlert("Succès", "✅ Événement ajouté avec succès!");
+            showAlert("Succès", "✅ Vous vous êtes inscrit à l'événement!");
         }
     }
 
-    @FXML
-    private void editEvenement(ActionEvent event) {
-        Evenement selected = evenementTable.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            showAlert("Attention", "⚠️ Veuillez sélectionner un événement à modifier");
-            return;
-        }
-
-        try {
-            Evenement fullEvent = evenementService.findById(selected.getId());
-            EvenementFormDialog dialog = new EvenementFormDialog(fullEvent);
-            dialog.show();
-            
-            if (dialog.isApproved()) {
-                loadEvenements();
-                showAlert("Succès", "✅ Événement modifié avec succès!");
-            }
-        } catch (SQLException e) {
-            showAlert("Erreur", "❌ Impossible de charger l'événement: " + e.getMessage());
-        }
-    }
-
-    @FXML
-    private void deleteEvenement(ActionEvent event) {
-        Evenement selected = evenementTable.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            showAlert("Attention", "⚠️ Veuillez sélectionner un événement à supprimer");
-            return;
-        }
-
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Confirmation de suppression");
-        confirm.setHeaderText("Supprimer l'événement");
-        confirm.setContentText("Êtes-vous sûr de vouloir supprimer: \"" + selected.getTitre() + "\" ?");
-        
-        confirm.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                try {
-                    evenementService.supprimer(selected.getId());
-                    loadEvenements();
-                    showAlert("Succès", "✅ Événement supprimé avec succès!");
-                } catch (SQLException e) {
-                    showAlert("Erreur", "❌ Impossible de supprimer: " + e.getMessage());
-                }
-            }
-        });
+    private void handleInscribe(Evenement event) {
+        Alert info = new Alert(Alert.AlertType.INFORMATION);
+        info.setTitle("Inscription");
+        info.setHeaderText("Événement: " + event.getTitre());
+        info.setContentText("Vous êtes intéressé par cet événement.\n\nVous pouvez vous inscrire via le bouton 'S'inscrire' principal.");
+        info.showAndWait();
     }
 
     private void showAlert(String title, String message) {
@@ -210,3 +216,4 @@ public class EvenementsController implements Initializable {
         alert.showAndWait();
     }
 }
+

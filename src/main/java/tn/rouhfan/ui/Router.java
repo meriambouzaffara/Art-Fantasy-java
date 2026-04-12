@@ -3,6 +3,7 @@ package tn.rouhfan.ui;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 
@@ -24,5 +25,14 @@ public final class Router {
             System.err.println("Router: Failed to load view " + fxmlPath);
             e.printStackTrace();
         }
+    }
+
+    public static VBox loadView(String fxmlPath) throws IOException {
+        java.net.URL url = Router.class.getResource(fxmlPath);
+        if (url == null) {
+            throw new IOException("FXML not found: " + fxmlPath);
+        }
+        FXMLLoader loader = new FXMLLoader(url);
+        return loader.load();
     }
 }

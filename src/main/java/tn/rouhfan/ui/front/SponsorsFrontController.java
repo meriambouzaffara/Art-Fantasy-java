@@ -1,28 +1,28 @@
-package tn.rouhfan.ui.back;
+package tn.rouhfan.ui.front;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import tn.rouhfan.entities.Sponsor;
 import tn.rouhfan.services.SponsorService;
+import tn.rouhfan.ui.back.SponsorFormDialog;
 
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ResourceBundle;
 
-public class SponsorsController implements Initializable {
+public class SponsorsFrontController implements Initializable {
 
-    @FXML private TableView<Sponsor> sponsorTable;
-    @FXML private TableColumn<Sponsor, Integer> colId;
-    @FXML private TableColumn<Sponsor, String> colNom;
-    @FXML private TableColumn<Sponsor, String> colEmail;
-    @FXML private TableColumn<Sponsor, String> colTelephone;
-    @FXML private TableColumn<Sponsor, String> colAdresse;
-    @FXML private TableColumn<Sponsor, String> colDate;
+    @FXML private FlowPane cardsContainer;
     @FXML private TextField searchField;
     @FXML private ComboBox<String> sortCombo;
 
@@ -33,21 +33,9 @@ public class SponsorsController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         sponsorService = new SponsorService();
-        setupColumns();
         setupSortCombo();
         setupSearch();
         loadSponsors();
-    }
-
-    private void setupColumns() {
-        colId.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getId()).asObject());
-        colNom.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getNom()));
-        colEmail.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getEmail() != null ? cellData.getValue().getEmail() : ""));
-        colTelephone.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getTel() != null ? cellData.getValue().getTel() : ""));
-        colAdresse.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getAdresse() != null ? cellData.getValue().getAdresse() : ""));
-        colDate.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
-            cellData.getValue().getCreatedAt() != null ? dateFormat.format(cellData.getValue().getCreatedAt()) : ""
-        ));
     }
 
     private void setupSortCombo() {
@@ -67,11 +55,69 @@ public class SponsorsController implements Initializable {
     private void loadSponsors() {
         try {
             sponsorsList = FXCollections.observableArrayList(sponsorService.recuperer());
-            sponsorTable.setItems(sponsorsList);
+            displayCards(sponsorsList);
         } catch (SQLException e) {
             showAlert("Erreur", "❌ Impossible de charger les sponsors: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void displayCards(ObservableList<Sponsor> sponsors) {
+        cardsContainer.getChildren().clear();
+        
+        for (Sponsor sponsor : sponsors) {
+            VBox card = createSponsorCard(sponsor);
+            cardsContainer.getChildren().add(card);
+        }
+    }
+
+    private VBox createSponsorCard(Sponsor sponsor) {
+        VBox card = new VBox(10);
+        card.setPadding(new Insets(20));
+        card.setPrefWidth(320);
+        card.setPrefHeight(280);
+        card.setStyle("-fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-background-color: #ffffff; " +
+                      "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 8, 0, 0, 2);");
+
+        // Nom (Logo simulé)
+        Label nameLabel = new Label("🏢 " + sponsor.getNom());
+        nameLabel.setStyle("-fx-font-size: 14; -fx-font-weight: bold; -fx-wrap-text: true;");
+
+        // Description
+        Label descLabel = new Label(sponsor.getDescription() != null ? sponsor.getDescription() : "");
+        descLabel.setStyle("-fx-font-size: 11; -fx-text-fill: #666; -fx-wrap-text: true;");
+        descLabel.setWrapText(true);
+
+        // Email
+        Label emailLabel = new Label("📧 " + (sponsor.getEmail() != null ? sponsor.getEmail() : "N/A"));
+        emailLabel.setStyle("-fx-font-size: 10; -fx-text-fill: #1976d2;");
+        emailLabel.setWrapText(true);
+
+        // Téléphone
+        Label telLabel = new Label("📞 " + (sponsor.getTel() != null ? sponsor.getTel() : "N/A"));
+        telLabel.setStyle("-fx-font-size: 10;");
+
+        // Adresse
+        Label addressLabel = new Label("📍 " + (sponsor.getAdresse() != null ? sponsor.getAdresse() : "N/A"));
+        addressLabel.setStyle("-fx-font-size: 10;");
+        addressLabel.setWrapText(true);
+
+        // Date
+        Label dateLabel = new Label("📅 " + (sponsor.getCreatedAt() != null ? dateFormat.format(sponsor.getCreatedAt()) : "N/A"));
+        dateLabel.setStyle("-fx-font-size: 9; -fx-text-fill: #999;");
+
+        // Spacer
+        VBox spacer = new VBox();
+        VBox.setVgrow(spacer, Priority.ALWAYS);
+
+        // Button Contact
+        Button contactBtn = new Button("Contacter");
+        contactBtn.setStyle("-fx-font-size: 11; -fx-padding: 6 15; -fx-background-color: #4caf50; -fx-text-fill: white; -fx-border-radius: 5;");
+        contactBtn.setPrefWidth(Double.MAX_VALUE);
+        contactBtn.setOnAction(e -> handleContact(sponsor));
+
+        card.getChildren().addAll(nameLabel, descLabel, emailLabel, telLabel, addressLabel, dateLabel, spacer, contactBtn);
+        return card;
     }
 
     private void handleSearch() {
@@ -80,7 +126,7 @@ public class SponsorsController implements Initializable {
             ObservableList<Sponsor> results = FXCollections.observableArrayList(
                 sponsorService.rechercher(keyword)
             );
-            sponsorTable.setItems(results);
+            displayCards(results);
         } catch (SQLException e) {
             showAlert("Erreur", "❌ Erreur lors de la recherche: " + e.getMessage());
         }
@@ -122,7 +168,7 @@ public class SponsorsController implements Initializable {
             }
 
             if (results != null) {
-                sponsorTable.setItems(results);
+                displayCards(results);
             }
         } catch (SQLException e) {
             showAlert("Erreur", "❌ Erreur lors du tri: " + e.getMessage());
@@ -143,56 +189,16 @@ public class SponsorsController implements Initializable {
         
         if (dialog.isApproved()) {
             loadSponsors();
-            showAlert("Succès", "✅ Sponsor ajouté avec succès!");
+            showAlert("Succès", "✅ Merci de votre intérêt en tant que sponsor!");
         }
     }
 
-    @FXML
-    private void editSponsor(ActionEvent event) {
-        Sponsor selected = sponsorTable.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            showAlert("Attention", "⚠️ Veuillez sélectionner un sponsor à modifier");
-            return;
-        }
-
-        try {
-            Sponsor fullSponsor = sponsorService.findById(selected.getId());
-            SponsorFormDialog dialog = new SponsorFormDialog(fullSponsor);
-            dialog.show();
-            
-            if (dialog.isApproved()) {
-                loadSponsors();
-                showAlert("Succès", "✅ Sponsor modifié avec succès!");
-            }
-        } catch (SQLException e) {
-            showAlert("Erreur", "❌ Impossible de charger le sponsor: " + e.getMessage());
-        }
-    }
-
-    @FXML
-    private void deleteSponsor(ActionEvent event) {
-        Sponsor selected = sponsorTable.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            showAlert("Attention", "⚠️ Veuillez sélectionner un sponsor à supprimer");
-            return;
-        }
-
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Confirmation de suppression");
-        confirm.setHeaderText("Supprimer le sponsor");
-        confirm.setContentText("Êtes-vous sûr de vouloir supprimer: \"" + selected.getNom() + "\" ?");
-        
-        confirm.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                try {
-                    sponsorService.supprimer(selected.getId());
-                    loadSponsors();
-                    showAlert("Succès", "✅ Sponsor supprimé avec succès!");
-                } catch (SQLException e) {
-                    showAlert("Erreur", "❌ Impossible de supprimer: " + e.getMessage());
-                }
-            }
-        });
+    private void handleContact(Sponsor sponsor) {
+        Alert info = new Alert(Alert.AlertType.INFORMATION);
+        info.setTitle("Contact");
+        info.setHeaderText("Sponsor: " + sponsor.getNom());
+        info.setContentText("Email: " + sponsor.getEmail() + "\nTéléphone: " + sponsor.getTel());
+        info.showAndWait();
     }
 
     private void showAlert(String title, String message) {
@@ -203,3 +209,4 @@ public class SponsorsController implements Initializable {
         alert.showAndWait();
     }
 }
+

@@ -30,6 +30,24 @@ public class FrontBaseController {
     private void goEvenements(ActionEvent event) {
         showHero(false);
         contentHost.getChildren().clear();
+        try {
+            VBox view = Router.loadView("/ui/front/EvenementsFront.fxml");
+            contentHost.getChildren().add(view);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void goSponsors(ActionEvent event) {
+        showHero(false);
+        contentHost.getChildren().clear();
+        try {
+            VBox view = Router.loadView("/ui/front/SponsorsFront.fxml");
+            contentHost.getChildren().add(view);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
