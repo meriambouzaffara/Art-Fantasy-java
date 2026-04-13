@@ -36,13 +36,12 @@ public class EvenementFormDialog {
     private TextArea descriptionArea;
     private ImageView imagePreview;
     private String selectedImagePath = "";
-    private TextField typeField;
+    private ComboBox<String> typeCombo;
     private ComboBox<String> statutCombo;
     private DatePicker dateEvenementPicker;
     private TextField lieuField;
     private Spinner<Integer> capaciteSpinner;
     private Spinner<Integer> participantsSpinner;
-    private TextField googleEventIdField;
     private ComboBox<Sponsor> sponsorCombo;
     private Label errorLabel;
 
@@ -131,10 +130,11 @@ public class EvenementFormDialog {
         grid.add(imagePreview, 1, 3);
 
         // Type
-        typeField = new TextField();
-        typeField.setPromptText("Ex: CONCERT, EXPOSITION");
-        grid.add(createLabel("Type"), 0, 4);
-        grid.add(typeField, 1, 4);
+        typeCombo = new ComboBox<>();
+        typeCombo.getItems().addAll("Formation", "Exposition", "Concert", "Festival", "Atelier", "Concours", "Conference");
+        typeCombo.setPromptText("Choisissez un type");
+        grid.add(createLabel("Type *"), 0, 4);
+        grid.add(typeCombo, 1, 4);
 
         // Statut
         statutCombo = new ComboBox<>();
@@ -164,12 +164,6 @@ public class EvenementFormDialog {
         participantsSpinner.setEditable(true);
         grid.add(createLabel("Participants"), 0, 9);
         grid.add(participantsSpinner, 1, 9);
-
-        // Google Event ID
-        googleEventIdField = new TextField();
-        googleEventIdField.setPromptText("ID Google Calendar (optionnel)");
-        grid.add(createLabel("Google Event ID"), 0, 10);
-        grid.add(googleEventIdField, 1, 10);
 
         // Sponsor
         sponsorCombo = new ComboBox<>();
@@ -224,7 +218,7 @@ public class EvenementFormDialog {
             }
         }
         
-        typeField.setText(evenement.getType() != null ? evenement.getType() : "");
+typeCombo.setValue(evenement.getType() != null ? evenement.getType() : null);
         statutCombo.setValue(evenement.getStatut() != null ? evenement.getStatut() : "PLANIFIÉ");
 
         if (evenement.getDateEvent() != null) {
@@ -237,7 +231,6 @@ public class EvenementFormDialog {
         lieuField.setText(evenement.getLieu() != null ? evenement.getLieu() : "");
         capaciteSpinner.getValueFactory().setValue(evenement.getCapacite() != null ? evenement.getCapacite() : 100);
         participantsSpinner.getValueFactory().setValue(evenement.getNbParticipants());
-        googleEventIdField.setText(evenement.getGoogleEventId() != null ? evenement.getGoogleEventId() : "");
 
         if (evenement.getSponsor() != null) {
             sponsorCombo.setValue(evenement.getSponsor());
@@ -256,7 +249,7 @@ public class EvenementFormDialog {
             evenement.setTitre(titreField.getText());
             evenement.setDescription(descriptionArea.getText());
             evenement.setImage(selectedImagePath);
-            evenement.setType(typeField.getText());
+            evenement.setType(typeCombo.getValue());
             evenement.setStatut(statutCombo.getValue() != null ? statutCombo.getValue() : "PLANIFIÉ");
 
             if (dateEvenementPicker.getValue() != null) {
@@ -267,7 +260,6 @@ public class EvenementFormDialog {
             evenement.setLieu(lieuField.getText());
             evenement.setCapacite(capaciteSpinner.getValue());
             evenement.setNbParticipants(participantsSpinner.getValue());
-            evenement.setGoogleEventId(googleEventIdField.getText());
             evenement.setSponsor(sponsorCombo.getValue());
 
             // Validate and save

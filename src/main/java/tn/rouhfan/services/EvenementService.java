@@ -6,12 +6,16 @@ import tn.rouhfan.tools.MyDatabase;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class EvenementService implements IService<Evenement> {
 
     Connection cnx;
+    private static final List<String> ALLOWED_TYPES = Arrays.asList(
+            "Formation", "Exposition", "Concert", "Festival", "Atelier", "Concours", "Conference"
+    );
 
     public EvenementService() {
         cnx = MyDatabase.getInstance().getConnection();
@@ -33,6 +37,12 @@ public class EvenementService implements IService<Evenement> {
         }
         if (e.getLieu() == null || e.getLieu().trim().isEmpty()) {
             throw new IllegalArgumentException("❌ Le lieu est obligatoire");
+        }
+        if (e.getType() == null || e.getType().trim().isEmpty()) {
+            throw new IllegalArgumentException("❌ Le type est obligatoire");
+        }
+        if (ALLOWED_TYPES.stream().noneMatch(type -> type.equalsIgnoreCase(e.getType().trim()))) {
+            throw new IllegalArgumentException("❌ Type invalide. Choisissez parmi : " + String.join(", ", ALLOWED_TYPES));
         }
         if (e.getCapacite() != null && e.getCapacite() <= 0) {
             throw new IllegalArgumentException("❌ La capacité doit être > 0");

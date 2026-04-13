@@ -22,7 +22,6 @@
         <ComboBox fx:id="sortCombo" prefWidth="150" />
         <Button text="🔄 Rafraîchir" onAction="#refresh" styleClass="btn-secondary" />
         <HBox HBox.hgrow="ALWAYS" />
-        <Button text="➕ Devenir Sponsor" onAction="#addSponsor" styleClass="btn-primary" />
     </HBox>
 
     <!-- Cards Container -->
