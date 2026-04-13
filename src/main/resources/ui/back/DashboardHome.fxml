@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox fx:id="rootNode" spacing="40.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.DashboardHomeController">
+<VBox fx:id="rootNode" spacing="40.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.DashboardHomeController" stylesheets="@oeuvres_categories.css">
     <VBox alignment="CENTER" spacing="10.0">
         <Label text="👑 Dashboard Admin" style="-fx-font-size: 36; -fx-font-weight: bold; -fx-text-fill: #241197;" />
         <Label text="Gestion complète de la plateforme Rouh el Fann" styleClass="text-subtitle" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #6c2a90;" />
@@ -18,12 +18,12 @@
             <Label text="Gestion Des Utilisateurs" styleClass="dash-card-title, color-users" />
             <Label text="Gestion des comptes" styleClass="dash-card-subtitle" />
         </VBox>
-        <VBox styleClass="dash-card" prefWidth="280.0" onMouseClicked="#openGalerie" GridPane.columnIndex="1" GridPane.rowIndex="0">
+        <VBox styleClass="dash-card-featured" prefWidth="280.0" onMouseClicked="#openGalerie" GridPane.columnIndex="1" GridPane.rowIndex="0">
             <Label text="🖼️" styleClass="dash-card-icon, color-works" />
             <Label text="Œuvres" styleClass="dash-card-title, color-works" />
             <Label text="Galerie artistique" styleClass="dash-card-subtitle" />
         </VBox>
-        <VBox styleClass="dash-card" prefWidth="280.0" onMouseClicked="#openCategories" GridPane.columnIndex="2" GridPane.rowIndex="0">
+        <VBox styleClass="dash-card-featured" prefWidth="280.0" onMouseClicked="#openCategories" GridPane.columnIndex="2" GridPane.rowIndex="0">
             <Label text="🏷️" styleClass="dash-card-icon, color-categories" />
             <Label text="Catégories" styleClass="dash-card-title, color-categories" />
             <Label text="Organisation du contenu" styleClass="dash-card-subtitle" />

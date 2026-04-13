@@ -20,6 +20,11 @@ public class OeuvreService implements IService<Oeuvre> {
 
     @Override
     public void ajouter(Oeuvre o) throws SQLException {
+        // Test d'unicité sur titre + description + user_id
+        if (isOeuvreExiste(o, 0)) {
+            throw new SQLException("Une œuvre identique existe déjà pour cet artiste.");
+        }
+
         String sql = "INSERT INTO oeuvre (description, titre, prix, statut, image, favori, date_vente, user_id, categorie_id) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -73,6 +78,11 @@ public class OeuvreService implements IService<Oeuvre> {
 
     @Override
     public void modifier(Oeuvre o) throws SQLException {
+        // Test d'unicité sur titre + description + user_id (excluant l'œuvre elle-même)
+        if (isOeuvreExiste(o, o.getId())) {
+            throw new SQLException("Une autre œuvre identique existe déjà pour cet artiste.");
+        }
+
         String sql = "UPDATE oeuvre SET description=?, titre=?, prix=?, statut=?, image=?, favori=?, date_vente=?, user_id=?, categorie_id=? WHERE id=?";
 
         PreparedStatement ps = cnx.prepareStatement(sql);
@@ -221,5 +231,23 @@ public class OeuvreService implements IService<Oeuvre> {
             return o;
         }
         return null;
+    }
+
+    private boolean isOeuvreExiste(Oeuvre o, int excludeId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM oeuvre WHERE titre = ? AND description = ? AND user_id = ? AND id != ?";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setString(1, o.getTitre());
+        ps.setString(2, o.getDescription());
+        if (o.getUser() != null) {
+            ps.setInt(3, o.getUser().getId());
+        } else {
+            ps.setNull(3, Types.INTEGER);
+        }
+        ps.setInt(4, excludeId);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            return rs.getInt(1) > 0;
+        }
+        return false;
     }
 }

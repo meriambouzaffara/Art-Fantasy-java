@@ -65,7 +65,7 @@
                 </HBox>
             </VBox>
 
-            <VBox fx:id="contentHost" spacing="20.0" styleClass="content" />
+            <VBox fx:id="contentHost" spacing="20.0" styleClass="content" VBox.vgrow="ALWAYS" />
         </VBox>
     </center>
 </BorderPane>

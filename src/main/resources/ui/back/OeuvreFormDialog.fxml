@@ -6,44 +6,80 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
 
-<VBox spacing="14.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.OeuvreFormController" styleClass="surface" padding="20">
-    <Label text="🖼️ Formulaire d'œuvre" styleClass="text-title" />
+<VBox spacing="25.0" prefWidth="650.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.OeuvreFormController" styleClass="form-container" stylesheets="@../theme.css">
+    <padding>
+        <Insets top="30" right="30" bottom="30" left="30"/>
+    </padding>
+
+    <VBox spacing="5.0">
+        <Label fx:id="formTitle" text="🖼️ Nouvelle Œuvre" styleClass="text-title" />
+        <Label text="Veuillez remplir les informations de l'œuvre d'art." styleClass="text-subtitle" />
+    </VBox>
     
-    <GridPane vgap="10.0" hgap="10.0">
-        <columnConstraints>
-            <ColumnConstraints minWidth="100" />
-            <ColumnConstraints hgrow="ALWAYS" />
-        </columnConstraints>
-        
-        <Label text="Titre:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-        <TextField fx:id="titreField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-        
-        <Label text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-        <TextArea fx:id="descriptionField" GridPane.columnIndex="1" GridPane.rowIndex="1" prefRowCount="3" />
-        
-        <Label text="Prix:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-        <TextField fx:id="prixField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-        
-        <Label text="Catégorie:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-        <ComboBox fx:id="categorieCombo" GridPane.columnIndex="1" GridPane.rowIndex="3" maxWidth="Infinity" />
-        
-        <Label text="Image:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-        <HBox spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
-            <TextField fx:id="imageField" HBox.hgrow="ALWAYS" />
-            <Button text="📁 Parcourir" onAction="#browseImage" styleClass="btn-secondary" />
-        </HBox>
-        
-        <Label text="Artiste:" GridPane.columnIndex="0" GridPane.rowIndex="5" />
-        <ComboBox fx:id="artisteCombo" GridPane.columnIndex="1" GridPane.rowIndex="5" maxWidth="Infinity" />
-    </GridPane>
+    <HBox spacing="30.0">
+        <!-- Left Side: Fields -->
+        <VBox spacing="20.0" HBox.hgrow="ALWAYS">
+            <VBox spacing="8.0">
+                <Label text="Titre de l'œuvre" styleClass="form-label" />
+                <TextField fx:id="titreField" promptText="Ex: La Nuit Étoilée" styleClass="form-control" />
+            </VBox>
+
+            <VBox spacing="8.0">
+                <Label text="Description" styleClass="form-label" />
+                <TextArea fx:id="descriptionField" promptText="Décrivez l'œuvre..." prefRowCount="4" styleClass="form-control" wrapText="true" />
+            </VBox>
+
+            <HBox spacing="15.0">
+                <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                    <Label text="Prix (DT)" styleClass="form-label" />
+                    <TextField fx:id="prixField" promptText="0.00" styleClass="form-control" />
+                </VBox>
+                <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                    <Label text="Statut" styleClass="form-label" />
+                    <ComboBox fx:id="statutCombo" maxWidth="Infinity" styleClass="combo-box">
+                        <items>
+                            <FXCollections fx:factory="observableArrayList">
+                                <String fx:value="disponible" />
+                                <String fx:value="vendue" />
+                            </FXCollections>
+                        </items>
+                    </ComboBox>
+                </VBox>
+            </HBox>
+
+            <VBox spacing="8.0">
+                <Label text="Catégorie" styleClass="form-label" />
+                <ComboBox fx:id="categorieCombo" maxWidth="Infinity" styleClass="combo-box" promptText="Choisir une catégorie" />
+            </VBox>
+
+            <VBox spacing="8.0">
+                <Label text="Artiste (Publié par)" styleClass="form-label" />
+                <ComboBox fx:id="artisteCombo" maxWidth="Infinity" styleClass="combo-box" promptText="Sélectionner l'artiste" />
+            </VBox>
+        </VBox>
+
+        <!-- Right Side: Image Upload & Preview -->
+        <VBox spacing="15.0" alignment="TOP_CENTER" prefWidth="240.0">
+            <Label text="Image de l'œuvre" styleClass="form-label" />
+            <StackPane fx:id="imageContainer" prefHeight="240.0" prefWidth="240.0" styleClass="image-preview-container">
+                <ImageView fx:id="imagePreview" fitHeight="230.0" fitWidth="230.0" preserveRatio="true" smooth="true" cache="true" />
+                <Label fx:id="placeholderLabel" text="📷 Cliquez pour ajouter" style="-fx-text-fill: #94a3b8;" />
+            </StackPane>
+            <Button fx:id="browseBtn" text="📁 Choisir une oeuvre" onAction="#browseImage" styleClass="btn-secondary" maxWidth="Infinity" />
+        </VBox>
+    </HBox>
     
-    <HBox spacing="10.0" alignment="CENTER_RIGHT">
-        <Button text="Annuler" onAction="#cancel" styleClass="btn-secondary" />
-        <Button text="💾 Enregistrer" onAction="#save" styleClass="btn-primary" />
+    <HBox spacing="15.0" alignment="CENTER_RIGHT">
+        <Button text="Annuler" onAction="#cancel" styleClass="btn-secondary" prefWidth="120" />
+        <Button fx:id="saveBtn" text="💾 Enregistrer" onAction="#save" styleClass="btn-primary" prefWidth="150" />
     </HBox>
 </VBox>

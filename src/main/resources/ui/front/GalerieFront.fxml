@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="25.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.front.GalerieFrontController" styleClass="content" stylesheets="@../back/oeuvres_categories.css">
+    <VBox spacing="5.0">
+        <Label fx:id="pageTitle" text="Galerie d'Art" styleClass="text-title" />
+        <Label fx:id="pageSubtitle" text="Explorez nos collections et découvrez des talents uniques." styleClass="text-subtitle" />
+    </VBox>
+
+    <HBox fx:id="filterBar" spacing="20.0" alignment="BOTTOM_LEFT" styleClass="surface" style="-fx-padding: 25;">
+        <VBox spacing="8.0">
+            <Label text="Nom (titre)" styleClass="filter-label" />
+            <TextField fx:id="searchField" promptText="Titre..." prefWidth="200" styleClass="text-field" />
+        </VBox>
+        
+        <VBox spacing="8.0" fx:id="categoryFilterBox">
+            <Label text="Catégorie" styleClass="filter-label" />
+            <ComboBox fx:id="categoryFilter" promptText="Toutes" prefWidth="180" styleClass="combo-box" />
+        </VBox>
+        
+        <VBox spacing="8.0" fx:id="sortBox">
+            <Label text="Tri" styleClass="filter-label" />
+            <ComboBox fx:id="sortCombo" promptText="Trier par" prefWidth="150" styleClass="combo-box" />
+        </VBox>
+
+        <VBox spacing="8.0" fx:id="orderBox">
+            <Label text="Ordre" styleClass="filter-label" />
+            <ComboBox fx:id="orderCombo" prefWidth="90" styleClass="combo-box" />
+        </VBox>
+
+        <Region HBox.hgrow="ALWAYS" />
+        
+        <!-- Visible only for Artists -->
+        <Button fx:id="addOeuvreBtn" text="➕ Publier une œuvre" onAction="#handleAddOeuvre" styleClass="btn-front-primary" visible="false" managed="false" />
+    </HBox>
+
+    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
+        <FlowPane fx:id="cardsPane" hgap="25.0" vgap="25.0" prefWrapLength="1100.0" alignment="TOP_LEFT">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+        </FlowPane>
+    </ScrollPane>
+</VBox>
