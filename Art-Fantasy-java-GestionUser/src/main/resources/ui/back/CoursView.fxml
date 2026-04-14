@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<HBox spacing="20" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.rouhfan.ui.back.CoursController"
+      styleClass="app-shell">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <VBox spacing="16" HBox.hgrow="ALWAYS">
+
+        <VBox spacing="4">
+            <Label text="🎨 Gestion des Cours" styleClass="text-title" />
+            <Label text="Gérez les formations et leurs contenus." styleClass="text-subtitle" />
+        </VBox>
+
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <TextField fx:id="searchField" promptText="🔍 Rechercher un cours..." prefWidth="280" />
+
+            <Button text="🔄" onAction="#refresh" styleClass="btn-secondary" />
+
+            <HBox HBox.hgrow="ALWAYS" />
+
+            <Button text="➕ Ajouter" onAction="#addCours" styleClass="btn-primary" />
+            <Button text="✏️ Modifier" onAction="#editCours" styleClass="btn-secondary" />
+            <Button text="🗑️ Supprimer" onAction="#deleteCours" styleClass="btn-secondary" />
+        </HBox>
+
+        <TableView fx:id="coursTable" VBox.vgrow="ALWAYS" styleClass="surface">
+            <columns>
+                <TableColumn fx:id="colId"          text="ID"          prefWidth="50"/>
+                <TableColumn fx:id="colNom"         text="Nom"         prefWidth="180"/>
+                <TableColumn fx:id="colDescription" text="Description" prefWidth="220"/>
+                <TableColumn fx:id="colNiveau"      text="Niveau"      prefWidth="100"/>
+                <TableColumn fx:id="colDuree"       text="Durée"       prefWidth="80"/>
+                <TableColumn fx:id="colStatut"      text="Statut"      prefWidth="100"/>
+                <TableColumn fx:id="colArtiste"     text="Artiste"     prefWidth="140"/>
+            </columns>
+            <placeholder>
+                <Label text="Aucun cours trouvé." styleClass="text-subtitle" />
+            </placeholder>
+        </TableView>
+    </VBox>
+
+    <VBox fx:id="formPane" spacing="15" prefWidth="700" visible="false" managed="false" styleClass="surface">
+        <padding>
+            <Insets top="20" right="20" bottom="20" left="20"/>
+        </padding>
+
+        <Label fx:id="lblFormTitre" text="➕ Ajouter un cours" styleClass="card-title" />
+        <Separator />
+
+        <ScrollPane fitToWidth="true" style="-fx-background-color: #1E90FF; -fx-background:#536473; -fx-border-color: #e45555;">
+            <VBox spacing="12" style="-fx-background-color: #536473;">
+
+                <VBox spacing="4">
+                    <Label text="Nom *" styleClass="text-subtitle" style="-fx-font-weight: bold; -fx-text-fill: #e45555;" />
+                    <TextField fx:id="tfNom" promptText="Nom du cours"
+                               style="-fx-background-color:  #1E90FF; -fx-text-fill: #007fff; -fx-border-color: #3c0808; -fx-border-radius: 5;"/>
+                    <Label fx:id="errNom" text="" visible="false" style="-fx-text-fill: #d63031; -fx-font-size: 11px;"/>
+                </VBox>
+
+                <VBox spacing="4">
+                    <Label text="Description" styleClass="text-subtitle" style="-fx-text-fill: #241197;" />
+                    <TextArea fx:id="taDescription" promptText="Description du cours" prefHeight="60" wrapText="true"
+                              style="-fx-control-inner-background:  #3c0808; -fx-text-fill: #a39042; -fx-border-color: #04447f;"/>
+                    <Label fx:id="errDescription" text="" visible="false" style="-fx-text-fill: #d63031; -fx-font-size: 11px;"/>
+                </VBox>
+
+                <HBox spacing="10">
+                    <VBox spacing="4" HBox.hgrow="ALWAYS">
+                        <Label text="Niveau" styleClass="text-subtitle" style="-fx-text-fill: #241197;" />
+                        <ComboBox fx:id="cbNiveau" maxWidth="Infinity" promptText="Sélectionner"
+                                  style="-fx-background-color:  #aeae63; -fx-border-color: #007fff;"/>
+                        <Label fx:id="errNiveau" text="" visible="false" style="-fx-text-fill: #d63031; -fx-font-size: 11px;"/>
+                    </VBox>
+                    <VBox spacing="4" HBox.hgrow="ALWAYS">
+                        <Label text="Durée" styleClass="text-subtitle" style="-fx-text-fill: #241197;" />
+                        <TextField fx:id="tfDuree" promptText="Ex: 2h 30m"
+                                   style="-fx-background-color:  #7f044e; -fx-text-fill: #a39042; -fx-border-color: #0080ff;"/>
+                        <Label fx:id="errDuree" text="" visible="false" style="-fx-text-fill: #d63031; -fx-font-size: 11px;"/>
+                    </VBox>
+                </HBox>
+
+                <VBox spacing="4">
+                    <Label text="Statut *" styleClass="text-subtitle" style="-fx-font-weight: bold; -fx-text-fill: #241197;" />
+                    <ComboBox fx:id="cbStatut" maxWidth="Infinity"
+                              style="-fx-background-color:  #7f044e; -fx-border-color: 	#007fff;"/>
+                    <Label fx:id="errStatut" text="" visible="false" style="-fx-text-fill: #d63031; -fx-font-size: 11px;"/>
+                </VBox>
+
+                <VBox spacing="4">
+                    <Label text="Contenu *" styleClass="text-subtitle" style="-fx-font-weight: bold; -fx-text-fill: #241197;" />
+                    <TextArea fx:id="taContenu" promptText="Saisissez le contenu..." prefHeight="80" wrapText="true"
+                              style="-fx-control-inner-background:  #7f044e; -fx-text-fill: #a39042; -fx-border-color: #0080ff;"/>
+                    <Label fx:id="errContenu" text="" visible="false" style="-fx-text-fill: #d63031; -fx-font-size: 11px;"/>
+                </VBox>
+
+                <VBox spacing="4">
+                    <Label text="Artiste *" styleClass="text-subtitle" style="-fx-font-weight: bold; -fx-text-fill: #241197;" />
+                    <ComboBox fx:id="cbArtiste" maxWidth="Infinity" promptText="Sélectionner un artiste"
+                              style="-fx-background-color: #7f044e; -fx-border-color: 	#b64f4f;"/>
+                    <Label fx:id="errArtiste" text="" visible="false" style="-fx-text-fill: #d63031; -fx-font-size: 11px;"/>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+
+        <VBox spacing="5" alignment="CENTER_LEFT">
+            <Label text="* Champs obligatoires" styleClass="text-subtitle" style="-fx-font-size: 11px; -fx-text-fill: #5a4a72;" />
+            <Label fx:id="lblErreurGlobal" text="" wrapText="true" style="-fx-text-fill: #d63031; -fx-font-size: 12px; -fx-font-weight: bold;"/>
+        </VBox>
+
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <Button text="Annuler" onAction="#handleAnnuler" styleClass="btn-secondary" />
+            <Button fx:id="btnSauvegarder" text="Sauvegarder" onAction="#handleSauvegarder" styleClass="btn-gold" />
+        </HBox>
+    </VBox>
+
+</HBox>
