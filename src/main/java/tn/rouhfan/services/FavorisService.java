@@ -91,4 +91,17 @@ public class FavorisService {
             ajouter(userId, oeuvreId);
         }
     }
+    public void supprimerParUser(int userId) throws SQLException {
+        String sql = "DELETE FROM favoris WHERE id_user = ?";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setInt(1, userId);
+        ps.executeUpdate();
+    }
+
+    public void supprimerParOeuvre(int oeuvreId) throws SQLException {
+        String sql = "DELETE FROM favoris WHERE oeuvre_id = ?";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setInt(1, oeuvreId);
+        ps.executeUpdate();
+    }
 }

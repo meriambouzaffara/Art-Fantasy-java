@@ -10,7 +10,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OeuvreService {
+public class OeuvreService implements IService<Oeuvre> {
 
     Connection cnx;
 
@@ -18,9 +18,10 @@ public class OeuvreService {
         cnx = MyDatabase.getInstance().getConnection();
     }
 
+    @Override
     public void ajouter(Oeuvre o) throws SQLException {
-        String sql = "INSERT INTO oeuvre (description, titre, prix, statut, image, favori, date_vente, user_id, categorie_id) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO oeuvre (description, titre, prix, statut, image, favori, date_vente, user_id, categorie_id) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
@@ -61,6 +62,86 @@ public class OeuvreService {
         System.out.println("Oeuvre ajoutée en BD");
     }
 
+    @Override
+    public void supprimer(int id) throws SQLException {
+        // Supprimer d'abord les favoris liés à cette oeuvre
+        FavorisService favorisService = new FavorisService();
+        favorisService.supprimerParOeuvre(id);
+
+        String sql = "DELETE FROM oeuvre WHERE id = ?";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setInt(1, id);
+        ps.executeUpdate();
+        System.out.println("🗑️ Oeuvre supprimée (ainsi que ses favoris)");
+    }
+
+    public void supprimerParUser(int userId) throws SQLException {
+        // 1. Récupérer les IDs des oeuvres de cet utilisateur (artiste)
+        List<Integer> oeuvreIds = new ArrayList<>();
+        String findIdsSql = "SELECT id FROM oeuvre WHERE user_id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(findIdsSql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    oeuvreIds.add(rs.getInt("id"));
+                }
+            }
+        }
+
+        // 2. Supprimer les favoris pour chaque oeuvre
+        FavorisService favorisService = new FavorisService();
+        for (Integer id : oeuvreIds) {
+            favorisService.supprimerParOeuvre(id);
+        }
+
+        // 3. Supprimer les oeuvres
+        String sql = "DELETE FROM oeuvre WHERE user_id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.executeUpdate();
+        }
+        System.out.println("🗑️ Toutes les oeuvres et leurs favoris ont été supprimés");
+    }
+
+    @Override
+    public void modifier(Oeuvre o) throws SQLException {
+        String sql = "UPDATE oeuvre SET description=?, titre=?, prix=?, statut=?, image=?, favori=?, date_vente=?, user_id=?, categorie_id=? WHERE id=?";
+
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setString(1, o.getDescription());
+        ps.setString(2, o.getTitre());
+
+        if (o.getPrix() != null)
+            ps.setBigDecimal(3, o.getPrix());
+        else
+            ps.setNull(3, Types.DECIMAL);
+
+        ps.setString(4, o.getStatut());
+        ps.setString(5, o.getImage());
+        ps.setBoolean(6, o.isFavori());
+
+        if (o.getDateVente() != null)
+            ps.setTimestamp(7, new Timestamp(o.getDateVente().getTime()));
+        else
+            ps.setNull(7, Types.TIMESTAMP);
+
+        if (o.getUser() != null)
+            ps.setInt(8, o.getUser().getId());
+        else
+            ps.setNull(8, Types.INTEGER);
+
+        if (o.getCategorie() != null)
+            ps.setInt(9, o.getCategorie().getIdCategorie());
+        else
+            ps.setNull(9, Types.INTEGER);
+
+        ps.setInt(10, o.getId());
+
+        ps.executeUpdate();
+        System.out.println("✏️ Oeuvre modifiée");
+    }
+
+    @Override
     public List<Oeuvre> recuperer() throws SQLException {
         List<Oeuvre> oeuvres = new ArrayList<>();
 
@@ -114,56 +195,10 @@ public class OeuvreService {
 
             oeuvres.add(o);
         }
-
         return oeuvres;
     }
 
-    public void supprimer(int id) throws SQLException {
-        String sql = "DELETE FROM oeuvre WHERE id = ?";
-        PreparedStatement ps = cnx.prepareStatement(sql);
-        ps.setInt(1, id);
-        ps.executeUpdate();
-
-        System.out.println("🗑️ Oeuvre supprimée");
-    }
-
-    public void modifier(Oeuvre o) throws SQLException {
-        String sql = "UPDATE oeuvre SET titre=?, description=?, prix=?, statut=?, image=?, favori=?, date_vente=?, user_id=?, categorie_id=? WHERE id=?";
-
-        PreparedStatement ps = cnx.prepareStatement(sql);
-        ps.setString(1, o.getTitre());
-        ps.setString(2, o.getDescription());
-
-        if (o.getPrix() != null)
-            ps.setBigDecimal(3, o.getPrix());
-        else
-            ps.setNull(3, Types.DECIMAL);
-
-        ps.setString(4, o.getStatut());
-        ps.setString(5, o.getImage());
-        ps.setBoolean(6, o.isFavori());
-
-        if (o.getDateVente() != null)
-            ps.setTimestamp(7, new Timestamp(o.getDateVente().getTime()));
-        else
-            ps.setNull(7, Types.TIMESTAMP);
-
-        if (o.getUser() != null)
-            ps.setInt(8, o.getUser().getId());
-        else
-            ps.setNull(8, Types.INTEGER);
-
-        if (o.getCategorie() != null)
-            ps.setInt(9, o.getCategorie().getIdCategorie());
-        else
-            ps.setNull(9, Types.INTEGER);
-
-        ps.setInt(10, o.getId());
-
-        ps.executeUpdate();
-        System.out.println("✏️ Oeuvre modifiée");
-    }
-
+    @Override
     public Oeuvre findById(int id) throws SQLException {
         String sql = "SELECT o.*, " +
                 "u.id AS u_id, u.nom AS u_nom, u.prenom AS u_prenom, " +
@@ -217,7 +252,6 @@ public class OeuvreService {
 
             return o;
         }
-
         return null;
     }
 }

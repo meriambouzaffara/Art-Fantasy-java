@@ -64,5 +64,11 @@ public class ReponseReclamationService implements IService<ReponseReclamation> {
         return null;
     }
 
-    // supprimer, modifier, findById : adapter aussi
+    public void supprimerParReclamation(int reclamationId) throws SQLException {
+        String sql = "DELETE FROM reponse_reclamation WHERE reclamation_id = ?";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setInt(1, reclamationId);
+        ps.executeUpdate();
+        System.out.println("🗑️ Toutes les réponses de la réclamation supprimées");
+    }
 }

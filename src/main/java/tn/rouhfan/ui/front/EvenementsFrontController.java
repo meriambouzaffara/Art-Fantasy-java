@@ -1,5 +1,5 @@
 package tn.rouhfan.ui.front;
-
+import tn.rouhfan.tools.SessionManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -28,6 +28,7 @@ public class EvenementsFrontController implements Initializable {
     @FXML private FlowPane cardsContainer;
     @FXML private TextField searchField;
     @FXML private ComboBox<String> sortCombo;
+    @FXML private Button addButton;
 
     private EvenementService evenementService;
     private ObservableList<Evenement> evenementsList;
@@ -38,6 +39,7 @@ public class EvenementsFrontController implements Initializable {
         evenementService = new EvenementService();
         setupSortCombo();
         setupSearch();
+        setupRoleBasedUI();
         loadEvenements();
     }
 
@@ -48,10 +50,17 @@ public class EvenementsFrontController implements Initializable {
             sortCombo.setOnAction(e -> handleSort());
         }
     }
-
     private void setupSearch() {
         if (searchField != null) {
             searchField.textProperty().addListener((observable, oldValue, newValue) -> handleSearch());
+        }
+    }
+
+    private void setupRoleBasedUI() {
+        String userRole = SessionManager.getInstance().getRole();
+        if ("ROLE_ARTISTE".equals(userRole) && addButton != null) {
+            addButton.setVisible(true);
+            addButton.setManaged(true);
         }
     }
 
@@ -121,7 +130,9 @@ public class EvenementsFrontController implements Initializable {
         // Type et Capacité
         HBox typeCapBox = new HBox(15);
         Label typeLabel = new Label("🎭 " + (event.getType() != null ? event.getType() : "N/A"));
-        Label capaciteLabel = new Label("👥 " + (event.getCapacite() != null ? event.getCapacite() : "∞") + " places");
+        String capaciteText = event.getCapacite() != null ? 
+            event.getCapacite().toString() : "∞";
+        Label capaciteLabel = new Label("👥 " + event.getNbParticipants() + "/" + capaciteText + " places");
         typeLabel.setStyle("-fx-font-size: 10;");
         capaciteLabel.setStyle("-fx-font-size: 10;");
         typeCapBox.getChildren().addAll(typeLabel, capaciteLabel);
@@ -134,13 +145,38 @@ public class EvenementsFrontController implements Initializable {
         VBox spacer = new VBox();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        // Button S'inscrire
-        Button inscribeBtn = new Button("S'inscrire");
-        inscribeBtn.setStyle("-fx-font-size: 11; -fx-padding: 6 15; -fx-background-color: #1976d2; -fx-text-fill: white; -fx-border-radius: 5;");
-        inscribeBtn.setPrefWidth(Double.MAX_VALUE);
-        inscribeBtn.setOnAction(e -> handleInscribe(event));
+        // Buttons based on user role
+        HBox buttonBox = new HBox(10);
+        buttonBox.setAlignment(javafx.geometry.Pos.CENTER);
 
-        card.getChildren().addAll(imageView, titleLabel, descLabel, dateLocBox, typeCapBox, statutLabel, spacer, inscribeBtn);
+        String userRole = SessionManager.getInstance().getRole();
+
+        if ("ROLE_ARTISTE".equals(userRole)) {
+            // CRUD buttons for artists
+            Button editBtn = new Button("✏️ Modifier");
+            editBtn.setStyle("-fx-font-size: 10; -fx-padding: 5 10; -fx-background-color: #ff9800; -fx-text-fill: white; -fx-border-radius: 3;");
+            editBtn.setOnAction(e -> handleEdit(event));
+
+            Button deleteBtn = new Button("🗑️ Supprimer");
+            deleteBtn.setStyle("-fx-font-size: 10; -fx-padding: 5 10; -fx-background-color: #f44336; -fx-text-fill: white; -fx-border-radius: 3;");
+            deleteBtn.setOnAction(e -> handleDelete(event));
+
+            buttonBox.getChildren().addAll(editBtn, deleteBtn);
+        } else if ("ROLE_PARTICIPANT".equals(userRole)) {
+            // Participate button for participants
+            Button participateBtn = new Button("🎟️ Participer");
+            participateBtn.setStyle("-fx-font-size: 11; -fx-padding: 6 15; -fx-background-color: #4caf50; -fx-text-fill: white; -fx-border-radius: 5;");
+            participateBtn.setPrefWidth(120);
+            participateBtn.setOnAction(e -> handleParticipate(event));
+            buttonBox.getChildren().add(participateBtn);
+        } else {
+            // View-only for others
+            Label viewOnlyLabel = new Label("👁️ Consultation uniquement");
+            viewOnlyLabel.setStyle("-fx-font-size: 10; -fx-text-fill: #666;");
+            buttonBox.getChildren().add(viewOnlyLabel);
+        }
+
+        card.getChildren().addAll(imageView, titleLabel, descLabel, dateLocBox, typeCapBox, statutLabel, spacer, buttonBox);
         return card;
     }
 
@@ -218,8 +254,49 @@ public class EvenementsFrontController implements Initializable {
         
         if (dialog.isApproved()) {
             loadEvenements();
-            showAlert("Succès", "✅ Vous vous êtes inscrit à l'événement!");
+            showAlert("Succès", "✅ Événement ajouté avec succès!");
         }
+    }
+
+    private void handleParticipate(Evenement event) {
+        try {
+            evenementService.participer(event.getId());
+            showAlert("Participation confirmée", "✅ Vous participez maintenant à l'événement: " + event.getTitre());
+            loadEvenements(); // Refresh to show updated participant count
+        } catch (SQLException e) {
+            showAlert("Erreur", "❌ Erreur lors de la participation: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void handleEdit(Evenement event) {
+        EvenementFormDialog dialog = new EvenementFormDialog(event);
+        dialog.show();
+        
+        if (dialog.isApproved()) {
+            loadEvenements();
+            showAlert("Succès", "✅ Événement modifié avec succès!");
+        }
+    }
+
+    private void handleDelete(Evenement event) {
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Supprimer l'événement");
+        confirmation.setHeaderText("Êtes-vous sûr de vouloir supprimer cet événement?");
+        confirmation.setContentText("Événement: " + event.getTitre() + "\n\nCette action est irréversible.");
+
+        confirmation.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                try {
+                    evenementService.supprimer(event.getId());
+                    showAlert("Succès", "✅ Événement supprimé avec succès!");
+                    loadEvenements();
+                } catch (SQLException e) {
+                    showAlert("Erreur", "❌ Erreur lors de la suppression: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     private void handleInscribe(Evenement event) {

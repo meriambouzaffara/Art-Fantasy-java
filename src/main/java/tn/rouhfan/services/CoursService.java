@@ -1,6 +1,6 @@
 package tn.rouhfan.services;
 
-import tn.rouhfan.entities.User; // ✅ Import User
+import tn.rouhfan.entities.User;
 import tn.rouhfan.entities.Cours;
 import tn.rouhfan.tools.MyDatabase;
 
@@ -18,7 +18,6 @@ public class CoursService implements IService<Cours> {
 
     @Override
     public void ajouter(Cours c) throws SQLException {
-        // ✅ Utilisation de id_artiste pointant vers la table user
         String sql = "INSERT INTO cours (nom, description, niveau, duree, statut, contenu, id_artiste) VALUES (?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         ps.setString(1, c.getNom());
@@ -37,7 +36,6 @@ public class CoursService implements IService<Cours> {
     @Override
     public List<Cours> recuperer() throws SQLException {
         List<Cours> liste = new ArrayList<>();
-        // ✅ Jointure sur la table 'user'
         String sql = "SELECT c.*, u.id AS artiste_id, u.nom AS artiste_nom, u.prenom AS artiste_prenom FROM cours c LEFT JOIN user u ON c.id_artiste = u.id";
         Statement st = cnx.createStatement();
         ResultSet rs = st.executeQuery(sql);
@@ -72,10 +70,15 @@ public class CoursService implements IService<Cours> {
 
     @Override
     public void supprimer(int id) throws SQLException {
+        // Supprimer d'abord les certificats liés à ce cours
+        CertificatService certificatService = new CertificatService();
+        certificatService.supprimerParCours(id);
+
         String sql = "DELETE FROM cours WHERE id = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, id);
         ps.executeUpdate();
+        System.out.println("🗑️ Cours supprimé (ainsi que ses certificats)");
     }
 
     private Cours mapper(ResultSet rs) throws SQLException {
@@ -88,12 +91,39 @@ public class CoursService implements IService<Cours> {
         c.setStatut(rs.getString("statut"));
         c.setContenu(rs.getString("contenu"));
 
-        // ✅ Création d'un User pour l'artiste
         User u = new User();
         u.setId(rs.getInt("artiste_id"));
         u.setNom(rs.getString("artiste_nom"));
         u.setPrenom(rs.getString("artiste_prenom"));
         c.setArtiste(u);
         return c;
+    }
+
+    public void supprimerParArtiste(int idArtiste) throws SQLException {
+        // 1. Récupérer les IDs des cours de cet artiste
+        List<Integer> coursIds = new ArrayList<>();
+        String findIdsSql = "SELECT id FROM cours WHERE id_artiste = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(findIdsSql)) {
+            ps.setInt(1, idArtiste);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    coursIds.add(rs.getInt("id"));
+                }
+            }
+        }
+
+        // 2. Supprimer les certificats pour chaque cours
+        CertificatService certificatService = new CertificatService();
+        for (Integer id : coursIds) {
+            certificatService.supprimerParCours(id);
+        }
+
+        // 3. Supprimer les cours
+        String sql = "DELETE FROM cours WHERE id_artiste = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, idArtiste);
+            ps.executeUpdate();
+        }
+        System.out.println("🗑️ Tous les cours et certificats de l'artiste ont été supprimés");
     }
 }

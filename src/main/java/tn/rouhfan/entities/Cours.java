@@ -9,7 +9,7 @@ public class Cours {
     private String statut;
     private String contenu;
 
-    // ✅ Remplacement de Artiste par User
+    //  Remplacement de Artiste par User
     private User artiste;
 
     public Cours() {}
@@ -46,7 +46,7 @@ public class Cours {
     public String getContenu() { return contenu; }
     public void setContenu(String contenu) { this.contenu = contenu; }
 
-    // ✅ Getter/Setter mis à jour
+    //  Getter/Setter mis à jour
     public User getArtiste() { return artiste; }
     public void setArtiste(User artiste) { this.artiste = artiste; }
 

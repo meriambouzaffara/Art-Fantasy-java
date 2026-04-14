@@ -19,7 +19,6 @@ public class CertificatService implements IService<Certificat> {
 
     @Override
     public void ajouter(Certificat c) throws SQLException {
-        // id_participant pointe vers user
         String sql = "INSERT INTO certificat (nom, niveau, score, id_cours, id_participant, date_obtention) VALUES (?, ?, ?, ?, ?, ?)";
         PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         ps.setString(1, c.getNom());
@@ -38,7 +37,6 @@ public class CertificatService implements IService<Certificat> {
     @Override
     public List<Certificat> recuperer() throws SQLException {
         List<Certificat> liste = new ArrayList<>();
-        // Jointure sur la table 'user'
         String sql = "SELECT cert.*, co.nom AS cours_nom, u.nom AS user_nom, u.prenom AS user_prenom " +
                 "FROM certificat cert " +
                 "LEFT JOIN cours co ON cert.id_cours = co.id " +
@@ -100,7 +98,6 @@ public class CertificatService implements IService<Certificat> {
         co.setNom(rs.getString("cours_nom"));
         c.setCours(co);
 
-        // Création d'un User pour le participant
         User u = new User();
         u.setId(rs.getInt("id_participant"));
         u.setNom(rs.getString("user_nom"));
@@ -114,6 +111,14 @@ public class CertificatService implements IService<Certificat> {
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, idParticipant);
         ps.executeUpdate();
-        System.out.println("🗑️ Tous les certificats de l'utilisateur supprimés");
+        System.out.println("🗑️ Tous les certificats de l'utilisateur (participant) supprimés");
+    }
+
+    public void supprimerParCours(int coursId) throws SQLException {
+        String sql = "DELETE FROM certificat WHERE id_cours = ?";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setInt(1, coursId);
+        ps.executeUpdate();
+        System.out.println("🗑️ Tous les certificats liés au cours supprimés");
     }
 }
