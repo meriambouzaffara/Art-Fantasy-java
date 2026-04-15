@@ -14,7 +14,9 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import tn.rouhfan.entities.Oeuvre;
+import tn.rouhfan.entities.User;
 import tn.rouhfan.services.OeuvreService;
+import tn.rouhfan.tools.SessionManager;
 import tn.rouhfan.ui.back.OeuvreFormController;
 
 import java.io.File;
@@ -31,6 +33,7 @@ public class OeuvreCardController {
     @FXML private Label statusLabel;
     @FXML private HBox actionsPane;
     @FXML private Button viewBtn;
+    @FXML private Button buyBtn;
 
     private Oeuvre oeuvre;
     private String userRole;
@@ -50,9 +53,9 @@ public class OeuvreCardController {
         
         // Status style
         if ("disponible".equalsIgnoreCase(o.getStatut())) {
-            statusLabel.setStyle("-fx-background-color: #dcfce7; -fx-text-fill: #15803d;");
+            statusLabel.setStyle("-fx-background-color: #dcfce7; -fx-text-fill: #15803d; -fx-padding: 6 12; -fx-background-radius: 20; -fx-font-size: 11; -fx-font-weight: bold;");
         } else {
-            statusLabel.setStyle("-fx-background-color: #fee2e2; -fx-text-fill: #b91c1c;");
+            statusLabel.setStyle("-fx-background-color: #fee2e2; -fx-text-fill: #b91c1c; -fx-padding: 6 12; -fx-background-radius: 20; -fx-font-size: 11; -fx-font-weight: bold;");
         }
 
         // Image loading
@@ -64,14 +67,26 @@ public class OeuvreCardController {
             }
         }
 
-        // Show actions only for ARTIST
-        if ("ARTIST".equals(role)) {
-            actionsPane.setVisible(true);
-            actionsPane.setManaged(true);
-        } else {
-            actionsPane.setVisible(false);
-            actionsPane.setManaged(false);
-        }
+        // Déterminer les droits
+        boolean isAdmin = role != null && role.toUpperCase().contains("ADMIN");
+        boolean isArtiste = role != null && (role.toUpperCase().contains("ARTIST") || role.toUpperCase().contains("ARTISTE"));
+        boolean isParticipant = role != null && role.toUpperCase().contains("PARTICIPANT");
+        
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        boolean isProprietaire = isArtiste && currentUser != null && 
+                                 o.getUser() != null && 
+                                 o.getUser().getId() == currentUser.getId();
+        
+        // Boutons Modifier/Supprimer : Admin ou propriétaire artiste
+        boolean canModify = isAdmin || isProprietaire;
+        actionsPane.setVisible(canModify);
+        actionsPane.setManaged(canModify);
+
+        // Bouton Acheter : visible UNIQUEMENT pour les participants, si oeuvre disponible
+        boolean isDisponible = "disponible".equalsIgnoreCase(o.getStatut());
+        boolean canBuy = isParticipant && isDisponible;
+        buyBtn.setVisible(canBuy);
+        buyBtn.setManaged(canBuy);
     }
 
     @FXML
@@ -93,6 +108,38 @@ public class OeuvreCardController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    private void handleBuy() {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Acheter l'œuvre");
+        confirm.setHeaderText("🛒 Confirmer l'achat");
+        confirm.setContentText("Voulez-vous acheter \"" + oeuvre.getTitre() + "\" pour " + 
+            (oeuvre.getPrix() != null ? oeuvre.getPrix().toString() : "0") + " DT ?");
+        
+        confirm.showAndWait().ifPresent(res -> {
+            if (res == ButtonType.OK) {
+                try {
+                    // Marquer l'oeuvre comme vendue
+                    oeuvre.setStatut("vendue");
+                    oeuvreService.modifier(oeuvre);
+                    
+                    Alert success = new Alert(Alert.AlertType.INFORMATION);
+                    success.setTitle("Achat réussi");
+                    success.setHeaderText(null);
+                    success.setContentText("✅ Vous avez acheté \"" + oeuvre.getTitre() + "\" avec succès !");
+                    success.showAndWait();
+                    
+                    if (refreshCallback != null) refreshCallback.run();
+                } catch (SQLException e) {
+                    Alert error = new Alert(Alert.AlertType.ERROR);
+                    error.setTitle("Erreur");
+                    error.setContentText("Erreur lors de l'achat: " + e.getMessage());
+                    error.showAndWait();
+                }
+            }
+        });
     }
 
     @FXML

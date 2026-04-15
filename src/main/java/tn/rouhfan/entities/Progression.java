@@ -8,7 +8,7 @@ public class Progression {
     private Date createdAt;
     private int niveau;
 
-    // Remplacement de Participant par User
+    // ✅ Remplacement de Participant par User
     private User participant;
     private Cours cours;
 

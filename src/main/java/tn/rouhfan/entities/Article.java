@@ -13,7 +13,7 @@ public class Article {
     private String image;
     private Magasin magasin;
 
-    //  Constructeur sans ID
+    // ✅ Constructeur sans ID
     public Article(String titre, double prix, Integer stock, String description,
                    LocalDateTime createdAt, String image, Magasin magasin) {
         this.titre = titre;
@@ -25,7 +25,7 @@ public class Article {
         this.magasin = magasin;
     }
 
-    //  Constructeur avec ID
+    // ✅ Constructeur avec ID
     public Article(Long idArticle, String titre, double prix, Integer stock, String description,
                    LocalDateTime createdAt, String image, Magasin magasin) {
         this.idArticle = idArticle;

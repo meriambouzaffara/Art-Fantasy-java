@@ -302,7 +302,7 @@
 .hero-front {
     -fx-alignment: CENTER;
     -fx-padding: 100 40;
-    -fx-background-color: #faf9fc; /* Couleur uni, la même que .root */
+    -fx-background-color: #faf9fc; /* Couleur uni, la mÃŠme que .root */
 }
 
 .hero-front-title {
@@ -353,7 +353,7 @@
     -fx-font-size: 18px;
     -fx-min-width: 32px;
     -fx-alignment: CENTER;
-    -fx-text-fill: #c9a849; /* Or pour faire ressortir les icônes */
+    -fx-text-fill: #c9a849; /* Or pour faire ressortir les icÃīnes */
 }
 
 .content {
@@ -365,7 +365,7 @@
     -fx-background-radius: 20;
     -fx-border-color: rgba(36, 17, 151, 0.05);
     -fx-border-radius: 20;
-    -fx-padding: 0; /* On gère le padding via les enfants */
+    -fx-padding: 0; /* On gÃĻre le padding via les enfants */
     -fx-effect: dropshadow(three-pass-box, rgba(36, 17, 151, 0.08), 15, 0, 0, 8);
     -fx-transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }

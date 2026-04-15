@@ -17,7 +17,7 @@ public class ArticleService implements IService<Article> {
         cnx = MyDatabase.getInstance().getConnection();
     }
 
-    //  Ajouter
+    // ✅ Ajouter
     @Override
     public void ajouter(Article a) throws SQLException {
         String sql = "INSERT INTO article (titre, prix, stock, description, created_at, image, magasin_id) " +
@@ -32,10 +32,10 @@ public class ArticleService implements IService<Article> {
         ps.setLong(6, a.getMagasin().getId());
 
         ps.executeUpdate();
-        System.out.println(" Article ajouté");
+        System.out.println("✅ Article ajouté");
     }
 
-    //  Supprimer
+    // ✅ Supprimer
     @Override
     public void supprimer(int id) throws SQLException {
         String sql = "DELETE FROM article WHERE id_article = ?";
@@ -46,7 +46,7 @@ public class ArticleService implements IService<Article> {
         System.out.println("🗑️ Article supprimé");
     }
 
-    //  Modifier
+    // ✅ Modifier
     @Override
     public void modifier(Article a) throws SQLException {
         String sql = "UPDATE article SET titre=?, prix=?, stock=?, description=?, image=?, magasin_id=? WHERE id_article=?";
@@ -61,10 +61,10 @@ public class ArticleService implements IService<Article> {
         ps.setLong(7, a.getIdArticle());
 
         ps.executeUpdate();
-        System.out.println("Article modifié");
+        System.out.println("✏️ Article modifié");
     }
 
-    //Récupérer tous
+    // ✅ Récupérer tous
     @Override
     public List<Article> recuperer() throws SQLException {
         List<Article> articles = new ArrayList<>();
@@ -78,16 +78,13 @@ public class ArticleService implements IService<Article> {
             Magasin m = new Magasin();
             m.setId(rs.getLong("magasin_id"));
 
-            Timestamp ts = rs.getTimestamp("created_at");
-            LocalDateTime createdAt = (ts != null) ? ts.toLocalDateTime() : LocalDateTime.now();
-
             Article a = new Article(
                     rs.getLong("id_article"),
                     rs.getString("titre"),
                     rs.getDouble("prix"),
                     rs.getInt("stock"),
                     rs.getString("description"),
-                    createdAt,
+                    rs.getTimestamp("created_at").toLocalDateTime(),
                     rs.getString("image"),
                     m
             );
@@ -98,7 +95,7 @@ public class ArticleService implements IService<Article> {
         return articles;
     }
 
-    // Find by ID
+    // ✅ Find by ID
     @Override
     public Article findById(int id) throws SQLException {
         String sql = "SELECT * FROM article WHERE id_article = ?";

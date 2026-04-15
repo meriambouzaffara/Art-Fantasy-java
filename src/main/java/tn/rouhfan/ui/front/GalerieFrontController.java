@@ -21,8 +21,10 @@ import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import tn.rouhfan.entities.Categorie;
 import tn.rouhfan.entities.Oeuvre;
+import tn.rouhfan.entities.User;
 import tn.rouhfan.services.CategorieService;
 import tn.rouhfan.services.OeuvreService;
+import tn.rouhfan.tools.SessionManager;
 import tn.rouhfan.ui.back.OeuvreFormController;
 
 import java.io.IOException;
@@ -30,6 +32,7 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class GalerieFrontController implements Initializable {
 
@@ -46,6 +49,10 @@ public class GalerieFrontController implements Initializable {
     @FXML private VBox sortBox;
     @FXML private VBox orderBox;
 
+    // Recherche catégories
+    @FXML private HBox categorySearchBar;
+    @FXML private TextField categorySearchField;
+
     private OeuvreService oeuvreService;
     private CategorieService categorieService;
     
@@ -53,30 +60,34 @@ public class GalerieFrontController implements Initializable {
     private ObservableList<Categorie> allCategories;
     
     private boolean isCategoryMode = false;
-    private String userRole = "PARTICIPANT"; // Default to PARTICIPANT
+    private User currentUser;
+    private String userRole = "ROLE_PARTICIPANT";
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         oeuvreService = new OeuvreService();
         categorieService = new CategorieService();
         
+        SessionManager session = SessionManager.getInstance();
+        currentUser = session.getCurrentUser();
+        if (currentUser != null) {
+            userRole = session.getRole();
+            System.out.println("[GalerieFront] User connecté: " + currentUser.getNom() + " | Rôle: " + userRole);
+        } else {
+            userRole = "ROLE_ANONYMOUS";
+            System.out.println("[GalerieFront] Aucun user connecté");
+        }
+        
         setupFilters();
-        loadData();
-    }
-
-    public void setUserRole(String role) {
-        this.userRole = role;
-        setupRoleUI();
     }
 
     private void setupRoleUI() {
-        if ("ARTIST".equals(userRole) && !isCategoryMode) {
-            addOeuvreBtn.setVisible(true);
-            addOeuvreBtn.setManaged(true);
-        } else {
-            addOeuvreBtn.setVisible(false);
-            addOeuvreBtn.setManaged(false);
-        }
+        boolean isAdmin = userRole != null && userRole.toUpperCase().contains("ADMIN");
+        boolean isArtiste = userRole != null && (userRole.toUpperCase().contains("ARTIST") || userRole.toUpperCase().contains("ARTISTE"));
+        boolean canAddOeuvre = !isCategoryMode && (isAdmin || isArtiste);
+        
+        addOeuvreBtn.setVisible(canAddOeuvre);
+        addOeuvreBtn.setManaged(canAddOeuvre);
     }
 
     public void setCategoryMode(boolean isCategoryMode) {
@@ -86,18 +97,22 @@ public class GalerieFrontController implements Initializable {
             pageSubtitle.setText("Explorez l'art par styles et techniques.");
             filterBar.setVisible(false);
             filterBar.setManaged(false);
+            // Afficher la barre de recherche catégories
+            categorySearchBar.setVisible(true);
+            categorySearchBar.setManaged(true);
         } else {
             pageTitle.setText("🖼️ Galerie d'Art");
             pageSubtitle.setText("Découvrez les créations de nos artistes.");
             filterBar.setVisible(true);
             filterBar.setManaged(true);
+            categorySearchBar.setVisible(false);
+            categorySearchBar.setManaged(false);
             setupRoleUI();
         }
         loadData();
     }
 
     private void setupFilters() {
-        // Category Combo display
         categoryFilter.setConverter(new StringConverter<Categorie>() {
             @Override public String toString(Categorie c) { return c == null ? "" : c.getNomCategorie(); }
             @Override public Categorie fromString(String string) { return null; }
@@ -108,6 +123,9 @@ public class GalerieFrontController implements Initializable {
         sortCombo.valueProperty().addListener((obs, old, newValue) -> applyFilters());
         orderCombo.valueProperty().addListener((obs, old, newValue) -> applyFilters());
         
+        // Recherche catégories en temps réel
+        categorySearchField.textProperty().addListener((obs, old, newValue) -> filterCategories(newValue));
+
         sortCombo.setItems(FXCollections.observableArrayList("Titre", "Prix"));
         sortCombo.setValue("Titre");
         
@@ -119,10 +137,12 @@ public class GalerieFrontController implements Initializable {
         try {
             if (isCategoryMode) {
                 allCategories = FXCollections.observableArrayList(categorieService.recuperer());
+                System.out.println("[GalerieFront] Catégories chargées: " + allCategories.size());
                 renderCategoryCards();
             } else {
                 allOeuvres = FXCollections.observableArrayList(oeuvreService.recuperer());
                 allCategories = FXCollections.observableArrayList(categorieService.recuperer());
+                System.out.println("[GalerieFront] Oeuvres chargées: " + allOeuvres.size() + " | Catégories: " + allCategories.size());
                 
                 Categorie all = new Categorie();
                 all.setNomCategorie("Toutes");
@@ -134,7 +154,28 @@ public class GalerieFrontController implements Initializable {
                 applyFilters();
             }
         } catch (SQLException e) {
+            System.err.println("[GalerieFront] ERREUR SQL: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Filtre les catégories affichées en fonction du texte de recherche
+     */
+    private void filterCategories(String searchText) {
+        if (!isCategoryMode || allCategories == null) return;
+        
+        String search = (searchText == null) ? "" : searchText.toLowerCase().trim();
+        
+        if (search.isEmpty()) {
+            renderCategoryCards();
+        } else {
+            ObservableList<Categorie> filtered = FXCollections.observableArrayList(
+                allCategories.stream()
+                    .filter(c -> c.getNomCategorie().toLowerCase().contains(search))
+                    .collect(Collectors.toList())
+            );
+            renderFilteredCategoryCards(filtered);
         }
     }
 
@@ -163,7 +204,7 @@ public class GalerieFrontController implements Initializable {
                     sorted.setComparator(isAsc ? Comparator.comparing(Oeuvre::getTitre) : Comparator.comparing(Oeuvre::getTitre).reversed()); 
                     break;
                 case "Prix": 
-                    sorted.setComparator(isAsc ? Comparator.comparing(Oeuvre::getPrix) : Comparator.comparing(Oeuvre::getPrix).reversed()); 
+                    sorted.setComparator(isAsc ? Comparator.comparing(o -> o.getPrix() != null ? o.getPrix() : java.math.BigDecimal.ZERO) : Comparator.comparing((Oeuvre o) -> o.getPrix() != null ? o.getPrix() : java.math.BigDecimal.ZERO).reversed()); 
                     break;
             }
         }
@@ -181,20 +222,24 @@ public class GalerieFrontController implements Initializable {
                 controller.setOeuvre(o, userRole, this::loadData);
                 cardsPane.getChildren().add(card);
             } catch (IOException e) {
+                System.err.println("[GalerieFront] Erreur chargement carte oeuvre: " + e.getMessage());
                 e.printStackTrace();
             }
         }
     }
 
     private void renderCategoryCards() {
+        renderFilteredCategoryCards(allCategories);
+    }
+
+    private void renderFilteredCategoryCards(ObservableList<Categorie> categories) {
         cardsPane.getChildren().clear();
-        for (Categorie c : allCategories) {
+        for (Categorie c : categories) {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/front/CategoryCard.fxml"));
                 Parent card = loader.load();
                 CategoryCardController controller = loader.getController();
                 controller.setCategory(c, () -> {
-                    // Action when category clicked: show artworks of this category
                     setCategoryMode(false);
                     for (Categorie cat : categoryFilter.getItems()) {
                         if (cat.getIdCategorie() == c.getIdCategorie()) {
@@ -205,6 +250,7 @@ public class GalerieFrontController implements Initializable {
                 });
                 cardsPane.getChildren().add(card);
             } catch (IOException e) {
+                System.err.println("[GalerieFront] Erreur chargement carte catégorie: " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -212,6 +258,13 @@ public class GalerieFrontController implements Initializable {
 
     @FXML
     private void handleAddOeuvre() {
+        boolean isAdmin = userRole != null && userRole.toUpperCase().contains("ADMIN");
+        boolean isArtiste = userRole != null && (userRole.toUpperCase().contains("ARTIST") || userRole.toUpperCase().contains("ARTISTE"));
+
+        if (!isAdmin && !isArtiste) {
+            return;
+        }
+        
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/back/OeuvreFormDialog.fxml"));
             Parent root = loader.load();

@@ -3,10 +3,12 @@ package tn.rouhfan.ui.back;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import tn.rouhfan.tools.SessionManager;
 import tn.rouhfan.ui.Router;
 
 public class BackBaseController {
@@ -16,6 +18,9 @@ public class BackBaseController {
 
     @FXML
     private Label pageTitle;
+
+    @FXML
+    private Label userNameLabel;
 
     @FXML
     private Button navAccueil;
@@ -52,6 +57,31 @@ public class BackBaseController {
 
     @FXML
     public void initialize() {
+        // ── GUARD DE SÉCURITÉ ──
+        if (!SessionManager.getInstance().checkAccess("ROLE_ADMIN")) {
+            // Rediriger vers le login après le chargement de la scène
+            javafx.application.Platform.runLater(() -> {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Accès refusé");
+                alert.setHeaderText(null);
+                alert.setContentText("⛔ Vous devez être administrateur pour accéder à cette page.");
+                alert.showAndWait();
+
+                try {
+                    Stage stage = (Stage) contentHost.getScene().getWindow();
+                    javafx.scene.Parent root = javafx.fxml.FXMLLoader.load(getClass().getResource("/ui/front/Login.fxml"));
+                    stage.getScene().setRoot(root);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+            return;
+        }
+
+        // Afficher le nom de l'utilisateur connecté
+        if (userNameLabel != null && SessionManager.getInstance().isLoggedIn()) {
+            userNameLabel.setText(SessionManager.getInstance().getFullName());
+        }
         openDashboardHome(null);
     }
 
@@ -134,6 +164,13 @@ public class BackBaseController {
     }
 
     @FXML
+    private void openProfile(ActionEvent event) {
+        clearActive();
+        pageTitle.setText("Mon Profil");
+        Router.setContent(contentHost, "/ui/back/ProfileView.fxml");
+    }
+
+    @FXML
     private void backToFront(ActionEvent event) {
         Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
         Scene scene = stage.getScene();
@@ -147,6 +184,16 @@ public class BackBaseController {
 
     @FXML
     private void logout(ActionEvent event) {
+        // Déconnexion : vider la session et retourner au login
+        SessionManager.getInstance().logout();
+        Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+        Scene scene = stage.getScene();
+        try {
+            javafx.scene.Parent root = javafx.fxml.FXMLLoader.load(getClass().getResource("/ui/front/Login.fxml"));
+            scene.setRoot(root);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void setActive(Button active) {

@@ -30,6 +30,9 @@ public class CategorieFormController implements Initializable {
     @FXML private ImageView imagePreview;
     @FXML private Label placeholderLabel;
     @FXML private StackPane imageContainer;
+    
+    @FXML private Label nomErrorLabel;
+    @FXML private Label imageErrorLabel;
 
     private CategorieService categorieService;
     private Categorie currentCategorie;
@@ -119,25 +122,44 @@ public class CategorieFormController implements Initializable {
     }
 
     private boolean validateFields() {
+        boolean isValid = true;
+        
+        // Hide errors initially
+        nomErrorLabel.setVisible(false);
+        nomErrorLabel.setManaged(false);
+        imageErrorLabel.setVisible(false);
+        imageErrorLabel.setManaged(false);
+
         String nom = nomField.getText().trim();
 
         if (nom.isEmpty()) {
-            showAlert("Champ obligatoire", "Le nom de la catégorie est obligatoire.");
-            return false;
-        }
-        if (nom.length() < 2) {
-            showAlert("Format invalide", "Le nom de la catégorie doit faire au moins 2 caractères.");
-            return false;
+            nomErrorLabel.setText("Le nom de la catégorie est obligatoire.");
+            nomErrorLabel.setVisible(true);
+            nomErrorLabel.setManaged(true);
+            isValid = false;
+        } else if (nom.length() < 2) {
+            nomErrorLabel.setText("Le nom de la catégorie doit faire au moins 2 caractères.");
+            nomErrorLabel.setVisible(true);
+            nomErrorLabel.setManaged(true);
+            isValid = false;
         }
 
         // Vérification de l'image obligatoire
         boolean hasImage = (selectedImageFile != null) || (currentCategorie != null && currentCategorie.getImageCategorie() != null && !currentCategorie.getImageCategorie().isEmpty());
         if (!hasImage) {
-            showAlert("Image manquante", "Veuillez sélectionner une image.");
-            return false;
+            imageErrorLabel.setText("Veuillez sélectionner une image.");
+            imageErrorLabel.setVisible(true);
+            imageErrorLabel.setManaged(true);
+            isValid = false;
         }
 
-        return true;
+        javafx.application.Platform.runLater(() -> {
+            if (nomField.getScene() != null && nomField.getScene().getWindow() != null) {
+                ((javafx.stage.Stage) nomField.getScene().getWindow()).sizeToScene();
+            }
+        });
+
+        return isValid;
     }
 
     @FXML private void cancel() { closeDialog(); }

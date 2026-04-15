@@ -15,7 +15,7 @@
 <?import javafx.collections.FXCollections?>
 <?import java.lang.String?>
 
-<VBox spacing="25.0" prefWidth="650.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.OeuvreFormController" styleClass="form-container" stylesheets="@../theme.css">
+<VBox spacing="15.0" prefWidth="650.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.OeuvreFormController" styleClass="form-container" stylesheets="@../theme.css">
     <padding>
         <Insets top="30" right="30" bottom="30" left="30"/>
     </padding>
@@ -31,17 +31,20 @@
             <VBox spacing="8.0">
                 <Label text="Titre de l'œuvre" styleClass="form-label" />
                 <TextField fx:id="titreField" promptText="Ex: La Nuit Étoilée" styleClass="form-control" />
+                <Label fx:id="titreErrorLabel" style="-fx-text-fill: #ef4444; -fx-font-size: 12px; -fx-font-weight: bold;" managed="false" visible="false" />
             </VBox>
 
             <VBox spacing="8.0">
                 <Label text="Description" styleClass="form-label" />
                 <TextArea fx:id="descriptionField" promptText="Décrivez l'œuvre..." prefRowCount="4" styleClass="form-control" wrapText="true" />
+                <Label fx:id="descriptionErrorLabel" style="-fx-text-fill: #ef4444; -fx-font-size: 12px; -fx-font-weight: bold;" managed="false" visible="false" />
             </VBox>
 
             <HBox spacing="15.0">
                 <VBox spacing="8.0" HBox.hgrow="ALWAYS">
                     <Label text="Prix (DT)" styleClass="form-label" />
                     <TextField fx:id="prixField" promptText="0.00" styleClass="form-control" />
+                    <Label fx:id="prixErrorLabel" style="-fx-text-fill: #ef4444; -fx-font-size: 12px; -fx-font-weight: bold;" managed="false" visible="false" />
                 </VBox>
                 <VBox spacing="8.0" HBox.hgrow="ALWAYS">
                     <Label text="Statut" styleClass="form-label" />
@@ -59,12 +62,8 @@
             <VBox spacing="8.0">
                 <Label text="Catégorie" styleClass="form-label" />
                 <ComboBox fx:id="categorieCombo" maxWidth="Infinity" styleClass="combo-box" promptText="Choisir une catégorie" />
-            </VBox>
-
-            <VBox spacing="8.0">
-                <Label text="Artiste (Publié par)" styleClass="form-label" />
-                <ComboBox fx:id="artisteCombo" maxWidth="Infinity" styleClass="combo-box" promptText="Sélectionner l'artiste" />
-            </VBox>
+                <Label fx:id="categorieErrorLabel" style="-fx-text-fill: #ef4444; -fx-font-size: 12px; -fx-font-weight: bold;" managed="false" visible="false" />
+        </VBox>
         </VBox>
 
         <!-- Right Side: Image Upload & Preview -->
@@ -75,6 +74,7 @@
                 <Label fx:id="placeholderLabel" text="📷 Cliquez pour ajouter" style="-fx-text-fill: #94a3b8;" />
             </StackPane>
             <Button fx:id="browseBtn" text="📁 Choisir une oeuvre" onAction="#browseImage" styleClass="btn-secondary" maxWidth="Infinity" />
+            <Label fx:id="imageErrorLabel" style="-fx-text-fill: #ef4444; -fx-font-size: 12px; -fx-font-weight: bold;" managed="false" visible="false" />
         </VBox>
     </HBox>
     

@@ -29,10 +29,15 @@
             <Label fx:id="statusLabel" style="-fx-padding: 6 12; -fx-background-radius: 20; -fx-font-size: 11; -fx-font-weight: bold; -fx-text-transform: uppercase;" />
         </HBox>
 
+        <!-- Actions Artiste/Admin : Modifier + Supprimer -->
         <HBox fx:id="actionsPane" spacing="10.0" alignment="CENTER" visible="false" managed="false">
             <Button text="✏️ Modifier" onAction="#handleEdit" styleClass="btn-secondary" maxWidth="Infinity" HBox.hgrow="ALWAYS" />
             <Button text="🗑️" onAction="#handleDelete" styleClass="btn-supprimer-table" />
         </HBox>
+
+        <!-- Bouton Acheter : visible pour tous si oeuvre "disponible" -->
+        <Button fx:id="buyBtn" text="🛒 Acheter" onAction="#handleBuy" maxWidth="Infinity" visible="false" managed="false"
+                style="-fx-background-color: linear-gradient(to right, #00b894, #00cec9); -fx-text-fill: white; -fx-font-weight: 800; -fx-background-radius: 12; -fx-padding: 12 20; -fx-font-size: 14; -fx-cursor: hand;" />
         
         <Button fx:id="viewBtn" text="👁️ Voir Détails" onAction="#handleView" styleClass="btn-front-secondary" maxWidth="Infinity" style="-fx-padding: 12 20;" />
     </VBox>

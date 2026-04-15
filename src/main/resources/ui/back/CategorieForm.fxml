@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.StackPane?>
 
-<VBox spacing="25.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.CategorieFormController" styleClass="form-container" stylesheets="@../theme.css">
+<VBox spacing="15.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.CategorieFormController" styleClass="form-container" stylesheets="@../theme.css">
     <padding>
         <Insets top="30" right="30" bottom="30" left="30"/>
     </padding>
@@ -23,6 +23,7 @@
         <VBox spacing="8.0">
             <Label text="Nom de la catégorie" styleClass="form-label" />
             <TextField fx:id="nomField" promptText="Ex: Peinture à l'huile" styleClass="form-control" />
+            <Label fx:id="nomErrorLabel" style="-fx-text-fill: #ef4444; -fx-font-size: 12px; -fx-font-weight: bold;" managed="false" visible="false" />
         </VBox>
 
         <VBox spacing="15.0" alignment="TOP_CENTER">
@@ -32,6 +33,7 @@
                 <Label fx:id="placeholderLabel" text="📷 Aperçu de l'image" style="-fx-text-fill: #94a3b8;" />
             </StackPane>
             <Button text="📁 Choisir une image" onAction="#browseImage" styleClass="btn-secondary" maxWidth="Infinity" />
+            <Label fx:id="imageErrorLabel" style="-fx-text-fill: #ef4444; -fx-font-size: 12px; -fx-font-weight: bold;" managed="false" visible="false" />
         </VBox>
     </VBox>
     

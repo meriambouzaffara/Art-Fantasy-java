@@ -7,10 +7,10 @@ public class QcmResultat {
     private float score;
     private boolean valide;
 
-    //  DateTimeImmutable en PHP → LocalDateTime en Java
+    // ✅ DateTimeImmutable en PHP → LocalDateTime en Java
     private LocalDateTime dateTentative;
 
-    //  Clés étrangères en tant qu'objets (Utilisation de User au lieu de Participant)
+    // ✅ Clés étrangères en tant qu'objets (Utilisation de User au lieu de Participant)
     private Qcm qcm;
     private User participant;
 
@@ -48,7 +48,7 @@ public class QcmResultat {
     public Qcm getQcm() { return qcm; }
     public void setQcm(Qcm qcm) { this.qcm = qcm; }
 
-    //  Getter/Setter mis à jour pour utiliser User
+    // ✅ Getter/Setter mis à jour pour utiliser User
     public User getParticipant() { return participant; }
     public void setParticipant(User participant) { this.participant = participant; }
 

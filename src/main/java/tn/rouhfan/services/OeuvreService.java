@@ -250,4 +250,14 @@ public class OeuvreService implements IService<Oeuvre> {
         }
         return false;
     }
+
+    public void supprimerParUser(int userId) throws SQLException {
+        String sql = "DELETE FROM oeuvre WHERE user_id = ?";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setInt(1, userId);
+        int rows = ps.executeUpdate();
+        if (rows > 0) {
+            System.out.println("🗑️ " + rows + " Oeuvre(s) supprimée(s) pour l'utilisateur ID: " + userId);
+        }
+    }
 }
