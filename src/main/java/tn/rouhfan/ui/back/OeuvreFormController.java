@@ -44,6 +44,12 @@ public class OeuvreFormController implements Initializable {
     @FXML private StackPane imageContainer;
     @FXML private Button saveBtn;
     @FXML private Button browseBtn;
+    @FXML private Label titreError;
+    @FXML private Label descriptionError;
+    @FXML private Label prixError;
+    @FXML private Label categorieError;
+    @FXML private Label artisteError;
+    @FXML private Label imageError;
 
     private OeuvreService oeuvreService;
     private CategorieService categorieService;
@@ -157,7 +163,7 @@ public class OeuvreFormController implements Initializable {
         
         // Accepter n'importe quel type d'image
         fileChooser.getExtensionFilters().addAll(
-            new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp", "*.webp")
+            new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
         );
         
         File file = fileChooser.showOpenDialog(titreField.getScene().getWindow());
@@ -213,59 +219,79 @@ public class OeuvreFormController implements Initializable {
     }
 
     private boolean validateFields() {
+        clearErrors();
+        boolean valid = true;
         String titre = titreField.getText().trim();
         String description = descriptionField.getText().trim();
         String prixStr = prixField.getText().trim();
 
         if (titre.isEmpty()) {
-            showAlert("Champ obligatoire", "Le titre est obligatoire.");
-            return false;
-        }
-        if (titre.length() < 2) {
-            showAlert("Format invalide", "Le titre doit faire au moins 2 caractères.");
-            return false;
+            showError(titreError, "Le titre est obligatoire.");
+            valid = false;
+        } else if (titre.length() < 2) {
+            showError(titreError, "Le titre doit faire au moins 2 caractères.");
+            valid = false;
         }
 
         if (description.isEmpty()) {
-            showAlert("Champ obligatoire", "La description est obligatoire.");
-            return false;
+            showError(descriptionError, "La description est obligatoire.");
+            valid = false;
         }
 
         if (prixStr.isEmpty()) {
-            showAlert("Champ obligatoire", "Le prix est obligatoire.");
-            return false;
-        }
-
-        BigDecimal prix;
-        try {
-            prix = new BigDecimal(prixStr);
-            if (prix.compareTo(BigDecimal.ZERO) <= 0) {
-                showAlert("Valeur invalide", "Le prix doit être supérieur à 0,00 DT.");
-                return false;
+            showError(prixError, "Le prix est obligatoire.");
+            valid = false;
+        } else {
+            try {
+                BigDecimal prix = new BigDecimal(prixStr);
+                if (prix.compareTo(BigDecimal.ZERO) <= 0) {
+                    showError(prixError, "Le prix doit être supérieur à 0,00 DT.");
+                    valid = false;
+                }
+            } catch (NumberFormatException e) {
+                showError(prixError, "Le prix doit être un nombre valide.");
+                valid = false;
             }
-        } catch (NumberFormatException e) {
-            showAlert("Prix invalide", "Le prix doit être un nombre valide.");
-            return false;
         }
 
         if (categorieCombo.getValue() == null) {
-            showAlert("Champ obligatoire", "Veuillez sélectionner une catégorie.");
-            return false;
+            showError(categorieError, "Veuillez sélectionner une catégorie.");
+            valid = false;
         }
 
         if (artisteCombo.getValue() == null) {
-            showAlert("Champ obligatoire", "Veuillez sélectionner un artiste.");
-            return false;
+            showError(artisteError, "Veuillez sélectionner un artiste.");
+            valid = false;
         }
 
-        // Vérification de l'image obligatoire
         boolean hasImage = (selectedImageFile != null) || (currentOeuvre != null && currentOeuvre.getImage() != null && !currentOeuvre.getImage().isEmpty());
         if (!hasImage) {
-            showAlert("Image manquante", "Veuillez sélectionner une image.");
-            return false;
+            showError(imageError, "Veuillez sélectionner une image.");
+            valid = false;
         }
 
-        return true;
+        return valid;
+    }
+
+    private void showError(Label errorLabel, String message) {
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
+        errorLabel.setManaged(true);
+    }
+
+    private void clearErrors() {
+        titreError.setVisible(false);
+        titreError.setManaged(false);
+        descriptionError.setVisible(false);
+        descriptionError.setManaged(false);
+        prixError.setVisible(false);
+        prixError.setManaged(false);
+        categorieError.setVisible(false);
+        categorieError.setManaged(false);
+        artisteError.setVisible(false);
+        artisteError.setManaged(false);
+        imageError.setVisible(false);
+        imageError.setManaged(false);
     }
 
     @FXML private void cancel() { closeDialog(); }

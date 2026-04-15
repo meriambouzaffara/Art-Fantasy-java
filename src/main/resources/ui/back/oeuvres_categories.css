@@ -18,6 +18,7 @@
     -fx-padding: 0;
     -fx-font-size: 14px;
     -fx-text-fill: #2d1b4e;
+    -fx-background-insets: 0;
 }
 
 .combo-box .cell {
@@ -27,9 +28,12 @@
     -fx-font-weight: normal;
 }
 
-.combo-box:focused {
+.combo-box:focused, .combo-box:showing, .combo-box:pressed {
     -fx-border-color: #e0e4f2;
     -fx-effect: none;
+    -fx-border-width: 1.5;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
 }
 
 .combo-box .arrow-button {
@@ -311,4 +315,34 @@
 .dash-card-featured:hover .dash-card-icon {
     -fx-scale-x: 1.2;
     -fx-scale-y: 1.2;
+}
+
+/* Error label for form validation - red text */
+.error-label {
+    -fx-text-fill: #d63031;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 2 0 0 0;
+    -fx-min-height: 20px;
+}
+
+/* Form label style */
+.form-label {
+    -fx-text-fill: #241197;
+    -fx-font-weight: 700;
+    -fx-font-size: 14px;
+}
+
+/* Form control (TextField, TextArea) style */
+.form-control {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(36, 17, 151, 0.1);
+    -fx-border-radius: 12;
+    -fx-padding: 8 12;
+    -fx-font-size: 14px;
+}
+
+.form-control:focused {
+    -fx-border-color: #241197;
 }

@@ -30,6 +30,8 @@ public class CategorieFormController implements Initializable {
     @FXML private ImageView imagePreview;
     @FXML private Label placeholderLabel;
     @FXML private StackPane imageContainer;
+    @FXML private Label nomError;
+    @FXML private Label imageError;
 
     private CategorieService categorieService;
     private Categorie currentCategorie;
@@ -68,7 +70,7 @@ public class CategorieFormController implements Initializable {
 
         // Accepter n'importe quel type d'image
         fileChooser.getExtensionFilters().addAll(
-            new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp", "*.webp")
+            new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
         );
         
         File file = fileChooser.showOpenDialog(nomField.getScene().getWindow());
@@ -119,25 +121,38 @@ public class CategorieFormController implements Initializable {
     }
 
     private boolean validateFields() {
+        clearErrors();
+        boolean valid = true;
         String nom = nomField.getText().trim();
 
         if (nom.isEmpty()) {
-            showAlert("Champ obligatoire", "Le nom de la catégorie est obligatoire.");
-            return false;
-        }
-        if (nom.length() < 2) {
-            showAlert("Format invalide", "Le nom de la catégorie doit faire au moins 2 caractères.");
-            return false;
+            showError(nomError, "Le nom de la catégorie est obligatoire.");
+            valid = false;
+        } else if (nom.length() < 2) {
+            showError(nomError, "Le nom de la catégorie doit faire au moins 2 caractères.");
+            valid = false;
         }
 
-        // Vérification de l'image obligatoire
         boolean hasImage = (selectedImageFile != null) || (currentCategorie != null && currentCategorie.getImageCategorie() != null && !currentCategorie.getImageCategorie().isEmpty());
         if (!hasImage) {
-            showAlert("Image manquante", "Veuillez sélectionner une image.");
-            return false;
+            showError(imageError, "Veuillez sélectionner une image.");
+            valid = false;
         }
 
-        return true;
+        return valid;
+    }
+
+    private void showError(Label errorLabel, String message) {
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
+        errorLabel.setManaged(true);
+    }
+
+    private void clearErrors() {
+        nomError.setVisible(false);
+        nomError.setManaged(false);
+        imageError.setVisible(false);
+        imageError.setManaged(false);
     }
 
     @FXML private void cancel() { closeDialog(); }
