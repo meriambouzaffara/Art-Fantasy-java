@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="0"
+      xmlns="http://javafx.com/javafx/8"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.rouhfan.ui.back.MagasinController">
+
+    <!-- ═══════════════════════════════════════════════════════════
+         EN-TÊTE
+    ═══════════════════════════════════════════════════════════ -->
+    <VBox spacing="4"
+          style="-fx-padding: 0 0 16 0;">
+        <Label text="🖌️ Gestion des Magasins" styleClass="text-title" />
+        <Label text="Créez, modifiez et supprimez les magasins Art Fantasy."
+               styleClass="text-subtitle" />
+    </VBox>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         BARRE D'ACTIONS
+    ═══════════════════════════════════════════════════════════ -->
+    <HBox spacing="10" alignment="CENTER_LEFT"
+          style="-fx-padding: 0 0 16 0;">
+        <TextField fx:id="searchField"
+                   promptText="🔍 Rechercher un magasin..."
+                   prefWidth="280"
+                   onKeyReleased="#onSearch" />
+        <Button text="🔄 Rafraîchir"
+                onAction="#refresh"
+                styleClass="btn-secondary" />
+        <Region HBox.hgrow="ALWAYS" />
+        <Label fx:id="countLabel" text=""
+               style="-fx-text-fill: #6c2a90; -fx-font-weight: bold; -fx-font-size: 13;" />
+        <Button text="➕ Nouveau magasin"
+                onAction="#showAddForm"
+                styleClass="btn-primary" />
+    </HBox>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         FORMULAIRE AJOUTER / MODIFIER (masqué par défaut)
+    ═══════════════════════════════════════════════════════════ -->
+    <VBox fx:id="formPanel"
+          spacing="14"
+          visible="false"
+          managed="false"
+          style="-fx-padding: 20;
+                 -fx-background-color: white;
+                 -fx-background-radius: 16;
+                 -fx-border-color: #c9a849;
+                 -fx-border-radius: 16;
+                 -fx-border-width: 1.5;
+                 -fx-effect: dropshadow(three-pass-box, rgba(201,168,73,0.15), 12, 0, 0, 4);">
+
+        <Label fx:id="formTitle" text="➕ Nouveau Magasin"
+               style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #241197;" />
+        <Separator />
+
+        <HBox spacing="14">
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Nom *" style="-fx-font-weight: bold; -fx-text-fill: #2d1b4e;" />
+                <TextField fx:id="nomField" promptText="Ex: Art Fantasy Tunis" />
+            </VBox>
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Adresse *" style="-fx-font-weight: bold; -fx-text-fill: #2d1b4e;" />
+                <TextField fx:id="adresseField" promptText="Ex: 12 Avenue Habib Bourguiba" />
+            </VBox>
+        </HBox>
+
+        <HBox spacing="14">
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Téléphone *" style="-fx-font-weight: bold; -fx-text-fill: #2d1b4e;" />
+                <TextField fx:id="telField" promptText="Ex: 71 234 567" />
+            </VBox>
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Email *" style="-fx-font-weight: bold; -fx-text-fill: #2d1b4e;" />
+                <TextField fx:id="emailField" promptText="Ex: contact@magasin.tn" />
+            </VBox>
+        </HBox>
+
+        <HBox spacing="14">
+            <VBox spacing="5" prefWidth="200">
+                <Label text="Latitude" style="-fx-font-weight: bold; -fx-text-fill: #2d1b4e;" />
+                <TextField fx:id="latField" promptText="Ex: 36.8065" />
+            </VBox>
+            <VBox spacing="5" prefWidth="200">
+                <Label text="Longitude" style="-fx-font-weight: bold; -fx-text-fill: #2d1b4e;" />
+                <TextField fx:id="lonField" promptText="Ex: 10.1815" />
+            </VBox>
+        </HBox>
+
+        <Label fx:id="errorLabel" text=""
+               style="-fx-text-fill: #d63031; -fx-font-size: 12;"
+               visible="false" managed="false" />
+
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <Button text="✅ Enregistrer" onAction="#saveMagasin" styleClass="btn-primary" />
+            <Button text="✖ Annuler"      onAction="#hideForm"    styleClass="btn-secondary" />
+        </HBox>
+    </VBox>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         GRILLE DE CARTES
+    ═══════════════════════════════════════════════════════════ -->
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: transparent; -fx-background: transparent;">
+        <FlowPane fx:id="magasinsFlow"
+                  hgap="20" vgap="20"
+                  prefWrapLength="900"
+                  style="-fx-padding: 8 0 20 0; -fx-background-color: transparent;" />
+    </ScrollPane>
+
+</VBox>

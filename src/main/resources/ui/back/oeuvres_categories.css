@@ -1,0 +1,314 @@
+/* Styles spécifiques pour la gestion des œuvres et catégories */
+
+/* Labels for filters above inputs */
+.filter-label {
+    -fx-text-fill: #241197;
+    -fx-font-weight: 800;
+    -fx-font-size: 14px;
+    -fx-padding: 0 0 10 0;
+}
+
+/* ComboBox Styling matching TextField exactly */
+.combo-box {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-border-color: #f0f2f9;
+    -fx-border-width: 1.5;
+    -fx-padding: 0;
+    -fx-font-size: 14px;
+    -fx-text-fill: #2d1b4e;
+}
+
+.combo-box .cell {
+    -fx-background-color: transparent;
+    -fx-padding: 10 15;
+    -fx-text-fill: #2d1b4e;
+    -fx-font-weight: normal;
+}
+
+.combo-box:focused {
+    -fx-border-color: #e0e4f2;
+    -fx-effect: none;
+}
+
+.combo-box .arrow-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 15 0 0;
+}
+
+.combo-box .arrow {
+    -fx-background-color: #2d1b4e;
+    -fx-shape: "M 0 0 L 4 4 L 8 0 Z";
+}
+
+.combo-box .list-view {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: #e0e4f2;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 10, 0, 0, 5);
+}
+
+.combo-box .list-cell {
+    -fx-padding: 10 15;
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #2d1b4e;
+    -fx-font-size: 14px;
+}
+
+.combo-box .list-cell:filled:hover {
+    -fx-background-color: #f5f6ff; /* Lightest Blue/White hover */
+    -fx-text-fill: #241197;
+}
+
+.combo-box .list-cell:filled:selected {
+    -fx-background-color: #ffffff; /* White background for selected */
+    -fx-text-fill: #241197;
+    -fx-font-weight: normal;
+}
+
+/* TextField Styling matching ComboBox */
+.text-field {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-border-color: #f0f2f9;
+    -fx-border-width: 1.5;
+    -fx-padding: 10 15;
+    -fx-font-size: 14px;
+    -fx-text-fill: #2d1b4e;
+    -fx-font-weight: normal;
+}
+
+.text-field:focused {
+    -fx-border-color: #e0e4f2;
+    -fx-effect: none;
+}
+
+/* Specific button style for Search (with gradient) */
+.btn-search {
+    -fx-background-color: linear-gradient(to right, #241197, #6c2a90);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: 700;
+    -fx-background-radius: 18;
+    -fx-padding: 12 25;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(36, 17, 151, 0.2), 10, 0, 0, 4);
+}
+
+.btn-search:hover {
+    -fx-background-color: linear-gradient(to right, #6c2a90, #241197);
+    -fx-translate-y: -2;
+    -fx-effect: dropshadow(three-pass-box, rgba(108, 42, 144, 0.4), 15, 0, 0, 8);
+}
+
+/* TableView Refined Styles - Applied via specific class */
+.table-art-fantasy {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: rgba(36, 17, 151, 0.08);
+    -fx-effect: dropshadow(three-pass-box, rgba(36, 17, 151, 0.03), 15, 0, 0, 5);
+    -fx-padding: 0;
+}
+
+.table-art-fantasy .column-header-background {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 16 16 0 0;
+    -fx-border-color: rgba(36, 17, 151, 0.05);
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 5 0;
+}
+
+.table-art-fantasy .column-header {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 15 10;
+}
+
+.table-art-fantasy .column-header .label {
+    -fx-text-fill: #241197;
+    -fx-font-weight: 800;
+    -fx-font-size: 13px;
+    -fx-text-transform: uppercase;
+}
+
+.table-art-fantasy .table-row-cell {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(36, 17, 151, 0.03);
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 0;
+    -fx-cell-size: 70px;
+}
+
+.table-art-fantasy .table-row-cell:odd {
+    -fx-background-color: #ffffff;
+}
+
+.table-art-fantasy .table-row-cell:filled:hover {
+    -fx-background-color: #f0f2ff;
+}
+
+.table-art-fantasy .table-cell {
+    -fx-border-color: transparent;
+    -fx-padding: 0 15;
+    -fx-alignment: CENTER_LEFT;
+    -fx-text-fill: #2d1b4e;
+    -fx-font-size: 14px;
+}
+
+/* Action Buttons in Table - Pill Style with Text & Icon as in capture */
+.btn-edit-reflet {
+    -fx-background-color: linear-gradient(to bottom right, #a29bfe, #6c5ce7); /* Vibrant Purple */
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-padding: 8 18;
+    -fx-font-weight: 800;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(108, 92, 231, 0.4), 10, 0, 0, 4);
+    -fx-transition: all 0.2s ease;
+    -fx-font-size: 14px;
+    -fx-min-width: 90px;
+}
+
+.btn-edit-reflet:hover {
+    -fx-background-color: linear-gradient(to bottom right, #6c5ce7, #a29bfe);
+    -fx-translate-y: -2;
+}
+
+.btn-delete-reflet {
+    -fx-background-color: linear-gradient(to bottom right, #fab1a0, #ff7675); /* Vibrant Coral */
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-padding: 8 18;
+    -fx-font-weight: 800;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(255, 118, 117, 0.4), 10, 0, 0, 4);
+    -fx-transition: all 0.2s ease;
+    -fx-font-size: 14px;
+    -fx-min-width: 95px;
+}
+
+.btn-delete-reflet:hover {
+    -fx-background-color: linear-gradient(to bottom right, #ff7675, #fab1a0);
+    -fx-translate-y: -2;
+}
+
+.btn-view-reflet {
+    -fx-background-color: linear-gradient(to bottom right, #81ecec, #00cec9); /* Vibrant Cyan */
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-padding: 8 18;
+    -fx-font-weight: 800;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 206, 201, 0.4), 10, 0, 0, 4);
+    -fx-transition: all 0.2s ease;
+    -fx-font-size: 14px;
+    -fx-min-width: 90px;
+}
+
+.btn-view-reflet:hover {
+    -fx-background-color: linear-gradient(to bottom right, #00cec9, #81ecec);
+    -fx-translate-y: -2;
+}
+
+/* Status text color */
+.status-purple {
+    -fx-text-fill: #241197;
+    -fx-font-weight: 600;
+}
+
+/* Specific style for Add Button in these modules - Matching capture */
+.btn-add {
+    -fx-background-color: #167e4e; /* Dark Green from capture */
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: 800;
+    -fx-background-radius: 18;
+    -fx-padding: 12 30;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 8, 0, 0, 3);
+    -fx-transition: all 0.3s ease;
+}
+
+.btn-add:hover {
+    -fx-background-color: #1a945c;
+    -fx-translate-y: -2;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 15, 0, 0, 6);
+}
+
+.btn-add-icon {
+    -fx-text-fill: #8c69f1; /* Light Purple '+' from capture */
+    -fx-font-weight: 900;
+    -fx-font-size: 18px;
+    -fx-padding: 0 8 0 0;
+}
+
+/* Specific button style for Close/Fermer in Details - Pill with Reflect */
+.btn-close-details {
+    -fx-background-color: linear-gradient(to bottom right, #241197, #6c2a90);
+    -fx-text-fill: white;
+    -fx-background-radius: 25;
+    -fx-padding: 10 35;
+    -fx-font-weight: 800;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(36, 17, 151, 0.4), 10, 0, 0, 4);
+    -fx-transition: all 0.2s ease;
+    -fx-font-size: 15px;
+}
+
+.btn-close-details:hover {
+    -fx-background-color: linear-gradient(to bottom right, #6c2a90, #241197);
+    -fx-translate-y: -2;
+    -fx-effect: dropshadow(three-pass-box, rgba(108, 42, 144, 0.5), 15, 0, 0, 6);
+}
+
+/* Image Preview in Forms */
+.image-preview-container {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 2;
+    -fx-border-style: dashed;
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-alignment: CENTER;
+}
+
+.image-preview-container:hover {
+    -fx-border-color: #6c5ce7;
+    -fx-background-color: #f5f6ff;
+}
+
+.table-image-view {
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 5, 0, 0, 2);
+}
+
+.dash-card-featured {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 20;
+    -fx-padding: 30;
+    -fx-alignment: CENTER;
+    -fx-effect: dropshadow(three-pass-box, rgba(36, 17, 151, 0.1), 15, 0, 0, 8);
+    -fx-cursor: hand;
+    -fx-transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    -fx-border-color: rgba(36, 17, 151, 0.05);
+    -fx-border-radius: 20;
+}
+
+.dash-card-featured:hover {
+    -fx-translate-y: -12;
+    -fx-background-color: linear-gradient(to bottom right, #ffffff, #f0f2ff);
+    -fx-effect: dropshadow(three-pass-box, rgba(36, 17, 151, 0.2), 25, 0, 0, 15);
+    -fx-border-color: rgba(36, 17, 151, 0.2);
+}
+
+.dash-card-featured .dash-card-icon {
+    -fx-font-size: 58px;
+    -fx-transition: all 0.3s ease;
+}
+
+.dash-card-featured:hover .dash-card-icon {
+    -fx-scale-x: 1.2;
+    -fx-scale-y: 1.2;
+}
