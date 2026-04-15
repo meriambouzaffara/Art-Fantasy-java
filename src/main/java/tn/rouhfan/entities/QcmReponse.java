@@ -5,7 +5,7 @@ public class QcmReponse {
     private String texte;
     private boolean correcte;
 
-    //  Clé étrangère en tant qu'objet
+    // ✅ Clé étrangère en tant qu'objet
     private QcmQuestion question;
 
     // ======= Constructeurs =======

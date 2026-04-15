@@ -17,6 +17,7 @@
         <Label fx:id="pageSubtitle" text="Explorez nos collections et découvrez des talents uniques." styleClass="text-subtitle" />
     </VBox>
 
+    <!-- Barre de filtres pour les OEUVRES -->
     <HBox fx:id="filterBar" spacing="20.0" alignment="BOTTOM_LEFT" styleClass="surface" style="-fx-padding: 25;">
         <VBox spacing="8.0">
             <Label text="Nom (titre)" styleClass="filter-label" />
@@ -40,8 +41,16 @@
 
         <Region HBox.hgrow="ALWAYS" />
         
-        <!-- Visible only for Artists -->
+        <!-- Visible only for Artists/Admin -->
         <Button fx:id="addOeuvreBtn" text="➕ Publier une œuvre" onAction="#handleAddOeuvre" styleClass="btn-front-primary" visible="false" managed="false" />
+    </HBox>
+
+    <!-- Barre de recherche pour les CATÉGORIES -->
+    <HBox fx:id="categorySearchBar" spacing="20.0" alignment="BOTTOM_LEFT" styleClass="surface" style="-fx-padding: 25;" visible="false" managed="false">
+        <VBox spacing="8.0">
+            <Label text="Rechercher une catégorie" styleClass="filter-label" />
+            <TextField fx:id="categorySearchField" promptText="Nom de la catégorie..." prefWidth="350" styleClass="text-field" />
+        </VBox>
     </HBox>
 
     <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">

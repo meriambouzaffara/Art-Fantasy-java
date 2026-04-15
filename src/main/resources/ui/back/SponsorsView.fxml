@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
@@ -14,8 +15,11 @@
         <Label text="Gérez les sponsors et partenariats." styleClass="text-subtitle" />
     </VBox>
 
+    <!-- TOP Row: Search and Buttons -->
     <HBox spacing="10.0" alignment="CENTER_LEFT">
         <TextField fx:id="searchField" promptText="🔍 Rechercher un sponsor..." prefWidth="280" />
+        <Label text="Tri:" />
+        <ComboBox fx:id="sortCombo" prefWidth="150" />
         <Button text="🔄 Rafraîchir" onAction="#refresh" styleClass="btn-secondary" />
         <HBox HBox.hgrow="ALWAYS" />
         <Button text="➕ Ajouter" onAction="#addSponsor" styleClass="btn-primary" />
@@ -23,6 +27,7 @@
         <Button text="🗑️ Supprimer" onAction="#deleteSponsor" styleClass="btn-secondary" />
     </HBox>
 
+    <!-- Table -->
     <TableView fx:id="sponsorTable" VBox.vgrow="ALWAYS" styleClass="surface">
         <columns>
             <TableColumn fx:id="colId" text="ID" prefWidth="50" />
@@ -34,3 +39,4 @@
         </columns>
     </TableView>
 </VBox>
+

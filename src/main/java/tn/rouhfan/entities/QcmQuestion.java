@@ -8,10 +8,10 @@ public class QcmQuestion {
     private int id;
     private String question;
 
-    // Clé étrangère en tant qu'objet
+    // ✅ Clé étrangère en tant qu'objet
     private Qcm qcm;
 
-    // Relation OneToMany → liste de réponses
+    // ✅ Relation OneToMany → liste de réponses
     private List<QcmReponse> reponses;
 
     // ======= Constructeurs =======
@@ -40,7 +40,7 @@ public class QcmQuestion {
     public List<QcmReponse> getReponses() { return reponses; }
     public void setReponses(List<QcmReponse> reponses) { this.reponses = reponses; }
 
-    // Méthodes utilitaires
+    // ✅ Méthodes utilitaires
     public void addReponse(QcmReponse reponse) {
         if (!reponses.contains(reponse)) {
             reponses.add(reponse);

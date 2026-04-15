@@ -14,7 +14,7 @@ public class Magasin {
     private Double longitude;
     private List<Article> articles;
 
-    //  Constructeur sans ID
+    // ✅ Constructeur sans ID
     public Magasin(String nom, String adresse, String tel, String email, Double latitude, Double longitude) {
         this.nom = nom;
         this.adresse = adresse;
@@ -25,7 +25,7 @@ public class Magasin {
         this.articles = new ArrayList<>();
     }
 
-    //  Constructeur avec ID
+    // ✅ Constructeur avec ID
     public Magasin(Long id, String nom, String adresse, String tel, String email, Double latitude, Double longitude) {
         this.id = id;
         this.nom = nom;

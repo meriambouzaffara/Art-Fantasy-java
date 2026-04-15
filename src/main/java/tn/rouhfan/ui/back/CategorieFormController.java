@@ -30,8 +30,14 @@ public class CategorieFormController implements Initializable {
     @FXML private ImageView imagePreview;
     @FXML private Label placeholderLabel;
     @FXML private StackPane imageContainer;
+<<<<<<< HEAD
     @FXML private Label nomError;
     @FXML private Label imageError;
+=======
+    
+    @FXML private Label nomErrorLabel;
+    @FXML private Label imageErrorLabel;
+>>>>>>> origin/gestion-oeuvres-categories
 
     private CategorieService categorieService;
     private Categorie currentCategorie;
@@ -121,6 +127,7 @@ public class CategorieFormController implements Initializable {
     }
 
     private boolean validateFields() {
+<<<<<<< HEAD
         clearErrors();
         boolean valid = true;
         String nom = nomField.getText().trim();
@@ -131,10 +138,33 @@ public class CategorieFormController implements Initializable {
         } else if (nom.length() < 2) {
             showError(nomError, "Le nom de la catégorie doit faire au moins 2 caractères.");
             valid = false;
+=======
+        boolean isValid = true;
+        
+        // Hide errors initially
+        nomErrorLabel.setVisible(false);
+        nomErrorLabel.setManaged(false);
+        imageErrorLabel.setVisible(false);
+        imageErrorLabel.setManaged(false);
+
+        String nom = nomField.getText().trim();
+
+        if (nom.isEmpty()) {
+            nomErrorLabel.setText("Le nom de la catégorie est obligatoire.");
+            nomErrorLabel.setVisible(true);
+            nomErrorLabel.setManaged(true);
+            isValid = false;
+        } else if (nom.length() < 2) {
+            nomErrorLabel.setText("Le nom de la catégorie doit faire au moins 2 caractères.");
+            nomErrorLabel.setVisible(true);
+            nomErrorLabel.setManaged(true);
+            isValid = false;
+>>>>>>> origin/gestion-oeuvres-categories
         }
 
         boolean hasImage = (selectedImageFile != null) || (currentCategorie != null && currentCategorie.getImageCategorie() != null && !currentCategorie.getImageCategorie().isEmpty());
         if (!hasImage) {
+<<<<<<< HEAD
             showError(imageError, "Veuillez sélectionner une image.");
             valid = false;
         }
@@ -153,6 +183,21 @@ public class CategorieFormController implements Initializable {
         nomError.setManaged(false);
         imageError.setVisible(false);
         imageError.setManaged(false);
+=======
+            imageErrorLabel.setText("Veuillez sélectionner une image.");
+            imageErrorLabel.setVisible(true);
+            imageErrorLabel.setManaged(true);
+            isValid = false;
+        }
+
+        javafx.application.Platform.runLater(() -> {
+            if (nomField.getScene() != null && nomField.getScene().getWindow() != null) {
+                ((javafx.stage.Stage) nomField.getScene().getWindow()).sizeToScene();
+            }
+        });
+
+        return isValid;
+>>>>>>> origin/gestion-oeuvres-categories
     }
 
     @FXML private void cancel() { closeDialog(); }

@@ -10,7 +10,11 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.StackPane?>
 
+<<<<<<< HEAD
 <VBox spacing="15.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.CategorieFormController" styleClass="form-container" stylesheets="@oeuvres_categories.css,@../theme.css">
+=======
+<VBox spacing="15.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.CategorieFormController" styleClass="form-container" stylesheets="@../theme.css">
+>>>>>>> origin/gestion-oeuvres-categories
     <padding>
         <Insets top="30" right="30" bottom="30" left="30"/>
     </padding>
@@ -20,6 +24,7 @@
         <Label text="Créez une catégorie pour organiser vos œuvres." styleClass="text-subtitle" />
     </VBox>
     
+<<<<<<< HEAD
     <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background:transparent; -fx-background-color:transparent;">
         <VBox spacing="20.0">
             <VBox spacing="8.0">
@@ -37,6 +42,23 @@
                 <Button text="📁 Choisir une image" onAction="#browseImage" styleClass="btn-secondary" maxWidth="Infinity" />
                 <Label fx:id="imageError" styleClass="error-label" managed="false" visible="false" />
             </VBox>
+=======
+    <VBox spacing="20.0">
+        <VBox spacing="8.0">
+            <Label text="Nom de la catégorie" styleClass="form-label" />
+            <TextField fx:id="nomField" promptText="Ex: Peinture à l'huile" styleClass="form-control" />
+            <Label fx:id="nomErrorLabel" style="-fx-text-fill: #ef4444; -fx-font-size: 12px; -fx-font-weight: bold;" managed="false" visible="false" />
+        </VBox>
+
+        <VBox spacing="15.0" alignment="TOP_CENTER">
+            <Label text="Image de couverture" styleClass="form-label" alignment="CENTER_LEFT" maxWidth="Infinity" />
+            <StackPane fx:id="imageContainer" prefHeight="240.0" prefWidth="240.0" styleClass="image-preview-container">
+                <ImageView fx:id="imagePreview" fitHeight="230.0" fitWidth="230.0" preserveRatio="true" smooth="true" cache="true" />
+                <Label fx:id="placeholderLabel" text="📷 Aperçu de l'image" style="-fx-text-fill: #94a3b8;" />
+            </StackPane>
+            <Button text="📁 Choisir une image" onAction="#browseImage" styleClass="btn-secondary" maxWidth="Infinity" />
+            <Label fx:id="imageErrorLabel" style="-fx-text-fill: #ef4444; -fx-font-size: 12px; -fx-font-weight: bold;" managed="false" visible="false" />
+>>>>>>> origin/gestion-oeuvres-categories
         </VBox>
     </ScrollPane>
     
