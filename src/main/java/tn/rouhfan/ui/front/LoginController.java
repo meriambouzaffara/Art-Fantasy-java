@@ -38,14 +38,12 @@ public class LoginController {
         String email = emailField.getText().trim();
         String password = passwordField.getText();
 
-        // Validation des champs
         if (email.isEmpty() || password.isEmpty()) {
             errorLabel.setText("Veuillez remplir tous les champs.");
             return;
         }
 
         try {
-            // Chercher l'utilisateur par email
             User user = userService.findByEmail(email);
 
             if (user == null) {
@@ -53,20 +51,24 @@ public class LoginController {
                 return;
             }
 
-            // Vérifier le mot de passe (supporte bcrypt ET texte clair)
             if (!PasswordUtils.checkPassword(password, user.getPassword())) {
                 errorLabel.setText("Mot de passe incorrect.");
                 return;
             }
 
-            // Login réussi — enregistrer dans la session
+            // Login réussi
             SessionManager.getInstance().login(user);
             String role = SessionManager.getInstance().getRole();
             System.out.println("Login réussi pour: " + user.getNom() + " " + user.getPrenom() + " | Rôle: " + role);
 
-            // Redirection vers la page d'accueil (connecté)
-            // L'utilisateur verra "Bienvenue, Prénom" + bouton Mon Espace
-            navigateTo(event, "/ui/front/FrontBase.fxml");
+            // Redirection selon le rôle
+            if (role != null && role.toUpperCase().contains("ADMIN")) {
+                // ADMIN → Dashboard directement
+                navigateTo(event, "/ui/back/BackBase.fxml");
+            } else {
+                // ARTISTE ou PARTICIPANT → FrontOffice
+                navigateTo(event, "/ui/front/FrontBase.fxml");
+            }
 
         } catch (Exception e) {
             errorLabel.setText("Erreur de connexion: " + e.getMessage());

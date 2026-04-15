@@ -20,6 +20,11 @@ public class OeuvreService implements IService<Oeuvre> {
 
     @Override
     public void ajouter(Oeuvre o) throws SQLException {
+        // Test d'unicité sur titre + description + user_id
+        if (isOeuvreExiste(o, 0)) {
+            throw new SQLException("Une œuvre identique existe déjà pour cet artiste.");
+        }
+
         String sql = "INSERT INTO oeuvre (description, titre, prix, statut, image, favori, date_vente, user_id, categorie_id) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -64,47 +69,20 @@ public class OeuvreService implements IService<Oeuvre> {
 
     @Override
     public void supprimer(int id) throws SQLException {
-        // Supprimer d'abord les favoris liés à cette oeuvre
-        FavorisService favorisService = new FavorisService();
-        favorisService.supprimerParOeuvre(id);
-
         String sql = "DELETE FROM oeuvre WHERE id = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, id);
         ps.executeUpdate();
-        System.out.println("🗑️ Oeuvre supprimée (ainsi que ses favoris)");
-    }
-
-    public void supprimerParUser(int userId) throws SQLException {
-        // 1. Récupérer les IDs des oeuvres de cet utilisateur (artiste)
-        List<Integer> oeuvreIds = new ArrayList<>();
-        String findIdsSql = "SELECT id FROM oeuvre WHERE user_id = ?";
-        try (PreparedStatement ps = cnx.prepareStatement(findIdsSql)) {
-            ps.setInt(1, userId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    oeuvreIds.add(rs.getInt("id"));
-                }
-            }
-        }
-
-        // 2. Supprimer les favoris pour chaque oeuvre
-        FavorisService favorisService = new FavorisService();
-        for (Integer id : oeuvreIds) {
-            favorisService.supprimerParOeuvre(id);
-        }
-
-        // 3. Supprimer les oeuvres
-        String sql = "DELETE FROM oeuvre WHERE user_id = ?";
-        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
-            ps.setInt(1, userId);
-            ps.executeUpdate();
-        }
-        System.out.println("🗑️ Toutes les oeuvres et leurs favoris ont été supprimés");
+        System.out.println("🗑️ Oeuvre supprimée");
     }
 
     @Override
     public void modifier(Oeuvre o) throws SQLException {
+        // Test d'unicité sur titre + description + user_id (excluant l'œuvre elle-même)
+        if (isOeuvreExiste(o, o.getId())) {
+            throw new SQLException("Une autre œuvre identique existe déjà pour cet artiste.");
+        }
+
         String sql = "UPDATE oeuvre SET description=?, titre=?, prix=?, statut=?, image=?, favori=?, date_vente=?, user_id=?, categorie_id=? WHERE id=?";
 
         PreparedStatement ps = cnx.prepareStatement(sql);
@@ -253,5 +231,33 @@ public class OeuvreService implements IService<Oeuvre> {
             return o;
         }
         return null;
+    }
+
+    private boolean isOeuvreExiste(Oeuvre o, int excludeId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM oeuvre WHERE titre = ? AND description = ? AND user_id = ? AND id != ?";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setString(1, o.getTitre());
+        ps.setString(2, o.getDescription());
+        if (o.getUser() != null) {
+            ps.setInt(3, o.getUser().getId());
+        } else {
+            ps.setNull(3, Types.INTEGER);
+        }
+        ps.setInt(4, excludeId);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            return rs.getInt(1) > 0;
+        }
+        return false;
+    }
+
+    public void supprimerParUser(int userId) throws SQLException {
+        String sql = "DELETE FROM oeuvre WHERE user_id = ?";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setInt(1, userId);
+        int rows = ps.executeUpdate();
+        if (rows > 0) {
+            System.out.println("🗑️ " + rows + " Oeuvre(s) supprimée(s) pour l'utilisateur ID: " + userId);
+        }
     }
 }
