@@ -14,4 +14,5 @@ public interface IService<T> {
     List<T> recuperer() throws SQLException;
 
     T findById(int id) throws SQLException;
+
 }

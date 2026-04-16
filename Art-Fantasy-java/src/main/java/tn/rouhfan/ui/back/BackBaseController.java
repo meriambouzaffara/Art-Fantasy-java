@@ -8,6 +8,12 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import tn.rouhfan.ui.Router;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import java.util.Optional;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import java.io.IOException;
 
 public class BackBaseController {
 
@@ -132,6 +138,13 @@ public class BackBaseController {
         pageTitle.setText("Avis & Réclamations");
         Router.setContent(contentHost, "/ui/back/AvisView.fxml");
     }
+    private void showError(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
 
     @FXML
     private void backToFront(ActionEvent event) {
@@ -147,7 +160,31 @@ public class BackBaseController {
 
     @FXML
     private void logout(ActionEvent event) {
+        // Afficher une confirmation avant déconnexion
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Déconnexion");
+        confirmation.setHeaderText(null);
+        confirmation.setContentText("Êtes-vous sûr de vouloir vous déconnecter ?");
+
+        java.util.Optional<ButtonType> result = confirmation.showAndWait();
+
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                // Revenir à la page d'accueil du front
+                Parent root = FXMLLoader.load(getClass().getResource("/ui/front/FrontBase.fxml"));
+                Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+                stage.getScene().setRoot(root);
+
+                // Optionnel: Afficher un message de confirmation
+                System.out.println("Déconnexion réussie !");
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                showError("Erreur", "Impossible de revenir à l'accueil");
+            }
+        }
     }
+
 
     private void setActive(Button active) {
         clearActive();
