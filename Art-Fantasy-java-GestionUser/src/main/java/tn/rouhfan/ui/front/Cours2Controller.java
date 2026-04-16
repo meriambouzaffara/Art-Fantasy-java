@@ -14,8 +14,10 @@ import tn.rouhfan.services.CoursService;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class Cours2Controller implements Initializable {
 
@@ -24,9 +26,11 @@ public class Cours2Controller implements Initializable {
     @FXML private VBox detailView;
     @FXML private Label lblNom, lblNiveau;
     @FXML private TextArea taContenu;
+    @FXML private TextField searchField; // Nouveau champ de recherche
 
     private final CoursService coursService = new CoursService();
     private Cours selectedCours;
+    private List<Cours> allPublishedCourses = new ArrayList<>();
 
     private VBox contentHost;
     private VBox heroSection;
@@ -34,73 +38,149 @@ public class Cours2Controller implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         loadDataAndCards();
-        // Attendre que la scène soit complètement chargée
-        Platform.runLater(() -> {
-            initContainerReferences();
+
+        // Listener pour la recherche en temps réel
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            handleSearch(newValue);
         });
+
+        Platform.runLater(this::initContainerReferences);
+    }
+
+    private void handleSearch(String query) {
+        if (allPublishedCourses == null) return;
+
+        if (query == null || query.isEmpty()) {
+            afficherCartes(allPublishedCourses);
+        } else {
+            String lowerCaseQuery = query.toLowerCase();
+            List<Cours> filteredList = allPublishedCourses.stream()
+                    .filter(c -> c.getNom().toLowerCase().contains(lowerCaseQuery))
+                    .collect(Collectors.toList());
+            afficherCartes(filteredList);
+        }
     }
 
     private void initContainerReferences() {
         try {
-            // Vérifier si le label est dans une scène
-            if (lblNom.getScene() == null) {
-                System.err.println("Scene pas encore prête, réessai dans 200ms...");
-                javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.millis(200));
-                pause.setOnFinished(event -> initContainerReferences());
-                pause.play();
-                return;
-            }
-
+            if (lblNom.getScene() == null) return;
             Stage stage = (Stage) lblNom.getScene().getWindow();
             BorderPane root = (BorderPane) stage.getScene().getRoot();
             contentHost = (VBox) root.lookup("#contentHost");
             heroSection = (VBox) root.lookup("#heroSection");
-
-            if (contentHost != null && heroSection != null) {
-                System.out.println("Conteneurs récupérés avec succès !");
-            } else {
-                System.err.println("Conteneurs non trouvés, réessai...");
-                javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.millis(200));
-                pause.setOnFinished(event -> initContainerReferences());
-                pause.play();
-            }
         } catch (Exception ex) {
-            System.err.println("Impossible de récupérer les conteneurs: " + ex.getMessage());
-            // Réessayer après un délai
-            javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.millis(200));
-            pause.setOnFinished(event -> initContainerReferences());
-            pause.play();
+            System.err.println("Erreur de récupération des conteneurs.");
         }
     }
 
     private void loadDataAndCards() {
-        coursesGrid.getChildren().clear();
         try {
-            List<Cours> list = coursService.recuperer();
-            // Filtrer uniquement les cours avec statut "Publié"
-            for (Cours c : list) {
-                if ("Publié".equals(c.getStatut())) {
-                    coursesGrid.getChildren().add(createCourseCard(c));
-                }
-            }
+            List<Cours> list = coursService.recupererFront();
+            allPublishedCourses = new ArrayList<>(list);
+            afficherCartes(allPublishedCourses);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
+    private void afficherCartes(List<Cours> cours) {
+        coursesGrid.getChildren().clear();
+        for (Cours c : cours) {
+            coursesGrid.getChildren().add(createCourseCard(c));
+        }
+    }
+
+    private String getCoursEmoji(String nom) {
+        if (nom == null) return "📚";
+        String n = nom.toLowerCase();
+        if (n.contains("peinture"))       return "🎨";
+        if (n.contains("dessin"))         return "✏️";
+        if (n.contains("sculpture"))      return "🗿";
+        if (n.contains("musique"))        return "🎵";
+        if (n.contains("calligraphie"))   return "🖊️";
+        return "📚";
+    }
+
+    private String getPaletteColor(String niveau) {
+        if ("Débutant".equals(niveau)) return "#23BBB7";
+        if ("Intermédiaire".equals(niveau)) return "#744D83";
+        if ("Avancé".equals(niveau)) return "#23627C";
+        return "#23BBB7";
+    }
+
     private VBox createCourseCard(Cours c) {
         VBox card = new VBox(15);
-        card.setPrefSize(280, 220);
+        card.setPrefSize(280, 240);
         card.setAlignment(Pos.CENTER);
-        card.setStyle("-fx-background-color: white; -fx-background-radius: 15; -fx-border-color: #3498db; -fx-border-width: 2; -fx-border-radius: 15; -fx-padding: 20; -fx-cursor: hand;");
 
-        Label titleLabel = new Label(c.getNom());
-        titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16;");
+        String accentColor = getPaletteColor(c.getNiveau());
+        String baseStyle =
+                "-fx-background-color: #E3DBE6;" +
+                        "-fx-background-radius: 20;" +
+                        "-fx-border-color: " + accentColor + ";" +
+                        "-fx-border-width: 3;" +
+                        "-fx-border-radius: 20;" +
+                        "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);" +
+                        "-fx-padding: 20;" +
+                        "-fx-cursor: hand;";
 
-        card.getChildren().addAll(new Label("📚"), titleLabel);
+        card.setStyle(baseStyle);
+        card.setOnMouseEntered(e -> card.setStyle(baseStyle + "-fx-scale-x: 1.03; -fx-scale-y: 1.03; -fx-border-width: 4;"));
+        card.setOnMouseExited(e -> card.setStyle(baseStyle));
+
+        Label emojiLabel = new Label(getCoursEmoji(c.getNom()));
+        emojiLabel.setStyle("-fx-font-size: 50;");
+
+        String nomAffiche = (c.getNom() != null) ? c.getNom().toUpperCase() : "SANS TITRE";
+        Label titleLabel = new Label(nomAffiche);
+        titleLabel.setStyle("-fx-font-weight: 900; -fx-font-size: 18; -fx-text-fill: #23627C; -fx-text-alignment: center;");
+        titleLabel.setWrapText(true);
+        titleLabel.setMaxWidth(220);
+
+        Label niveauLabel = new Label(c.getNiveau() != null ? c.getNiveau() : "N/A");
+        niveauLabel.setStyle("-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: white; " +
+                "-fx-padding: 5 18; -fx-background-radius: 20; " +
+                "-fx-background-color: " + accentColor + ";");
+
+        card.getChildren().addAll(emojiLabel, titleLabel, niveauLabel);
         card.setOnMouseClicked(event -> showDetails(c));
 
         return card;
+    }
+
+    private int getNiveauOrdre(String niveau) {
+        if (niveau == null) return 3;
+        switch (niveau) {
+            case "Débutant": return 1;
+            case "Intermédiaire": return 2;
+            case "Avancé": return 3;
+            default: return 3;
+        }
+    }
+
+    @FXML private void trierParNiveauCroissant() {
+        allPublishedCourses.sort((c1, c2) -> Integer.compare(getNiveauOrdre(c1.getNiveau()), getNiveauOrdre(c2.getNiveau())));
+        handleSearch(searchField.getText());
+    }
+
+    @FXML private void trierParNiveauDecroissant() {
+        allPublishedCourses.sort((c1, c2) -> Integer.compare(getNiveauOrdre(c2.getNiveau()), getNiveauOrdre(c1.getNiveau())));
+        handleSearch(searchField.getText());
+    }
+
+    @FXML private void trierParNomCroissant() {
+        allPublishedCourses.sort((c1, c2) -> c1.getNom().compareToIgnoreCase(c2.getNom()));
+        handleSearch(searchField.getText());
+    }
+
+    @FXML private void trierParNomDecroissant() {
+        allPublishedCourses.sort((c1, c2) -> c2.getNom().compareToIgnoreCase(c1.getNom()));
+        handleSearch(searchField.getText());
+    }
+
+    @FXML private void resetTri() {
+        searchField.clear();
+        loadDataAndCards();
     }
 
     private void showDetails(Cours c) {
@@ -109,87 +189,32 @@ public class Cours2Controller implements Initializable {
         mainScroll.setManaged(false);
         detailView.setVisible(true);
         detailView.setManaged(true);
-
         lblNom.setText(c.getNom());
         lblNiveau.setText("Difficulté : " + c.getNiveau());
         taContenu.setText(c.getContenu());
     }
 
-    @FXML
-    private void retourListe() {
+    @FXML private void retourListe() {
         detailView.setVisible(false);
         detailView.setManaged(false);
         mainScroll.setVisible(true);
         mainScroll.setManaged(true);
     }
 
-    @FXML
-    private void goPasserQcm() {
-        if (selectedCours == null) {
-            System.out.println("Aucun cours sélectionné");
-            showErrorAlert("Erreur", "Veuillez sélectionner un cours d'abord");
-            return;
-        }
-
+    @FXML private void goPasserQcm() {
+        if (selectedCours == null) return;
         try {
-            // Récupérer les conteneurs au moment du besoin (en cas d'échec précédent)
-            if (contentHost == null || heroSection == null) {
-                System.out.println("Tentative de récupération des conteneurs...");
-                Stage stage = (Stage) lblNom.getScene().getWindow();
-                BorderPane root = (BorderPane) stage.getScene().getRoot();
-                contentHost = (VBox) root.lookup("#contentHost");
-                heroSection = (VBox) root.lookup("#heroSection");
-            }
-
-            if (contentHost == null) {
-                System.err.println("contentHost est null, impossible de continuer");
-                showErrorAlert("Erreur", "Problème technique, veuillez réessayer");
-                return;
-            }
-
-            // Charger la vue du QCM
-            String fxmlPath = "/ui/front/QcmPassageView.fxml";
-            URL fxmlLocation = getClass().getResource(fxmlPath);
-
-            if (fxmlLocation == null) {
-                System.err.println("Fichier FXML introuvable: " + fxmlPath);
-                showErrorAlert("Erreur", "Fichier QcmPassageView.fxml introuvable");
-                return;
-            }
-
-            FXMLLoader loader = new FXMLLoader(fxmlLocation);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/front/QcmPassageView.fxml"));
             Parent qcmView = loader.load();
-
             QcmPassageController controller = loader.getController();
             controller.initData(selectedCours, contentHost, heroSection);
-
-            // Cacher heroSection et afficher le QCM
-            if (heroSection != null) {
-                heroSection.setVisible(false);
-                heroSection.setManaged(false);
-            }
-
+            if (heroSection != null) { heroSection.setVisible(false); heroSection.setManaged(false); }
             contentHost.setVisible(true);
             contentHost.setManaged(true);
             contentHost.getChildren().clear();
             contentHost.getChildren().add(qcmView);
-
         } catch (IOException ex) {
-            System.err.println("Erreur lors du chargement du QCM: " + ex.getMessage());
             ex.printStackTrace();
-            showErrorAlert("Erreur", "Impossible de charger le QCM: " + ex.getMessage());
-        } catch (Exception ex) {
-            System.err.println("Erreur inattendue: " + ex.getMessage());
-            ex.printStackTrace();
-            showErrorAlert("Erreur", "Une erreur inattendue s'est produite");
         }
-    }
-
-    private void showErrorAlert(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
     }
 }

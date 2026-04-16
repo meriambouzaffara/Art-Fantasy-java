@@ -5,9 +5,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import tn.rouhfan.entities.Certificat;
 import tn.rouhfan.services.CertificatService;
+import tn.rouhfan.services.CertificatPdfGenerator;
 
+import java.io.File;
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -21,8 +24,11 @@ public class Certificats2Controller implements Initializable {
     @FXML private TableColumn<Certificat, String> colNom, colNiveau, colScore, colDate, colCours, colParticipant;
     @FXML private Label lblInfo;
     @FXML private TextField searchField;
+    @FXML private Button btnViewPdf;
+    @FXML private Button btnDownloadPdf;
 
     private final CertificatService certService = new CertificatService();
+    private final CertificatPdfGenerator pdfGenerator = new CertificatPdfGenerator();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
     private List<Certificat> allCertificats;
 
@@ -31,6 +37,7 @@ public class Certificats2Controller implements Initializable {
         setupColumns();
         loadCertificats();
         setupSearch();
+        setupSelectionListener();
     }
 
     private void setupColumns() {
@@ -46,6 +53,14 @@ public class Certificats2Controller implements Initializable {
                 cd.getValue().getParticipant() != null ?
                         cd.getValue().getParticipant().getNom() + " " +
                                 (cd.getValue().getParticipant().getPrenom() != null ? cd.getValue().getParticipant().getPrenom() : "") : ""));
+    }
+
+    private void setupSelectionListener() {
+        certificatTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            boolean hasSelection = newVal != null;
+            if (btnViewPdf != null) btnViewPdf.setDisable(!hasSelection);
+            if (btnDownloadPdf != null) btnDownloadPdf.setDisable(!hasSelection);
+        });
     }
 
     private void loadCertificats() {
@@ -69,11 +84,9 @@ public class Certificats2Controller implements Initializable {
 
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue == null || newValue.trim().isEmpty()) {
-                // Afficher tous les certificats
                 certificatTable.setItems(FXCollections.observableArrayList(allCertificats));
                 lblInfo.setText(allCertificats.size() + " certificat(s) trouvé(s)");
             } else {
-                // Filtrer les certificats
                 String searchText = newValue.toLowerCase().trim();
                 List<Certificat> filtered = new ArrayList<>();
 
@@ -121,5 +134,62 @@ public class Certificats2Controller implements Initializable {
         if (searchField != null) {
             searchField.clear();
         }
+    }
+
+    @FXML
+    private void viewPdf() {
+        Certificat selected = certificatTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert("Erreur", "Veuillez sélectionner un certificat");
+            return;
+        }
+
+        try {
+            // Créer un fichier temporaire
+            String tempPath = System.getProperty("java.io.tmpdir") + "/certificat_" + selected.getId() + ".pdf";
+            pdfGenerator.generateCertificat(selected, tempPath);
+
+            // Ouvrir le PDF avec l'application par défaut
+            java.awt.Desktop.getDesktop().open(new File(tempPath));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible d'ouvrir le certificat: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void downloadPdf() {
+        Certificat selected = certificatTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert("Erreur", "Veuillez sélectionner un certificat");
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Enregistrer le certificat");
+        fileChooser.setInitialFileName("certificat_" + selected.getCours().getNom().replaceAll(" ", "_") + ".pdf");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Fichiers PDF (*.pdf)", "*.pdf")
+        );
+
+        File file = fileChooser.showSaveDialog(null);
+        if (file != null) {
+            try {
+                pdfGenerator.generateCertificat(selected, file.getAbsolutePath());
+                showAlert("Succès", "Certificat enregistré avec succès !\n" + file.getAbsolutePath());
+            } catch (Exception e) {
+                e.printStackTrace();
+                showAlert("Erreur", "Impossible d'enregistrer le certificat: " + e.getMessage());
+            }
+        }
+    }
+
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }

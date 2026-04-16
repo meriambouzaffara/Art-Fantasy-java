@@ -454,6 +454,14 @@ public class CoursController implements Initializable {
         colNiveau.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("niveau"));
         colDuree.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("duree"));
         colStatut.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("statut"));
+        colArtiste.setCellValueFactory(cellData -> {
+            Cours cours = cellData.getValue();
+            if (cours != null && cours.getArtiste() != null) {
+                String artisteNom = cours.getArtiste().getPrenom() + " " + cours.getArtiste().getNom();
+                return new javafx.beans.property.SimpleStringProperty(artisteNom);
+            }
+            return new javafx.beans.property.SimpleStringProperty("");
+        });
     }
 
     private void setupSearch() {

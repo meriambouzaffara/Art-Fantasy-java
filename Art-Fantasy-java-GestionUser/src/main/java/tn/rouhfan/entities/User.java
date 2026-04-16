@@ -60,13 +60,7 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", nom='" + nom + '\'' +
-                ", prenom='" + prenom + '\'' +
-                ", email='" + email + '\'' +
-                ", statut='" + statut + '\'' +
-                ", type='" + type + '\'' +
-                '}';
+
+        return (prenom != null ? prenom : "") + " " + (nom != null ? nom : "");
     }
 }

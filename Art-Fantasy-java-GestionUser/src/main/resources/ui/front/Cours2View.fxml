@@ -3,13 +3,36 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox spacing="20" style="-fx-background-color: #f4f7fb;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.front.Cours2Controller">
+<VBox spacing="20" style="-fx-background-color: #F0EADF;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.front.Cours2Controller">
     <children>
-        <Label text="🎨 Nos Formations Artistiques" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #2d3436; -fx-padding: 20 0 0 20;" />
+        <Label text="🎨 Nos Formations Artistiques" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #23627C; -fx-padding: 20 0 0 20;" />
 
-        <ScrollPane fx:id="mainScroll" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
+        <HBox spacing="15" alignment="CENTER_LEFT" style="-fx-padding: 10 20 5 20;">
+            <TextField fx:id="searchField" promptText="🔍 Rechercher un cours..."
+                       style="-fx-background-color: white; -fx-border-color: #23BBB7; -fx-border-radius: 20; -fx-background-radius: 20; -fx-padding: 8 15; -fx-pref-width: 300; -fx-text-fill: #23627C; -fx-font-weight: bold;" />
+
+            <Region HBox.hgrow="ALWAYS" /> <Label text="Trier par :" style="-fx-font-weight: bold; -fx-text-fill: #23627C; -fx-font-size: 14;" />
+
+            <MenuButton text="📊 Niveau" style="-fx-background-color: #23BBB7; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;">
+                <items>
+                    <MenuItem text="⬆️ Débutant → Avancé" onAction="#trierParNiveauCroissant" />
+                    <MenuItem text="⬇️ Avancé → Débutant" onAction="#trierParNiveauDecroissant" />
+                </items>
+            </MenuButton>
+
+            <MenuButton text="📝 Nom" style="-fx-background-color: #744D83; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;">
+                <items>
+                    <MenuItem text="⬆️ A → Z" onAction="#trierParNomCroissant" />
+                    <MenuItem text="⬇️ Z → A" onAction="#trierParNomDecroissant" />
+                </items>
+            </MenuButton>
+
+            <Button text="🔄" onAction="#resetTri" style="-fx-background-color: #D3EDEF; -fx-text-fill: #23627C; -fx-font-weight: bold; -fx-background-radius: 8; -fx-border-color: #23BBB7; -fx-border-radius: 8; -fx-cursor: hand;" />
+        </HBox>
+
+        <ScrollPane fx:id="mainScroll" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
             <content>
-                <FlowPane fx:id="coursesGrid" hgap="25" vgap="25" prefWrapLength="1000">
+                <FlowPane fx:id="coursesGrid" hgap="25" vgap="25">
                     <padding>
                         <Insets bottom="30" left="30" right="30" top="10" />
                     </padding>
@@ -17,12 +40,12 @@
             </content>
         </ScrollPane>
 
-        <VBox fx:id="detailView" visible="false" managed="false" spacing="15" style="-fx-padding: 30;">
-            <Button text="← Retour aux cours" onAction="#retourListe" style="-fx-background-color: #6c5ce7; -fx-text-fill: white; -fx-cursor: hand;" />
-            <Label fx:id="lblNom" style="-fx-font-size: 24; -fx-font-weight: bold;" />
-            <Label fx:id="lblNiveau" style="-fx-text-fill: #636e72;" />
-            <TextArea fx:id="taContenu" editable="false" wrapText="true" prefHeight="400" style="-fx-background-radius: 10;" />
-            <Button text="📝 Passer le QCM" onAction="#goPasserQcm" style="-fx-background-color: #00b894; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20;" />
+        <VBox fx:id="detailView" visible="false" managed="false" spacing="15" style="-fx-padding: 30; -fx-background-color: #E3DBE6; -fx-background-radius: 20;">
+            <Button text="← Retour aux cours" onAction="#retourListe" style="-fx-background-color: #744D83; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8;" />
+            <Label fx:id="lblNom" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #23627C;" />
+            <Label fx:id="lblNiveau" style="-fx-text-fill: #23627C; -fx-font-weight: bold;" />
+            <TextArea fx:id="taContenu" editable="false" wrapText="true" prefHeight="400" style="-fx-control-inner-background: #F0EADF; -fx-background-radius: 10;" />
+            <Button text="📝 Passer le QCM" onAction="#goPasserQcm" style="-fx-background-color: #23BBB7; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 10;" />
         </VBox>
     </children>
 </VBox>
