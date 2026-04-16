@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.shape.Line?>
+
+<VBox spacing="0.0" prefWidth="850.0" prefHeight="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.front.OeuvreDetailsController" style="-fx-background-color: white; -fx-background-radius: 25; -fx-overflow: hidden;" stylesheets="@../theme.css">
+    <HBox spacing="0.0" VBox.vgrow="ALWAYS">
+        <!-- Left Side: Image with Overlay -->
+        <StackPane prefWidth="450.0" style="-fx-background-color: #f8fafc;">
+            <ImageView fx:id="oeuvreImage" fitWidth="450.0" fitHeight="600.0" preserveRatio="true" smooth="true" />
+            <VBox alignment="TOP_LEFT" pickOnBounds="false">
+                <padding><Insets top="20" left="20"/></padding>
+                <Label fx:id="statusBadge" style="-fx-background-color: rgba(36, 17, 151, 0.9); -fx-text-fill: white; -fx-padding: 8 15; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 12; -fx-text-transform: uppercase;" />
+            </VBox>
+        </StackPane>
+
+        <!-- Right Side: Content -->
+        <VBox spacing="25.0" prefWidth="400.0" style="-fx-padding: 40;">
+            <HBox alignment="CENTER_RIGHT">
+                <Button text="✕" onAction="#close" style="-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 20; -fx-cursor: hand;" />
+            </HBox>
+
+            <VBox spacing="10.0">
+                <Label fx:id="categorieLabel" style="-fx-text-fill: #c9a849; -fx-font-weight: bold; -fx-font-size: 14; -fx-text-transform: uppercase; -fx-letter-spacing: 2;" />
+                <Label fx:id="titreLabel" wrapText="true" style="-fx-text-fill: #241197; -fx-font-size: 32; -fx-font-weight: 800; -fx-line-spacing: -5;" />
+            </VBox>
+
+            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                <StackPane style="-fx-background-color: #f0eef5; -fx-background-radius: 50; -fx-min-width: 45; -fx-min-height: 45;">
+                    <Label text="🎨" style="-fx-font-size: 20;" />
+                </StackPane>
+                <VBox>
+                    <Label text="ARTISTE" style="-fx-text-fill: #94a3b8; -fx-font-size: 10; -fx-font-weight: bold;" />
+                    <Label fx:id="artisteLabel" style="-fx-text-fill: #2d1b4e; -fx-font-size: 15; -fx-font-weight: bold;" />
+                </VBox>
+            </HBox>
+
+            <Line endX="320.0" stroke="#f1f5f9" strokeWidth="1.0" />
+
+            <VBox spacing="10.0" VBox.vgrow="ALWAYS">
+                <Label text="DESCRIPTION" style="-fx-text-fill: #94a3b8; -fx-font-size: 10; -fx-font-weight: bold;" />
+                <Label fx:id="descriptionLabel" wrapText="true" style="-fx-text-fill: #5a4a72; -fx-font-size: 14; -fx-line-spacing: 5;" />
+            </VBox>
+
+            <Region VBox.vgrow="ALWAYS" />
+
+            <HBox spacing="20.0" alignment="BOTTOM_LEFT">
+                <VBox spacing="5.0">
+                    <Label text="PRIX ACTUEL" style="-fx-text-fill: #94a3b8; -fx-font-size: 10; -fx-font-weight: bold;" />
+                    <Label fx:id="prixLabel" style="-fx-text-fill: #241197; -fx-font-size: 28; -fx-font-weight: 900;" />
+                </VBox>
+            </HBox>
+        </VBox>
+    </HBox>
+</VBox>

@@ -22,7 +22,7 @@
         <ComboBox fx:id="sortCombo" prefWidth="180" />
         <Button text="🔄 Rafraîchir" onAction="#refresh" styleClass="btn-secondary" />
         <HBox HBox.hgrow="ALWAYS" />
-        <Button text="➕ S'inscrire" onAction="#addEvenement" styleClass="btn-primary" />
+        <Button fx:id="addButton" text="➕ Ajouter Événement" onAction="#addEvenement" styleClass="btn-primary" visible="false" managed="false" />
     </HBox>
 
     <!-- Cards Container -->

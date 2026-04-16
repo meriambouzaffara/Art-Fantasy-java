@@ -42,6 +42,12 @@
             <version>5.11.2</version>
             <scope>test</scope>
         </dependency>
+        <!-- BCrypt pour le hachage des mots de passe (compatible Symfony) -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
     </dependencies>
 
     <build>

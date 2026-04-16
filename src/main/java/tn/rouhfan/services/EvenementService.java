@@ -268,6 +268,31 @@ public class EvenementService implements IService<Evenement> {
         return events;
     }
 
+    // ✅ PARTICIPER À UN ÉVÉNEMENT (incrémente nb_participants)
+    public void participer(int eventId) throws SQLException {
+        // First check if event exists and has capacity
+        Evenement event = findById(eventId);
+        if (event == null) {
+            throw new SQLException("Événement non trouvé");
+        }
+        
+        // Check if event is full
+        if (event.getCapacite() != null && event.getNbParticipants() >= event.getCapacite()) {
+            throw new SQLException("Événement complet");
+        }
+        
+        String sql = "UPDATE evenement SET nb_participants = nb_participants + 1 WHERE id = ?";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setInt(1, eventId);
+        int rows = ps.executeUpdate();
+        
+        if (rows > 0) {
+            System.out.println("✅ Participation enregistrée pour l'événement ID: " + eventId);
+        } else {
+            throw new SQLException("Erreur lors de la mise à jour");
+        }
+    }
+
     // ✅ HELPER - mapper ResultSet en Evenement
     private Evenement mapResultSetToEvenement(ResultSet rs) throws SQLException {
         Evenement e = new Evenement();
@@ -293,5 +318,5 @@ public class EvenementService implements IService<Evenement> {
         }
 
         return e;
+        }
     }
-}
