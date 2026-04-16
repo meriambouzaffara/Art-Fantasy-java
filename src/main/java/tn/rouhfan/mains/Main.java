@@ -192,7 +192,15 @@ public class Main {
                     "uploads/categories/peinture.png"
             );
             cs.ajouter(c);
+
             System.out.println("✅ Categorie ajoutée !");
+
+
+            System.out.println("\n Liste des catégories :");
+            List<Categorie> categories = cs.recuperer();
+            for (Categorie cat : categories) {
+                System.out.println(cat);
+            }
 
             // =========================
             // OEUVRE
@@ -209,7 +217,15 @@ public class Main {
                     c)
                     ;
             os.ajouter(o);
+
             System.out.println("✅ Oeuvre ajoutée !");
+
+
+            System.out.println("\n Liste des œuvres :");
+            List<Oeuvre> oeuvres = os.recuperer();
+            for (Oeuvre oe : oeuvres) {
+                System.out.println(oe);
+            }
 
             // =========================
             // FAVORIS
@@ -243,14 +259,15 @@ public class Main {
                 }
             }
 
+            System.out.println("✅ Categorie ajoutée !");
             System.out.println("\n Liste des catégories :");
-            List<Categorie> categories = cs.recuperer();
+            categories = cs.recuperer();
             for (Categorie cat : categories) {
                 System.out.println(cat);
             }
 
             System.out.println("\n Liste des oeuvres :");
-            List<Oeuvre> oeuvres = os.recuperer();
+            oeuvres = os.recuperer();
             for (Oeuvre oe : oeuvres) {
                 System.out.println(oe);
                 if (oe.getCategorie() != null) {

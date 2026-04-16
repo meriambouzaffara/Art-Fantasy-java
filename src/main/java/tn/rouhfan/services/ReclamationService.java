@@ -37,20 +37,33 @@ public class ReclamationService implements IService<Reclamation> {
 
     @Override
     public void supprimer(int id) throws SQLException {
+        String sql = "DELETE FROM reclamation WHERE id = ?";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setInt(1, id);
+        ps.executeUpdate();
+        System.out.println("🗑️ Reclamation supprimée");
+    }
 
+    public void supprimerParAuteur(int auteurId) throws SQLException {
+        String sql = "DELETE FROM reclamation WHERE auteur_id = ?";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setInt(1, auteurId);
+        ps.executeUpdate();
+        System.out.println("🗑️ Toutes les reclamations de l'utilisateur supprimées");
     }
 
     @Override
     public void modifier(Reclamation reclamation) throws SQLException {
-
+        // Optionnel: implémenter si besoin
     }
 
-    @Override
-    public List<Reclamation> recuperer() throws SQLException {
+    public List<Reclamation> recupererParUser(int auteurId) throws SQLException {
         List<Reclamation> list = new ArrayList<>();
-        String sql = "SELECT * FROM reclamation";
-        Statement st = cnx.createStatement();
-        ResultSet rs = st.executeQuery(sql);
+        String sql = "SELECT * FROM reclamation WHERE auteur_id = ? ORDER BY created_at DESC";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setInt(1, auteurId);
+        ResultSet rs = ps.executeQuery();
+
         while (rs.next()) {
             Reclamation r = new Reclamation();
             r.setId(rs.getInt("id"));
@@ -66,9 +79,30 @@ public class ReclamationService implements IService<Reclamation> {
     }
 
     @Override
+    public List<Reclamation> recuperer() throws SQLException {
+        List<Reclamation> list = new ArrayList<>();
+
+        String sql = "SELECT * FROM reclamation ORDER BY created_at DESC";
+
+        Statement st = cnx.createStatement();
+        ResultSet rs = st.executeQuery(sql);
+
+        while (rs.next()) {
+            Reclamation r = new Reclamation();
+            r.setId(rs.getInt("id"));
+            r.setSujet(rs.getString("sujet"));
+            r.setDescription(rs.getString("description"));
+            r.setStatut(rs.getString("statut"));
+            r.setCreatedAt(rs.getDate("created_at"));
+            r.setAuteurId(rs.getInt("auteur_id"));
+            r.setCategorie(rs.getString("categorie"));
+            list.add(r);
+        }
+
+        return list;
+    }
+    @Override
     public Reclamation findById(int id) throws SQLException {
         return null;
     }
-
-    // supprimer, modifier, findById : adapter aussi les colonnes
 }

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.StackPane?>
+
+<VBox spacing="0.0" prefWidth="300.0" styleClass="card" stylesheets="@../theme.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.front.CategoryCardController" onMouseClicked="#handleClick">
+    <StackPane styleClass="card-image-container" prefHeight="220.0">
+        <ImageView fx:id="categoryImage" fitHeight="220.0" fitWidth="300.0" preserveRatio="true" />
+    </StackPane>
+
+    <VBox spacing="5.0" alignment="CENTER" styleClass="card-content">
+        <Label fx:id="nomLabel" styleClass="card-title" />
+        <Label fx:id="countLabel" style="-fx-text-fill: #c9a849; -fx-font-size: 14; -fx-font-weight: bold;" />
+    </VBox>
+</VBox>
