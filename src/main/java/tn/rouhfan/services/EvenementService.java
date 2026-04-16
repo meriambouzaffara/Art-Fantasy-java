@@ -21,7 +21,6 @@ public class EvenementService implements IService<Evenement> {
         cnx = MyDatabase.getInstance().getConnection();
     }
 
-    // ✅ VALIDATION
     public boolean valider(Evenement e) {
         if (e.getTitre() == null || e.getTitre().trim().isEmpty()) {
             throw new IllegalArgumentException("❌ Le titre est obligatoire");
@@ -44,22 +43,49 @@ public class EvenementService implements IService<Evenement> {
         if (ALLOWED_TYPES.stream().noneMatch(type -> type.equalsIgnoreCase(e.getType().trim()))) {
             throw new IllegalArgumentException("❌ Type invalide. Choisissez parmi : " + String.join(", ", ALLOWED_TYPES));
         }
-        if (e.getCapacite() != null && e.getCapacite() <= 0) {
-            throw new IllegalArgumentException("❌ La capacité doit être > 0");
+        if (e.getCapacite() != null) {
+            if (e.getCapacite() < 0) {
+                throw new IllegalArgumentException("❌ La capacité ne peut pas être négative");
+            }
+            if (e.getCapacite() == 0) {
+                throw new IllegalArgumentException("❌ La capacité doit être supérieure à 0");
+            }
         }
         if (e.getNbParticipants() < 0) {
             throw new IllegalArgumentException("❌ Le nombre de participants ne peut pas être négatif");
         }
-        if (e.getNbParticipants() > e.getCapacite()) {
+        if (e.getCapacite() != null && e.getNbParticipants() > e.getCapacite()) {
             throw new IllegalArgumentException("❌ Le nombre de participants ne peut pas dépasser la capacité");
         }
         return true;
     }
 
-    // ✅ AJOUTER
+    private boolean existeEvenementEnDouble(Evenement e) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM evenement WHERE LOWER(titre)=LOWER(?) AND date_event=? AND LOWER(lieu)=LOWER(?) AND LOWER(type)=LOWER(?)";
+        if (e.getId() > 0) {
+            sql += " AND id <> ?";
+        }
+
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setString(1, e.getTitre().trim());
+        ps.setTimestamp(2, new Timestamp(e.getDateEvent().getTime()));
+        ps.setString(3, e.getLieu().trim());
+        ps.setString(4, e.getType().trim());
+        if (e.getId() > 0) {
+            ps.setInt(5, e.getId());
+        }
+
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+        return rs.getInt(1) > 0;
+    }
+
     @Override
     public void ajouter(Evenement e) throws SQLException {
         valider(e);
+        if (existeEvenementEnDouble(e)) {
+            throw new SQLException("❌ Événement déjà existant avec le même titre, date, lieu et type");
+        }
         
         String sql = "INSERT INTO evenement (titre, description, image, type, statut, date_event, lieu, capacite, nb_participants, google_event_id, sponsor_id) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -97,13 +123,11 @@ public class EvenementService implements IService<Evenement> {
         System.out.println("✅ Evenement ajouté en BD: " + e.getTitre());
     }
 
-    // ✅ RECUPERER TOUS
     @Override
     public List<Evenement> recuperer() throws SQLException {
         return recupererAvecJoin("SELECT e.*, s.id AS s_id, s.nom AS s_nom FROM evenement e LEFT JOIN sponsor s ON e.sponsor_id = s.id");
     }
 
-    // ✅ FIND BY ID
     @Override
     public Evenement findById(int id) throws SQLException {
         String sql = "SELECT e.*, s.id AS s_id, s.nom AS s_nom FROM evenement e LEFT JOIN sponsor s ON e.sponsor_id = s.id WHERE e.id = ?";
@@ -117,7 +141,6 @@ public class EvenementService implements IService<Evenement> {
         return null;
     }
 
-    // ✅ SUPPRIMER
     @Override
     public void supprimer(int id) throws SQLException {
         String sql = "DELETE FROM evenement WHERE id = ?";
@@ -130,10 +153,12 @@ public class EvenementService implements IService<Evenement> {
         }
     }
 
-    // ✅ MODIFIER
     @Override
     public void modifier(Evenement e) throws SQLException {
         valider(e);
+        if (existeEvenementEnDouble(e)) {
+            throw new SQLException("❌ Événement déjà existant avec le même titre, date, lieu et type");
+        }
         
         String sql = "UPDATE evenement SET titre=?, description=?, image=?, type=?, statut=?, date_event=?, lieu=?, capacite=?, nb_participants=?, google_event_id=?, sponsor_id=? WHERE id=?";
 
@@ -167,7 +192,7 @@ public class EvenementService implements IService<Evenement> {
         }
     }
 
-    // ✅ RECHERCHE (par titre, description, lieu, type)
+    // RECHERCHE (par titre, description, lieu, type)
     public List<Evenement> rechercher(String keyword) throws SQLException {
         if (keyword == null || keyword.trim().isEmpty()) {
             return recuperer();
@@ -193,7 +218,6 @@ public class EvenementService implements IService<Evenement> {
         return results;
     }
 
-    // ✅ TRI
     public List<Evenement> triPar(String colonne, boolean ascending) throws SQLException {
         List<Evenement> events = recuperer();
 
@@ -224,7 +248,6 @@ public class EvenementService implements IService<Evenement> {
         return events;
     }
 
-    // ✅ RECHERCHE + TRI
     public List<Evenement> rechercherEtTrier(String keyword, String colonne, boolean ascending) throws SQLException {
         List<Evenement> events = rechercher(keyword);
 
@@ -255,7 +278,6 @@ public class EvenementService implements IService<Evenement> {
         return events;
     }
 
-    // ✅ HELPER - récupérer et mapper avec JOIN
     private List<Evenement> recupererAvecJoin(String sql) throws SQLException {
         List<Evenement> events = new ArrayList<>();
         Statement st = cnx.createStatement();
@@ -268,7 +290,6 @@ public class EvenementService implements IService<Evenement> {
         return events;
     }
 
-    // ✅ PARTICIPER À UN ÉVÉNEMENT (incrémente nb_participants)
     public void participer(int eventId) throws SQLException {
         // First check if event exists and has capacity
         Evenement event = findById(eventId);
@@ -293,7 +314,6 @@ public class EvenementService implements IService<Evenement> {
         }
     }
 
-    // ✅ HELPER - mapper ResultSet en Evenement
     private Evenement mapResultSetToEvenement(ResultSet rs) throws SQLException {
         Evenement e = new Evenement();
 
@@ -305,7 +325,8 @@ public class EvenementService implements IService<Evenement> {
         e.setStatut(rs.getString("statut"));
         e.setDateEvent(rs.getTimestamp("date_event"));
         e.setLieu(rs.getString("lieu"));
-        e.setCapacite(rs.getInt("capacite"));
+        int capaciteValue = rs.getInt("capacite");
+        e.setCapacite(rs.wasNull() ? null : capaciteValue);
         e.setNbParticipants(rs.getInt("nb_participants"));
         e.setGoogleEventId(rs.getString("google_event_id"));
 

@@ -59,6 +59,36 @@ public class SponsorServiceTest {
 
     @Test
     @Order(3)
+    void testAjouterSponsorEnDouble() throws SQLException {
+
+        Sponsor s1 = new Sponsor(
+                "Dup Sponsor",
+                "logo.png",
+                "desc",
+                "dup@mail.com",
+                "12345678",
+                "adresse",
+                new Date()
+        );
+
+        sponsorService.ajouter(s1);
+
+        Sponsor s2 = new Sponsor(
+                "Dup Sponsor",
+                "logo.png",
+                "desc",
+                "dup@mail.com",
+                "12345678",
+                "adresse",
+                new Date()
+        );
+
+        assertThrows(SQLException.class, () -> sponsorService.ajouter(s2));
+        sponsorService.supprimer(s1.getId());
+    }
+
+    @Test
+    @Order(4)
     void testSupprimerSponsor() throws SQLException {
         sponsorService.supprimer(sponsorId);
         Sponsor deleted = sponsorService.findById(sponsorId);

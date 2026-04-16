@@ -18,7 +18,6 @@ public class SponsorService implements IService<Sponsor> {
         cnx = MyDatabase.getInstance().getConnection();
     }
 
-    // ✅ VALIDATION
     public boolean valider(Sponsor s) {
         if (s.getNom() == null || s.getNom().trim().isEmpty()) {
             throw new IllegalArgumentException("❌ Le nom du sponsor est obligatoire");
@@ -47,10 +46,33 @@ public class SponsorService implements IService<Sponsor> {
         return true;
     }
 
-    // ✅ AJOUTER
+    private boolean existeSponsorEnDouble(Sponsor s) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM sponsor WHERE LOWER(nom) = LOWER(?) AND LOWER(email) = LOWER(?) " +
+                "AND LOWER(tel) = LOWER(?) AND LOWER(adresse) = LOWER(?)";
+        if (s.getId() > 0) {
+            sql += " AND id <> ?";
+        }
+
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setString(1, s.getNom().trim());
+        ps.setString(2, s.getEmail().trim());
+        ps.setString(3, s.getTel().trim());
+        ps.setString(4, s.getAdresse().trim());
+        if (s.getId() > 0) {
+            ps.setInt(5, s.getId());
+        }
+
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+        return rs.getInt(1) > 0;
+    }
+
     @Override
     public void ajouter(Sponsor s) throws SQLException {
         valider(s);
+        if (existeSponsorEnDouble(s)) {
+            throw new SQLException("❌ Sponsor déjà existant avec le même nom, email, téléphone et adresse");
+        }
 
         String sql = "INSERT INTO sponsor (nom, logo, description, email, tel, adresse, created_at) " +
                 "VALUES (?, ?, ?, ?, ?, ?, NOW())";
@@ -73,7 +95,6 @@ public class SponsorService implements IService<Sponsor> {
         System.out.println("✅ Sponsor ajouté en BD: " + s.getNom());
     }
 
-    // ✅ RECUPERER TOUS
     @Override
     public List<Sponsor> recuperer() throws SQLException {
         List<Sponsor> sponsors = new ArrayList<>();
@@ -89,7 +110,6 @@ public class SponsorService implements IService<Sponsor> {
         return sponsors;
     }
 
-    // ✅ FIND BY ID
     @Override
     public Sponsor findById(int id) throws SQLException {
         String sql = "SELECT * FROM sponsor WHERE id = ?";
@@ -103,7 +123,6 @@ public class SponsorService implements IService<Sponsor> {
         return null;
     }
 
-    // ✅ SUPPRIMER
     @Override
     public void supprimer(int id) throws SQLException {
         String sql = "DELETE FROM sponsor WHERE id = ?";
@@ -116,10 +135,12 @@ public class SponsorService implements IService<Sponsor> {
         }
     }
 
-    // ✅ MODIFIER
     @Override
     public void modifier(Sponsor s) throws SQLException {
         valider(s);
+        if (existeSponsorEnDouble(s)) {
+            throw new SQLException("❌ Sponsor déjà existant avec le même nom, email, téléphone et adresse");
+        }
 
         String sql = "UPDATE sponsor SET nom=?, logo=?, description=?, email=?, tel=?, adresse=? WHERE id=?";
 
@@ -138,7 +159,7 @@ public class SponsorService implements IService<Sponsor> {
         }
     }
 
-    // ✅ RECHERCHE (par nom, email, tel, adresse)
+    //  RECHERCHE (par nom, email, tel, adresse)
     public List<Sponsor> rechercher(String keyword) throws SQLException {
         if (keyword == null || keyword.trim().isEmpty()) {
             return recuperer();
@@ -165,7 +186,6 @@ public class SponsorService implements IService<Sponsor> {
         return results;
     }
 
-    // ✅ TRI
     public List<Sponsor> triPar(String colonne, boolean ascending) throws SQLException {
         List<Sponsor> sponsors = recuperer();
 
@@ -190,7 +210,6 @@ public class SponsorService implements IService<Sponsor> {
         return sponsors;
     }
 
-    // ✅ RECHERCHE + TRI
     public List<Sponsor> rechercherEtTrier(String keyword, String colonne, boolean ascending) throws SQLException {
         List<Sponsor> sponsors = rechercher(keyword);
 
@@ -215,7 +234,6 @@ public class SponsorService implements IService<Sponsor> {
         return sponsors;
     }
 
-    // ✅ HELPER - mapper ResultSet en Sponsor
     private Sponsor mapResultSetToSponsor(ResultSet rs) throws SQLException {
         Sponsor s = new Sponsor();
 

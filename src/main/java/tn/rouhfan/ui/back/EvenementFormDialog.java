@@ -241,7 +241,6 @@ typeCombo.setValue(evenement.getType() != null ? evenement.getType() : null);
         try {
             errorLabel.setText("");
 
-            // Collect data
             if (evenement == null) {
                 evenement = new Evenement();
             }
@@ -258,11 +257,24 @@ typeCombo.setValue(evenement.getType() != null ? evenement.getType() : null);
             }
 
             evenement.setLieu(lieuField.getText());
-            evenement.setCapacite(capaciteSpinner.getValue());
-            evenement.setNbParticipants(participantsSpinner.getValue());
+
+            // 🔥 FIX ICI
+            capaciteSpinner.commitValue();
+            participantsSpinner.commitValue();
+
+            Integer capacite = capaciteSpinner.getValue();
+            Integer participants = participantsSpinner.getValue();
+
+            if (capacite == null || participants == null) {
+                errorLabel.setText("❌ Valeurs numériques invalides !");
+                return;
+            }
+
+            evenement.setCapacite(capacite);
+            evenement.setNbParticipants(participants);
+
             evenement.setSponsor(sponsorCombo.getValue());
 
-            // Validate and save
             evenementService.valider(evenement);
 
             if (evenement.getId() > 0) {
