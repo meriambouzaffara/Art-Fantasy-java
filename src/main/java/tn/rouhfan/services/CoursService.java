@@ -36,7 +36,7 @@ public class CoursService implements IService<Cours> {
     @Override
     public List<Cours> recuperer() throws SQLException {
         List<Cours> liste = new ArrayList<>();
-        String sql = "SELECT c.*, u.id AS artiste_id, u.nom AS artiste_nom, u.prenom AS artiste_prenom FROM cours c LEFT JOIN user u ON c.id_artiste = u.id";
+        String sql = "SELECT c.*, u.id AS artiste_id, u.nom AS artiste_nom, u.prenom AS artiste_prenom FROM cours c LEFT JOIN `user` u ON c.id_artiste = u.id";
         Statement st = cnx.createStatement();
         ResultSet rs = st.executeQuery(sql);
         while (rs.next()) liste.add(mapper(rs));
@@ -45,7 +45,7 @@ public class CoursService implements IService<Cours> {
 
     @Override
     public Cours findById(int id) throws SQLException {
-        String sql = "SELECT c.*, u.id AS artiste_id, u.nom AS artiste_nom, u.prenom AS artiste_prenom FROM cours c LEFT JOIN user u ON c.id_artiste = u.id WHERE c.id = ?";
+        String sql = "SELECT c.*, u.id AS artiste_id, u.nom AS artiste_nom, u.prenom AS artiste_prenom FROM cours c LEFT JOIN `user` u ON c.id_artiste = u.id WHERE c.id = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, id);
         ResultSet rs = ps.executeQuery();

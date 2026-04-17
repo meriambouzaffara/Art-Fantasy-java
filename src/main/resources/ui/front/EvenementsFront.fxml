@@ -30,4 +30,3 @@
         <FlowPane fx:id="cardsContainer" prefWidth="1000" prefHeight="600" hgap="20" vgap="20" style="-fx-padding: 15;" />
     </ScrollPane>
 </VBox>
-

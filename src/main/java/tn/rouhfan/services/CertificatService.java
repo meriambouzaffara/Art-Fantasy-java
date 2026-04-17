@@ -40,7 +40,7 @@ public class CertificatService implements IService<Certificat> {
         String sql = "SELECT cert.*, co.nom AS cours_nom, u.nom AS user_nom, u.prenom AS user_prenom " +
                 "FROM certificat cert " +
                 "LEFT JOIN cours co ON cert.id_cours = co.id " +
-                "LEFT JOIN user u ON cert.id_participant = u.id";
+                "LEFT JOIN `user` u ON cert.id_participant = u.id";
         Statement st = cnx.createStatement();
         ResultSet rs = st.executeQuery(sql);
         while (rs.next())
@@ -53,7 +53,7 @@ public class CertificatService implements IService<Certificat> {
         String sql = "SELECT cert.*, co.nom AS cours_nom, u.nom AS user_nom, u.prenom AS user_prenom " +
                 "FROM certificat cert " +
                 "LEFT JOIN cours co ON cert.id_cours = co.id " +
-                "LEFT JOIN user u ON cert.id_participant = u.id " +
+                "LEFT JOIN `user` u ON cert.id_participant = u.id " +
                 "WHERE cert.id = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, id);

@@ -69,7 +69,7 @@ public class SponsorsFrontController implements Initializable {
 
     private void displayCards(ObservableList<Sponsor> sponsors) {
         cardsContainer.getChildren().clear();
-        
+
         for (Sponsor sponsor : sponsors) {
             VBox card = createSponsorCard(sponsor);
             cardsContainer.getChildren().add(card);
@@ -91,7 +91,7 @@ public class SponsorsFrontController implements Initializable {
         logoView.setFitWidth(280);
         logoView.setFitHeight(150);
         logoView.setPreserveRatio(true);
-        
+
         if (sponsor.getLogo() != null && !sponsor.getLogo().isEmpty()) {
             try {
                 String imageUrl = ImageUtils.getImageUrl(sponsor.getLogo());
@@ -120,11 +120,11 @@ public class SponsorsFrontController implements Initializable {
         VBox detailsBox = new VBox(5);
         Label telLabel = new Label("📞 " + (sponsor.getTel() != null ? sponsor.getTel() : "N/A"));
         telLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 12;");
-        
+
         Label addressLabel = new Label("📍 " + (sponsor.getAdresse() != null ? sponsor.getAdresse() : "N/A"));
         addressLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 12;");
         addressLabel.setWrapText(true);
-        
+
         detailsBox.getChildren().addAll(telLabel, addressLabel);
 
         // Date
@@ -152,7 +152,7 @@ public class SponsorsFrontController implements Initializable {
         try {
             String keyword = searchField.getText();
             ObservableList<Sponsor> results = FXCollections.observableArrayList(
-                sponsorService.rechercher(keyword)
+                    sponsorService.rechercher(keyword)
             );
             displayCards(results);
         } catch (SQLException e) {
@@ -170,27 +170,27 @@ public class SponsorsFrontController implements Initializable {
             switch (sortOption) {
                 case "Nom (A-Z)":
                     results = FXCollections.observableArrayList(
-                        sponsorService.rechercherEtTrier(keyword, "nom", true)
+                            sponsorService.rechercherEtTrier(keyword, "nom", true)
                     );
                     break;
                 case "Nom (Z-A)":
                     results = FXCollections.observableArrayList(
-                        sponsorService.rechercherEtTrier(keyword, "nom", false)
+                            sponsorService.rechercherEtTrier(keyword, "nom", false)
                     );
                     break;
                 case "Email (A-Z)":
                     results = FXCollections.observableArrayList(
-                        sponsorService.rechercherEtTrier(keyword, "email", true)
+                            sponsorService.rechercherEtTrier(keyword, "email", true)
                     );
                     break;
                 case "Date Récente":
                     results = FXCollections.observableArrayList(
-                        sponsorService.rechercherEtTrier(keyword, "date", false)
+                            sponsorService.rechercherEtTrier(keyword, "date", false)
                     );
                     break;
                 case "Date Ancienne":
                     results = FXCollections.observableArrayList(
-                        sponsorService.rechercherEtTrier(keyword, "date", true)
+                            sponsorService.rechercherEtTrier(keyword, "date", true)
                     );
                     break;
             }
@@ -214,7 +214,7 @@ public class SponsorsFrontController implements Initializable {
     private void addSponsor(ActionEvent event) {
         SponsorFormDialog dialog = new SponsorFormDialog(null);
         dialog.show();
-        
+
         if (dialog.isApproved()) {
             loadSponsors();
             showAlert("Succès", "✅ Merci de votre intérêt en tant que sponsor!");
@@ -237,4 +237,3 @@ public class SponsorsFrontController implements Initializable {
         alert.showAndWait();
     }
 }
-

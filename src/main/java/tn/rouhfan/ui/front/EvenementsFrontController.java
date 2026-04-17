@@ -89,7 +89,7 @@ public class EvenementsFrontController implements Initializable {
 
     private void displayCards(ObservableList<Evenement> events) {
         cardsContainer.getChildren().clear();
-        
+
         for (Evenement event : events) {
             VBox card = createEventCard(event);
             cardsContainer.getChildren().add(card);
@@ -110,7 +110,7 @@ public class EvenementsFrontController implements Initializable {
         imageView.setFitWidth(300);
         imageView.setFitHeight(220);
         imageView.setPreserveRatio(true);
-        
+
         if (event.getImage() != null && !event.getImage().isEmpty()) {
             try {
                 String imageUrl = ImageUtils.getImageUrl(event.getImage());
@@ -126,7 +126,7 @@ public class EvenementsFrontController implements Initializable {
 
         // Sous-conteneur haut (Titre + Auteur)
         VBox headerBox = new VBox(5);
-        
+
         Label titleLabel = new Label(event.getTitre());
         titleLabel.getStyleClass().add("card-title");
         titleLabel.setWrapText(true);
@@ -143,14 +143,14 @@ public class EvenementsFrontController implements Initializable {
         }
         Label creatorLabel = new Label("👤 Créé par: " + creatorName);
         creatorLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 12;");
-        
+
         headerBox.getChildren().addAll(titleLabel, creatorLabel);
 
         // Informations Event (Date/Lieu/Type)
         VBox infoBox = new VBox(5);
         Label dateLabel = new Label("📅 " + (event.getDateEvent() != null ? dateFormat.format(event.getDateEvent()) : "N/A"));
         dateLabel.setStyle("-fx-text-fill: #6c2a90; -fx-font-weight: bold; -fx-font-size: 13;");
-        
+
         Label lieuLabel = new Label("📍 " + (event.getLieu() != null ? event.getLieu() : "N/A"));
         lieuLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 12;");
 
@@ -180,8 +180,8 @@ public class EvenementsFrontController implements Initializable {
 
         if ("ROLE_ARTISTE".equals(userRole) || "ROLE_ADMIN".equals(userRole)) {
             boolean isCreator = false;
-            if (SessionManager.getInstance().getCurrentUser() != null && 
-                event.getCreateurId() == SessionManager.getInstance().getCurrentUser().getId()) {
+            if (SessionManager.getInstance().getCurrentUser() != null &&
+                    event.getCreateurId() == SessionManager.getInstance().getCurrentUser().getId()) {
                 isCreator = true;
             }
 
@@ -198,8 +198,8 @@ public class EvenementsFrontController implements Initializable {
 
                 buttonBox.getChildren().addAll(editBtn, deleteBtn);
             }
-        } 
-        
+        }
+
         if ("ROLE_PARTICIPANT".equals(userRole)) {
             Button participateBtn = new Button("🎟️ Participer");
             participateBtn.setMaxWidth(Double.MAX_VALUE);
@@ -224,7 +224,7 @@ public class EvenementsFrontController implements Initializable {
         try {
             String keyword = searchField.getText();
             ObservableList<Evenement> results = FXCollections.observableArrayList(
-                evenementService.rechercher(keyword)
+                    evenementService.rechercher(keyword)
             );
             displayCards(results);
         } catch (SQLException e) {
@@ -242,32 +242,32 @@ public class EvenementsFrontController implements Initializable {
             switch (sortOption) {
                 case "Titre (A-Z)":
                     results = FXCollections.observableArrayList(
-                        evenementService.rechercherEtTrier(keyword, "titre", true)
+                            evenementService.rechercherEtTrier(keyword, "titre", true)
                     );
                     break;
                 case "Titre (Z-A)":
                     results = FXCollections.observableArrayList(
-                        evenementService.rechercherEtTrier(keyword, "titre", false)
+                            evenementService.rechercherEtTrier(keyword, "titre", false)
                     );
                     break;
                 case "Date Croissante":
                     results = FXCollections.observableArrayList(
-                        evenementService.rechercherEtTrier(keyword, "date", true)
+                            evenementService.rechercherEtTrier(keyword, "date", true)
                     );
                     break;
                 case "Date Décroissante":
                     results = FXCollections.observableArrayList(
-                        evenementService.rechercherEtTrier(keyword, "date", false)
+                            evenementService.rechercherEtTrier(keyword, "date", false)
                     );
                     break;
                 case "Lieu (A-Z)":
                     results = FXCollections.observableArrayList(
-                        evenementService.rechercherEtTrier(keyword, "lieu", true)
+                            evenementService.rechercherEtTrier(keyword, "lieu", true)
                     );
                     break;
                 case "Capacité":
                     results = FXCollections.observableArrayList(
-                        evenementService.rechercherEtTrier(keyword, "capacite", true)
+                            evenementService.rechercherEtTrier(keyword, "capacite", true)
                     );
                     break;
             }
@@ -291,7 +291,7 @@ public class EvenementsFrontController implements Initializable {
     private void addEvenement(ActionEvent event) {
         EvenementFormDialog dialog = new EvenementFormDialog(null);
         dialog.show();
-        
+
         if (dialog.isApproved()) {
             loadEvenements();
             showAlert("Succès", "✅ Événement ajouté avec succès!");
@@ -302,10 +302,10 @@ public class EvenementsFrontController implements Initializable {
         try {
             evenementService.participer(event.getId());
             showAlert("Participation confirmée", "✅ Vous participez maintenant à l'événement: " + event.getTitre() + "\nVotre ticket PDF va être généré !");
-            
+
             // Generate PDF Ticket
             generatePdfTicket(event);
-            
+
             loadEvenements(); // Refresh to show updated participant count
         } catch (SQLException e) {
             showAlert("Erreur", "❌ Erreur lors de la participation: " + e.getMessage());
@@ -315,9 +315,9 @@ public class EvenementsFrontController implements Initializable {
 
     private void generatePdfTicket(Evenement event) {
         try {
-            String currentUser = SessionManager.getInstance().isLoggedIn() ? 
-                                 SessionManager.getInstance().getFullName() : "Participant";
-            
+            String currentUser = SessionManager.getInstance().isLoggedIn() ?
+                    SessionManager.getInstance().getFullName() : "Participant";
+
             String fileName = "Ticket_Evenement_" + event.getId() + ".pdf";
             File pdfFile = new File(fileName);
             Document document = new Document();
@@ -355,12 +355,12 @@ public class EvenementsFrontController implements Initializable {
             String dateFormatted = event.getDateEvent() != null ? dateFormat.format(event.getDateEvent()) : "Non définie";
             document.add(new Paragraph("Date : " + dateFormatted, fontText));
             document.add(new Paragraph("Type : " + event.getType(), fontText));
-            
+
             document.add(new Paragraph(" ", fontText)); // Espace
             document.add(new Paragraph("Détails du Participant :", fontSubTitle));
             document.add(new Paragraph("---------------------------------------------------------"));
             document.add(new Paragraph("Nom du Participant : " + currentUser, fontText));
-            
+
             document.add(new Paragraph(" ", fontText));
             Paragraph footer = new Paragraph("Merci de votre participation ! Ce ticket est strictement personnel.", FontFactory.getFont(FontFactory.HELVETICA_OBLIQUE, 10));
             footer.setAlignment(Element.ALIGN_CENTER);
@@ -384,7 +384,7 @@ public class EvenementsFrontController implements Initializable {
     private void handleEdit(Evenement event) {
         EvenementFormDialog dialog = new EvenementFormDialog(event);
         dialog.show();
-        
+
         if (dialog.isApproved()) {
             loadEvenements();
             showAlert("Succès", "✅ Événement modifié avec succès!");
@@ -427,4 +427,3 @@ public class EvenementsFrontController implements Initializable {
         alert.showAndWait();
     }
 }
-
