@@ -2,7 +2,9 @@ package tn.rouhfan.services;
 
 import tn.rouhfan.entities.Evenement;
 import tn.rouhfan.entities.Sponsor;
+import tn.rouhfan.entities.User;
 import tn.rouhfan.tools.MyDatabase;
+import tn.rouhfan.tools.SessionManager;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -19,6 +21,22 @@ public class EvenementService implements IService<Evenement> {
 
     public EvenementService() {
         cnx = MyDatabase.getInstance().getConnection();
+        verifierEtAjouterColonneCreateurId();
+    }
+
+    private void verifierEtAjouterColonneCreateurId() {
+        try {
+            DatabaseMetaData metaData = cnx.getMetaData();
+            ResultSet rs = metaData.getColumns(null, null, "evenement", "createur_id");
+            if (!rs.next()) {
+                System.out.println("⚠️ Colonne createur_id manquante, ajout en cours...");
+                Statement st = cnx.createStatement();
+                st.executeUpdate("ALTER TABLE evenement ADD COLUMN createur_id INT DEFAULT NULL");
+                System.out.println("✅ Colonne createur_id ajoutée avec succès !");
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur lors de la vérification de la colonne createur_id: " + e.getMessage());
+        }
     }
 
     public boolean valider(Evenement e) {
@@ -87,8 +105,8 @@ public class EvenementService implements IService<Evenement> {
             throw new SQLException("❌ Événement déjà existant avec le même titre, date, lieu et type");
         }
         
-        String sql = "INSERT INTO evenement (titre, description, image, type, statut, date_event, lieu, capacite, nb_participants, google_event_id, sponsor_id) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO evenement (titre, description, image, type, statut, date_event, lieu, capacite, nb_participants, google_event_id, sponsor_id, createur_id) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
@@ -113,6 +131,16 @@ public class EvenementService implements IService<Evenement> {
         else
             ps.setNull(11, Types.INTEGER);
 
+        int createurId = 0;
+        if (SessionManager.getInstance().isLoggedIn()) {
+            createurId = SessionManager.getInstance().getCurrentUser().getId();
+        }
+        if (createurId > 0) {
+            ps.setInt(12, createurId);
+        } else {
+            ps.setNull(12, Types.INTEGER);
+        }
+
         ps.executeUpdate();
 
         ResultSet rs = ps.getGeneratedKeys();
@@ -125,12 +153,12 @@ public class EvenementService implements IService<Evenement> {
 
     @Override
     public List<Evenement> recuperer() throws SQLException {
-        return recupererAvecJoin("SELECT e.*, s.id AS s_id, s.nom AS s_nom FROM evenement e LEFT JOIN sponsor s ON e.sponsor_id = s.id");
+        return recupererAvecJoin("SELECT e.*, s.id AS s_id, s.nom AS s_nom, u.nom AS u_nom, u.prenom AS u_prenom FROM evenement e LEFT JOIN sponsor s ON e.sponsor_id = s.id LEFT JOIN user u ON e.createur_id = u.id");
     }
 
     @Override
     public Evenement findById(int id) throws SQLException {
-        String sql = "SELECT e.*, s.id AS s_id, s.nom AS s_nom FROM evenement e LEFT JOIN sponsor s ON e.sponsor_id = s.id WHERE e.id = ?";
+        String sql = "SELECT e.*, s.id AS s_id, s.nom AS s_nom, u.nom AS u_nom, u.prenom AS u_prenom FROM evenement e LEFT JOIN sponsor s ON e.sponsor_id = s.id LEFT JOIN user u ON e.createur_id = u.id WHERE e.id = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, id);
         ResultSet rs = ps.executeQuery();
@@ -160,7 +188,7 @@ public class EvenementService implements IService<Evenement> {
             throw new SQLException("❌ Événement déjà existant avec le même titre, date, lieu et type");
         }
         
-        String sql = "UPDATE evenement SET titre=?, description=?, image=?, type=?, statut=?, date_event=?, lieu=?, capacite=?, nb_participants=?, google_event_id=?, sponsor_id=? WHERE id=?";
+        String sql = "UPDATE evenement SET titre=?, description=?, image=?, type=?, statut=?, date_event=?, lieu=?, capacite=?, nb_participants=?, google_event_id=?, sponsor_id=?, createur_id=? WHERE id=?";
 
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, e.getTitre().trim());
@@ -184,7 +212,12 @@ public class EvenementService implements IService<Evenement> {
         else
             ps.setNull(11, Types.INTEGER);
 
-        ps.setInt(12, e.getId());
+        if (e.getCreateurId() > 0)
+            ps.setInt(12, e.getCreateurId());
+        else 
+            ps.setNull(12, Types.INTEGER);
+
+        ps.setInt(13, e.getId());
 
         int rows = ps.executeUpdate();
         if (rows > 0) {
@@ -198,7 +231,7 @@ public class EvenementService implements IService<Evenement> {
             return recuperer();
         }
 
-        String sql = "SELECT e.*, s.id AS s_id, s.nom AS s_nom FROM evenement e LEFT JOIN sponsor s ON e.sponsor_id = s.id " +
+        String sql = "SELECT e.*, s.id AS s_id, s.nom AS s_nom, u.nom AS u_nom, u.prenom AS u_prenom FROM evenement e LEFT JOIN sponsor s ON e.sponsor_id = s.id LEFT JOIN user u ON e.createur_id = u.id " +
                 "WHERE LOWER(e.titre) LIKE LOWER(?) OR LOWER(e.description) LIKE LOWER(?) OR LOWER(e.lieu) LIKE LOWER(?) OR LOWER(e.type) LIKE LOWER(?)";
 
         PreparedStatement ps = cnx.prepareStatement(sql);
@@ -329,6 +362,16 @@ public class EvenementService implements IService<Evenement> {
         e.setCapacite(rs.wasNull() ? null : capaciteValue);
         e.setNbParticipants(rs.getInt("nb_participants"));
         e.setGoogleEventId(rs.getString("google_event_id"));
+
+        int createurId = rs.getInt("createur_id");
+        if (!rs.wasNull()) {
+            e.setCreateurId(createurId);
+            User createur = new User();
+            createur.setId(createurId);
+            createur.setNom(rs.getString("u_nom"));
+            createur.setPrenom(rs.getString("u_prenom"));
+            e.setCreateur(createur);
+        }
 
         int sponsorId = rs.getInt("s_id");
         if (!rs.wasNull()) {

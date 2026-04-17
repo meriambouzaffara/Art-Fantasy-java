@@ -12,6 +12,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import tn.rouhfan.entities.Sponsor;
 import tn.rouhfan.services.SponsorService;
@@ -75,70 +77,74 @@ public class SponsorsFrontController implements Initializable {
     }
 
     private VBox createSponsorCard(Sponsor sponsor) {
-        VBox card = new VBox(10);
-        card.setPadding(new Insets(20));
-        card.setPrefWidth(320);
-        card.setPrefHeight(420);
-        card.setStyle("-fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-background-color: #ffffff; " +
-                      "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 8, 0, 0, 2);");
+        VBox card = new VBox(0);
+        card.setPrefWidth(280);
+        card.getStyleClass().add("card");
 
-        // Logo
+        // Logo Container
+        StackPane imageContainer = new StackPane();
+        imageContainer.getStyleClass().add("card-image-container");
+        imageContainer.setStyle("-fx-background-color: #f8f9fa; -fx-background-radius: 12 12 0 0;");
+        imageContainer.setPrefHeight(150.0);
+
         ImageView logoView = new ImageView();
         logoView.setFitWidth(280);
-        logoView.setFitHeight(120);
+        logoView.setFitHeight(150);
         logoView.setPreserveRatio(true);
-        logoView.setStyle("-fx-border-color: #ddd; -fx-border-radius: 5;");
         
         if (sponsor.getLogo() != null && !sponsor.getLogo().isEmpty()) {
             try {
                 String imageUrl = ImageUtils.getImageUrl(sponsor.getLogo());
                 Image img = new Image(imageUrl);
                 logoView.setImage(img);
-            } catch (Exception e) {
-                logoView.setStyle("-fx-border-color: #ddd; -fx-border-radius: 5; -fx-font-size: 50;");
-            }
-        } else {
-            logoView.setStyle("-fx-border-color: #ddd; -fx-border-radius: 5; -fx-background-color: #f5f5f5;");
+            } catch (Exception e) {}
         }
+        imageContainer.getChildren().add(logoView);
 
-        // Nom
+        // Content
+        VBox contentBox = new VBox(12);
+        contentBox.getStyleClass().add("card-content");
+
+        // Header (Nom)
         Label nameLabel = new Label(sponsor.getNom() != null ? sponsor.getNom() : "");
-        nameLabel.setStyle("-fx-font-size: 14; -fx-font-weight: bold; -fx-wrap-text: true;");
-
-        // Description
-        Label descLabel = new Label(sponsor.getDescription() != null ? sponsor.getDescription() : "");
-        descLabel.setStyle("-fx-font-size: 11; -fx-text-fill: #666; -fx-wrap-text: true;");
-        descLabel.setWrapText(true);
+        nameLabel.getStyleClass().add("card-title");
+        nameLabel.setStyle("-fx-text-fill: #1e293b; -fx-font-size: 16;");
+        nameLabel.setWrapText(true);
 
         // Email
         Label emailLabel = new Label("📧 " + (sponsor.getEmail() != null ? sponsor.getEmail() : "N/A"));
-        emailLabel.setStyle("-fx-font-size: 10; -fx-text-fill: #1976d2;");
+        emailLabel.setStyle("-fx-text-fill: #6c2a90; -fx-font-weight: bold; -fx-font-size: 12;");
         emailLabel.setWrapText(true);
 
-        // Téléphone
+        // Details Box (Phone / Address)
+        VBox detailsBox = new VBox(5);
         Label telLabel = new Label("📞 " + (sponsor.getTel() != null ? sponsor.getTel() : "N/A"));
-        telLabel.setStyle("-fx-font-size: 10;");
-
-        // Adresse
+        telLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 12;");
+        
         Label addressLabel = new Label("📍 " + (sponsor.getAdresse() != null ? sponsor.getAdresse() : "N/A"));
-        addressLabel.setStyle("-fx-font-size: 10;");
+        addressLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 12;");
         addressLabel.setWrapText(true);
+        
+        detailsBox.getChildren().addAll(telLabel, addressLabel);
 
         // Date
-        Label dateLabel = new Label("📅 " + (sponsor.getCreatedAt() != null ? dateFormat.format(sponsor.getCreatedAt()) : "N/A"));
-        dateLabel.setStyle("-fx-font-size: 9; -fx-text-fill: #999;");
+        HBox footerBox = new HBox();
+        Label dateLabel = new Label("Partenaire depuis le " + (sponsor.getCreatedAt() != null ? dateFormat.format(sponsor.getCreatedAt()) : "N/A"));
+        dateLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11; -fx-font-style: italic;");
+        footerBox.getChildren().add(dateLabel);
 
         // Spacer
-        VBox spacer = new VBox();
+        Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
         // Button Contact
-        Button contactBtn = new Button("Contacter");
-        contactBtn.setStyle("-fx-font-size: 11; -fx-padding: 6 15; -fx-background-color: #4caf50; -fx-text-fill: white; -fx-border-radius: 5;");
-        contactBtn.setPrefWidth(Double.MAX_VALUE);
+        Button contactBtn = new Button("✉️ Contacter");
+        contactBtn.setMaxWidth(Double.MAX_VALUE);
+        contactBtn.setStyle("-fx-background-color: linear-gradient(to right, #6c2a90, #9c4dcc); -fx-text-fill: white; -fx-font-weight: 800; -fx-background-radius: 8; -fx-padding: 10 15; -fx-font-size: 13; -fx-cursor: hand;");
         contactBtn.setOnAction(e -> handleContact(sponsor));
 
-        card.getChildren().addAll(logoView, nameLabel, descLabel, emailLabel, telLabel, addressLabel, dateLabel, spacer, contactBtn);
+        contentBox.getChildren().addAll(nameLabel, emailLabel, detailsBox, footerBox, spacer, contactBtn);
+        card.getChildren().addAll(imageContainer, contentBox);
         return card;
     }
 

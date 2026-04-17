@@ -15,6 +15,18 @@
         <Label text="Gérez les sponsors et partenariats." styleClass="text-subtitle" />
     </VBox>
 
+    <!-- TOP STATS -->
+    <HBox spacing="20.0" alignment="CENTER">
+        <VBox style="-fx-background-color: #fff3e0; -fx-padding: 15; -fx-background-radius: 10;" prefWidth="250" alignment="CENTER">
+            <Label text="Total Sponsors" style="-fx-text-fill: #f57c00; -fx-font-weight: bold;" />
+            <Label fx:id="statTotalSponsors" text="0" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #f57c00;" />
+        </VBox>
+        <VBox style="-fx-background-color: #e0f7fa; -fx-padding: 15; -fx-background-radius: 10;" prefWidth="250" alignment="CENTER">
+            <Label text="Nouveaux Sponsors (30j)" style="-fx-text-fill: #0097a7; -fx-font-weight: bold;" />
+            <Label fx:id="statRecentSponsors" text="0" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #0097a7;" />
+        </VBox>
+    </HBox>
+
     <!-- TOP Row: Search and Buttons -->
     <HBox spacing="10.0" alignment="CENTER_LEFT">
         <TextField fx:id="searchField" promptText="🔍 Rechercher un sponsor..." prefWidth="280" />

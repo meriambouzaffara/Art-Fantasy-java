@@ -27,6 +27,10 @@ public class EvenementsController implements Initializable {
     @FXML private TextField searchField;
     @FXML private ComboBox<String> sortCombo;
 
+    @FXML private Label statTotalEvents;
+    @FXML private Label statTotalCapacity;
+    @FXML private Label statTotalParticipants;
+
     private EvenementService evenementService;
     private ObservableList<Evenement> evenementsList;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -70,10 +74,26 @@ public class EvenementsController implements Initializable {
         try {
             evenementsList = FXCollections.observableArrayList(evenementService.recuperer());
             evenementTable.setItems(evenementsList);
+            updateStats(evenementsList);
         } catch (SQLException e) {
             showAlert("Erreur", "❌ Impossible de charger les événements: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void updateStats(ObservableList<Evenement> list) {
+        if (statTotalEvents == null) return;
+        statTotalEvents.setText(String.valueOf(list.size()));
+        
+        int capacity = 0;
+        int participants = 0;
+        for (Evenement e : list) {
+            if (e.getCapacite() != null) capacity += e.getCapacite();
+            participants += e.getNbParticipants();
+        }
+        
+        statTotalCapacity.setText(String.valueOf(capacity));
+        statTotalParticipants.setText(String.valueOf(participants));
     }
 
     private void handleSearch() {
@@ -83,6 +103,7 @@ public class EvenementsController implements Initializable {
                 evenementService.rechercher(keyword)
             );
             evenementTable.setItems(results);
+            updateStats(results);
         } catch (SQLException e) {
             showAlert("Erreur", "❌ Erreur lors de la recherche: " + e.getMessage());
         }

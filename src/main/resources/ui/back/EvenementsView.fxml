@@ -15,6 +15,22 @@
         <Label text="Planifiez et gérez les événements artistiques." styleClass="text-subtitle" />
     </VBox>
 
+    <!-- TOP STATS -->
+    <HBox spacing="20.0" alignment="CENTER">
+        <VBox style="-fx-background-color: #fce4ec; -fx-padding: 15; -fx-background-radius: 10;" prefWidth="200" alignment="CENTER">
+            <Label text="Total Événements" style="-fx-text-fill: #e91e63; -fx-font-weight: bold;" />
+            <Label fx:id="statTotalEvents" text="0" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #e91e63;" />
+        </VBox>
+        <VBox style="-fx-background-color: #e3f2fd; -fx-padding: 15; -fx-background-radius: 10;" prefWidth="200" alignment="CENTER">
+            <Label text="Capacité Totale" style="-fx-text-fill: #1976d2; -fx-font-weight: bold;" />
+            <Label fx:id="statTotalCapacity" text="0" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #1976d2;" />
+        </VBox>
+        <VBox style="-fx-background-color: #e8f5e9; -fx-padding: 15; -fx-background-radius: 10;" prefWidth="200" alignment="CENTER">
+            <Label text="Participants Inscrits" style="-fx-text-fill: #388e3c; -fx-font-weight: bold;" />
+            <Label fx:id="statTotalParticipants" text="0" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #388e3c;" />
+        </VBox>
+    </HBox>
+
     <!-- TOP Row: Search and Buttons -->
     <HBox spacing="10.0" alignment="CENTER_LEFT">
         <TextField fx:id="searchField" promptText="🔍 Rechercher un événement..." prefWidth="280" />

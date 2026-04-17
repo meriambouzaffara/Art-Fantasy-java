@@ -5,11 +5,42 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.fxml.Initializable;
+import java.net.URL;
+import java.util.ResourceBundle;
+import tn.rouhfan.services.EvenementService;
+import tn.rouhfan.services.SponsorService;
 
-public class DashboardHomeController {
+public class DashboardHomeController implements Initializable {
 
     @FXML
     private Node rootNode;
+
+    @FXML
+    private Label statEvenements;
+
+    @FXML
+    private Label statSponsors;
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        try {
+            EvenementService evenementService = new EvenementService();
+            int nbEvents = evenementService.recuperer().size();
+            if (statEvenements != null) {
+                statEvenements.setText(nbEvents + " événements prévus");
+            }
+
+            SponsorService sponsorService = new SponsorService();
+            int nbSponsors = sponsorService.recuperer().size();
+            if (statSponsors != null) {
+                statSponsors.setText(nbSponsors + " sponsors actifs");
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur chargement stats Dashboard: " + e.getMessage());
+        }
+    }
 
     @FXML
     private void openDashboardHome(Event event) {

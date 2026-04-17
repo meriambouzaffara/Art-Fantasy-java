@@ -18,6 +18,9 @@ public class Evenement {
 
     private Sponsor sponsor;
 
+    private int createurId;
+    private User createur;
+
     public Evenement() {}
 
     public Evenement(String titre, String description, String image, String type,
@@ -72,6 +75,12 @@ public class Evenement {
 
     public Sponsor getSponsor() { return sponsor; }
     public void setSponsor(Sponsor sponsor) { this.sponsor = sponsor; }
+
+    public int getCreateurId() { return createurId; }
+    public void setCreateurId(int createurId) { this.createurId = createurId; }
+
+    public User getCreateur() { return createur; }
+    public void setCreateur(User createur) { this.createur = createur; }
 
     @Override
     public String toString() {

@@ -32,12 +32,14 @@
             <Label text="📅" styleClass="dash-card-icon, color-events" />
             <Label text="Événements" styleClass="dash-card-title, color-events" />
             <Label text="Programmation &amp; gestion" styleClass="dash-card-subtitle" />
+            <Label fx:id="statEvenements" text="..." style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #e91e63; -fx-padding: 5 0 0 0;" />
         </VBox>
 
         <VBox styleClass="dash-card" prefWidth="280.0" onMouseClicked="#openSponsors" GridPane.columnIndex="0" GridPane.rowIndex="1">
             <Label text="🤝" styleClass="dash-card-icon, color-sponsors" />
             <Label text="Sponsors" styleClass="dash-card-title, color-sponsors" />
             <Label text="Partenaires officiels" styleClass="dash-card-subtitle" />
+            <Label fx:id="statSponsors" text="..." style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #4caf50; -fx-padding: 5 0 0 0;" />
         </VBox>
         <VBox styleClass="dash-card" prefWidth="280.0" onMouseClicked="#openCours" GridPane.columnIndex="1" GridPane.rowIndex="1">
             <Label text="🎨" styleClass="dash-card-icon, color-courses" />

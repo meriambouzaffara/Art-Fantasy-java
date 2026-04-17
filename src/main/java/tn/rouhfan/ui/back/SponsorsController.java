@@ -26,6 +26,9 @@ public class SponsorsController implements Initializable {
     @FXML private TextField searchField;
     @FXML private ComboBox<String> sortCombo;
 
+    @FXML private Label statTotalSponsors;
+    @FXML private Label statRecentSponsors;
+
     private SponsorService sponsorService;
     private ObservableList<Sponsor> sponsorsList;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -68,10 +71,28 @@ public class SponsorsController implements Initializable {
         try {
             sponsorsList = FXCollections.observableArrayList(sponsorService.recuperer());
             sponsorTable.setItems(sponsorsList);
+            updateStats(sponsorsList);
         } catch (SQLException e) {
             showAlert("Erreur", "❌ Impossible de charger les sponsors: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void updateStats(ObservableList<Sponsor> list) {
+        if (statTotalSponsors == null) return;
+        statTotalSponsors.setText(String.valueOf(list.size()));
+        
+        long now = System.currentTimeMillis();
+        long thirtyDays = 30L * 24 * 60 * 60 * 1000;
+        int recent = 0;
+        for (Sponsor s : list) {
+            if (s.getCreatedAt() != null) {
+                if (now - s.getCreatedAt().getTime() <= thirtyDays) {
+                    recent++;
+                }
+            }
+        }
+        statRecentSponsors.setText(String.valueOf(recent));
     }
 
     private void handleSearch() {
@@ -81,6 +102,7 @@ public class SponsorsController implements Initializable {
                 sponsorService.rechercher(keyword)
             );
             sponsorTable.setItems(results);
+            updateStats(results);
         } catch (SQLException e) {
             showAlert("Erreur", "❌ Erreur lors de la recherche: " + e.getMessage());
         }
