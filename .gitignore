@@ -34,5 +34,8 @@ src/main/resources/google-calendar-key.json
 ### VS Code ###
 .vscode/
 
+### Environment Variables ###
+.env
+
 ### Mac OS ###
 .DS_Store

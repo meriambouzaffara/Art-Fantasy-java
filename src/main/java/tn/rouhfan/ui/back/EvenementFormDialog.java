@@ -15,6 +15,7 @@ import tn.rouhfan.entities.Evenement;
 import tn.rouhfan.entities.Sponsor;
 import tn.rouhfan.services.EvenementService;
 import tn.rouhfan.services.SponsorService;
+import tn.rouhfan.services.TwilioSmsService;
 import tn.rouhfan.tools.ImageUtils;
 
 import java.io.File;
@@ -306,6 +307,17 @@ typeCombo.setValue(evenement.getType() != null ? evenement.getType() : null);
                 evenementService.modifier(evenement);
             } else {
                 evenementService.ajouter(evenement);
+                
+                // Envoi d'un SMS au sponsor si présent
+                if (evenement.getSponsor() != null && evenement.getSponsor().getTel() != null) {
+                    try {
+                        TwilioSmsService smsService = new TwilioSmsService();
+                        String msg = "Rouh'El Fann: Bonjour " + evenement.getSponsor().getNom() + ", l'événement '" + evenement.getTitre() + "' est planifié avec vous comme principal sponsor!";
+                        smsService.sendSms(evenement.getSponsor().getTel(), msg);
+                    } catch (Exception smsEx) {
+                        System.err.println("Le SMS n'a pas pu être envoyé: " + smsEx.getMessage());
+                    }
+                }
             }
 
             approved = true;

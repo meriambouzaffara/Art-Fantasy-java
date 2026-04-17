@@ -17,6 +17,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import tn.rouhfan.entities.Evenement;
 import tn.rouhfan.services.EvenementService;
+import tn.rouhfan.services.GroqAiService;
 import tn.rouhfan.tools.ImageUtils;
 import tn.rouhfan.ui.back.EvenementFormDialog;
 
@@ -42,6 +43,7 @@ public class EvenementsFrontController implements Initializable {
     @FXML private TextField searchField;
     @FXML private ComboBox<String> sortCombo;
     @FXML private Button addButton;
+    @FXML private Button aiRecButton;
 
     private EvenementService evenementService;
     private ObservableList<Evenement> evenementsList;
@@ -74,6 +76,10 @@ public class EvenementsFrontController implements Initializable {
         if ("ROLE_ARTISTE".equals(userRole) && addButton != null) {
             addButton.setVisible(true);
             addButton.setManaged(true);
+        }
+        if ("ROLE_PARTICIPANT".equals(userRole) && aiRecButton != null) {
+            aiRecButton.setVisible(true);
+            aiRecButton.setManaged(true);
         }
     }
 
@@ -278,6 +284,65 @@ public class EvenementsFrontController implements Initializable {
         } catch (SQLException e) {
             showAlert("Erreur", "❌ Erreur lors du tri: " + e.getMessage());
         }
+    }
+
+    @FXML
+    private void showAiRecommendations(ActionEvent event) {
+        if (evenementsList == null || evenementsList.isEmpty()) {
+            showAlert("Info", "Aucun événement disponible pour demander des recommandations.");
+            return;
+        }
+        
+        GroqAiService aiService = new GroqAiService();
+        GroqAiService.AiRecommendationResult result = aiService.getRecommendations(evenementsList, 3);
+        
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("✨ Recommandations IA - Rouh'El Fann");
+        dialog.setHeaderText(result.getAnalysis());
+        
+        DialogPane dialogPane = dialog.getDialogPane();
+        dialogPane.getButtonTypes().add(ButtonType.CLOSE);
+        
+        VBox container = new VBox(15);
+        container.setPadding(new Insets(15));
+        
+        for (GroqAiService.AiRecommendationItem item : result.getItems()) {
+            Evenement evt = item.getEntity();
+            
+            VBox card = new VBox(5);
+            card.setStyle("-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-background-radius: 8; -fx-border-color: #e9ecef; -fx-border-radius: 8;");
+            
+            Label titleLbl = new Label("🎯 " + evt.getTitre() + " (" + evt.getType() + ")");
+            titleLbl.setStyle("-fx-font-weight: bold; -fx-font-size: 14; -fx-text-fill: #2c3e50;");
+            
+            Label dateLbl = new Label("📅 " + (evt.getDateEvent() != null ? dateFormat.format(evt.getDateEvent()) : "N/A") + " | 📍 " + evt.getLieu());
+            dateLbl.setStyle("-fx-text-fill: #7f8c8d; -fx-font-size: 12;");
+            
+            Label aiVisionLbl = new Label("🤖 Vision IA: " + item.getAiVision());
+            aiVisionLbl.setWrapText(true);
+            aiVisionLbl.setStyle("-fx-text-fill: #8e44ad; -fx-font-style: italic;");
+            
+            Label reasonLbl = new Label("💡 Pourquoi ? " + item.getReason());
+            reasonLbl.setWrapText(true);
+            reasonLbl.setStyle("-fx-text-fill: #27ae60; -fx-font-weight: bold;");
+            
+            card.getChildren().addAll(titleLbl, dateLbl, aiVisionLbl, reasonLbl);
+            container.getChildren().add(card);
+        }
+        
+        if (result.getItems().isEmpty()) {
+             Label emptyLbl = new Label("Désolé, aucune recommandation spécifique n'a pu être trouvée.");
+             container.getChildren().add(emptyLbl);
+        }
+        
+        ScrollPane scrollPane = new ScrollPane(container);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPrefViewportHeight(200);
+        scrollPane.setPrefViewportWidth(90);
+        scrollPane.setStyle("-fx-background-color: transparent;");
+        
+        dialogPane.setContent(scrollPane);
+        dialog.showAndWait();
     }
 
     @FXML
