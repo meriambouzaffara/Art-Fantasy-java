@@ -60,6 +60,20 @@
             <artifactId>poi-ooxml</artifactId>
             <version>5.2.3</version>
         </dependency>
+
+        <!-- OpenPDF for PDF export -->
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>2.0.3</version>
+        </dependency>
+
+        <!-- Log4j Core for logging implementation -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.20.0</version>
+        </dependency>
     </dependencies>
 
     <build>

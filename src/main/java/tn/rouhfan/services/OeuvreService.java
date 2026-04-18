@@ -121,7 +121,7 @@ public class OeuvreService implements IService<Oeuvre> {
     public List<Oeuvre> recuperer() throws SQLException {
         List<Oeuvre> oeuvres = new ArrayList<>();
 
-        String sql = "SELECT o.*, " +
+        String sql = "SELECT o.*, o.date_vente, " +
                 "u.id AS u_id, u.nom AS u_nom, u.prenom AS u_prenom, " +
                 "c.id_categorie AS c_id, c.nom_categorie AS c_nom " +
                 "FROM oeuvre o " +

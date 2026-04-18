@@ -68,6 +68,7 @@
 
         <Region HBox.hgrow="ALWAYS" />
         
+        <Button fx:id="exportPDFButton" text="📄 Exporter PDF" onAction="#handleExportPDF" styleClass="btn-secondary" style="-fx-padding: 10 20; -fx-background-radius: 10; -fx-background-color: #6c2a90; -fx-text-fill: white;" />
         <Button text="🔄 Rafraîchir" onAction="#loadFavoris" styleClass="btn-secondary" style="-fx-padding: 10 20; -fx-background-radius: 10;" />
     </HBox>
 

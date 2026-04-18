@@ -239,11 +239,11 @@ public class OeuvreStatistiquesController {
             org.apache.poi.ss.usermodel.Cell titleCell = titleRow.createCell(1);
             titleCell.setCellValue("Œuvres les plus vendues — Rouh el Fann");
             titleCell.setCellStyle(titleStyle);
-            sheet.addMergedRegion(new CellRangeAddress(1, 1, 1, 7));
+            sheet.addMergedRegion(new CellRangeAddress(1, 1, 1, 6));
 
             // Header Row
             Row headerRow = sheet.createRow(3);
-            String[] headers = {"N°", "Titre", "Prix (DT)", "Catégorie", "Artiste", "Date vente", "Id"};
+            String[] headers = {"N°", "Titre", "Prix (DT)", "Catégorie", "Artiste", "Date vente"};
             for (int i = 0; i < headers.length; i++) {
                 org.apache.poi.ss.usermodel.Cell cell = headerRow.createCell(i + 1);
                 cell.setCellValue(headers[i]);
@@ -253,6 +253,7 @@ public class OeuvreStatistiquesController {
             // Data Rows
             int rowNum = 4;
             int count = 1;
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm");
             for (Oeuvre o : soldOeuvres) {
                 Row row = sheet.createRow(rowNum++);
                 row.createCell(1).setCellValue(count++);
@@ -260,14 +261,19 @@ public class OeuvreStatistiquesController {
                 row.createCell(3).setCellValue(o.getPrix() != null ? o.getPrix().doubleValue() : 0.0);
                 row.createCell(4).setCellValue(o.getCategorie() != null ? o.getCategorie().getNomCategorie() : "N/A");
                 row.createCell(5).setCellValue(o.getUser() != null ? o.getUser().getNom() + " " + o.getUser().getPrenom() : "Inconnu");
-                row.createCell(6).setCellValue(o.getDateVente() != null ? o.getDateVente().toString() : "-");
-                row.createCell(7).setCellValue(o.getId());
                 
-                // Optional: add some body style
+                String dateStr;
+                if (o.getDateVente() != null) {
+                    dateStr = sdf.format(o.getDateVente());
+                } else {
+                    // Fallback to today's date if empty in DB
+                    dateStr = sdf.format(new java.util.Date());
+                }
+                row.createCell(6).setCellValue(dateStr);
             }
 
             // Auto-size columns
-            for (int i = 1; i <= 7; i++) {
+            for (int i = 1; i <= 6; i++) {
                 sheet.autoSizeColumn(i);
             }
 

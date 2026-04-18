@@ -4,10 +4,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
+import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
 import tn.rouhfan.entities.Categorie;
 import tn.rouhfan.entities.Favoris;
@@ -17,15 +19,22 @@ import tn.rouhfan.services.FavorisService;
 import tn.rouhfan.tools.SessionManager;
 import tn.rouhfan.ui.front.OeuvreCardController;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
+
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.*;
 
 public class FavorisController implements Initializable {
 
@@ -35,15 +44,24 @@ public class FavorisController implements Initializable {
     @FXML private ComboBox<String> orderCombo;
     @FXML private FlowPane cardsPane;
     @FXML private ScrollPane scrollPane;
+    @FXML private Button exportPDFButton;
 
     private FavorisService favorisService = new FavorisService();
     private CategorieService categorieService = new CategorieService();
     private List<Oeuvre> allFavorites = new ArrayList<>();
+    private List<Oeuvre> currentFilteredOeuvres = new ArrayList<>();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         setupFilters();
         loadFavoris();
+        
+        // Gérer la visibilité du bouton PDF selon le rôle
+        String role = SessionManager.getInstance().getRole();
+        if ("ROLE_PARTICIPANT".equals(role)) {
+            exportPDFButton.setVisible(false);
+            exportPDFButton.setManaged(false); // Pour ne pas laisser d'espace vide
+        }
     }
 
     private void setupFilters() {
@@ -109,9 +127,9 @@ public class FavorisController implements Initializable {
 
         if (!isAsc) comparator = comparator.reversed();
 
-        List<Oeuvre> sorted = filtered.stream().sorted(comparator).collect(Collectors.toList());
+        currentFilteredOeuvres = filtered.stream().sorted(comparator).collect(Collectors.toList());
 
-        displayOeuvres(sorted);
+        displayOeuvres(currentFilteredOeuvres);
     }
 
     @FXML
@@ -120,6 +138,99 @@ public class FavorisController implements Initializable {
         if (host != null) {
             tn.rouhfan.ui.Router.setContent(host, "/ui/front/GalerieFront.fxml");
         }
+    }
+
+    @FXML
+    private void handleExportPDF() {
+        if (currentFilteredOeuvres.isEmpty()) {
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Enregistrer le rapport PDF");
+        fileChooser.setInitialFileName("Mes_Favoris_RouhElFann.pdf");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Fichier PDF", "*.pdf"));
+        
+        File file = fileChooser.showSaveDialog(searchField.getScene().getWindow());
+        if (file == null) return;
+
+        Document document = new Document(PageSize.A4);
+        try {
+            PdfWriter.getInstance(document, new FileOutputStream(file));
+            document.open();
+
+            // Titre Principal
+            com.lowagie.text.Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 24, new java.awt.Color(36, 17, 151));
+            Paragraph title = new Paragraph("Œuvres favoris — Rouh el Fann", titleFont);
+            title.setAlignment(Element.ALIGN_LEFT);
+            title.setSpacingAfter(10f);
+            document.add(title);
+
+            // Date d'exportation
+            com.lowagie.text.Font metaFont = FontFactory.getFont(FontFactory.HELVETICA, 12, java.awt.Color.BLACK);
+            String dateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+            Paragraph meta = new Paragraph("Liste exportée le " + dateStr, metaFont);
+            meta.setSpacingAfter(20f);
+            document.add(meta);
+
+            // Tableau
+            PdfPTable table = new PdfPTable(4);
+            table.setWidthPercentage(100);
+            table.setSpacingBefore(10f);
+            table.setWidths(new float[]{3f, 1.5f, 2f, 2.5f});
+
+            // En-têtes
+            Font headFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, java.awt.Color.BLACK);
+            java.awt.Color headBg = new java.awt.Color(240, 238, 245);
+            String[] headers = {"Titre", "Prix (DT)", "Catégorie", "Publié par"};
+            
+            for (String header : headers) {
+                PdfPCell cell = new PdfPCell(new Phrase(header, headFont));
+                cell.setBackgroundColor(headBg);
+                cell.setPadding(10);
+                cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+                table.addCell(cell);
+            }
+
+            // Données
+            Font bodyFont = FontFactory.getFont(FontFactory.HELVETICA, 11, java.awt.Color.BLACK);
+            for (Oeuvre o : currentFilteredOeuvres) {
+                table.addCell(new PdfPCell(new Phrase(o.getTitre(), bodyFont))).setPadding(8);
+                table.addCell(new PdfPCell(new Phrase(String.format("%.2f", o.getPrix()), bodyFont))).setPadding(8);
+                table.addCell(new PdfPCell(new Phrase(o.getCategorie() != null ? o.getCategorie().getNomCategorie() : "N/A", bodyFont))).setPadding(8);
+                
+                String author = "Inconnu";
+                if (o.getUser() != null) {
+                    author = o.getUser().getNom() + " " + (o.getUser().getPrenom() != null ? o.getUser().getPrenom() : "");
+                }
+                table.addCell(new PdfPCell(new Phrase(author, bodyFont))).setPadding(8);
+            }
+
+            document.add(table);
+            document.close();
+
+            showInfo("Succès", "Votre liste de favoris a été exportée en PDF avec succès !");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Erreur d'export", "Une erreur est survenue lors de la génération du PDF : " + e.getMessage());
+        }
+    }
+
+    private void showInfo(String title, String content) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+
+    private void showError(String title, String content) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     private void displayOeuvres(List<Oeuvre> oeuvres) {
