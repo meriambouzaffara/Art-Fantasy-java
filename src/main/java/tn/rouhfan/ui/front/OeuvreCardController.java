@@ -15,6 +15,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import tn.rouhfan.entities.Oeuvre;
 import tn.rouhfan.entities.User;
+import tn.rouhfan.services.FavorisService;
 import tn.rouhfan.services.OeuvreService;
 import tn.rouhfan.tools.SessionManager;
 import tn.rouhfan.ui.back.OeuvreFormController;
@@ -34,11 +35,13 @@ public class OeuvreCardController {
     @FXML private HBox actionsPane;
     @FXML private Button viewBtn;
     @FXML private Button buyBtn;
+    @FXML private Label favIcon;
 
     private Oeuvre oeuvre;
     private String userRole;
     private Runnable refreshCallback;
     private OeuvreService oeuvreService = new OeuvreService();
+    private FavorisService favorisService = new FavorisService();
 
     public void setOeuvre(Oeuvre o, String role, Runnable callback) {
         this.oeuvre = o;
@@ -87,6 +90,43 @@ public class OeuvreCardController {
         boolean canBuy = isParticipant && isDisponible;
         buyBtn.setVisible(canBuy);
         buyBtn.setManaged(canBuy);
+
+        // Initialiser l'état du favori
+        updateFavoriteIcon();
+    }
+
+    private void updateFavoriteIcon() {
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            favIcon.getParent().setVisible(false);
+            return;
+        }
+        try {
+            if (favorisService.exists(currentUser.getId(), oeuvre.getId())) {
+                favIcon.setText("⭐");
+                favIcon.setStyle("-fx-text-fill: #fac62d; -fx-font-size: 22; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 0);");
+            } else {
+                favIcon.setText("☆");
+                favIcon.setStyle("-fx-text-fill: #241197; -fx-font-size: 22; -fx-font-weight: bold;");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleToggleFavorite() {
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        if (currentUser == null) return;
+
+        try {
+            favorisService.toggle(currentUser.getId(), oeuvre.getId());
+            updateFavoriteIcon();
+            // Optionnel : rafraîchir la liste si on est dans la vue favoris
+            if (refreshCallback != null) refreshCallback.run();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -123,6 +163,7 @@ public class OeuvreCardController {
                 try {
                     // Marquer l'oeuvre comme vendue
                     oeuvre.setStatut("vendue");
+                    oeuvre.setDateVente(new java.util.Date());
                     oeuvreService.modifier(oeuvre);
                     
                     Alert success = new Alert(Alert.AlertType.INFORMATION);

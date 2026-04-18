@@ -13,8 +13,8 @@
 
 <VBox spacing="25.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.front.GalerieFrontController" styleClass="content" stylesheets="@../back/oeuvres_categories.css">
     <VBox spacing="5.0">
-        <Label fx:id="pageTitle" text="Galerie d'Art" styleClass="text-title" />
-        <Label fx:id="pageSubtitle" text="Explorez nos collections et découvrez des talents uniques." styleClass="text-subtitle" />
+        <Label fx:id="pageTitle" text="🖼️ Galerie d'Art" styleClass="text-title" />
+        <Label fx:id="pageSubtitle" text="Découvrez les créations de nos artistes." styleClass="text-subtitle" />
     </VBox>
 
     <!-- Barre de filtres pour les OEUVRES -->
@@ -41,6 +41,8 @@
 
         <Region HBox.hgrow="ALWAYS" />
         
+        <Button text="⭐ Mes Favoris" onAction="#handleViewFavoris" styleClass="btn-secondary" style="-fx-background-color: white; -fx-text-fill: #241197; -fx-border-color: #241197; -fx-border-radius: 25; -fx-background-radius: 25; -fx-padding: 10 25; -fx-font-weight: bold; -fx-border-width: 1.5;" />
+
         <!-- Visible only for Artists/Admin -->
         <Button fx:id="addOeuvreBtn" text="➕ Publier une œuvre" onAction="#handleAddOeuvre" styleClass="btn-front-primary" visible="false" managed="false" />
     </HBox>

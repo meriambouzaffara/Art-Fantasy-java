@@ -27,12 +27,15 @@ import tn.rouhfan.services.OeuvreService;
 import tn.rouhfan.tools.SessionManager;
 import tn.rouhfan.ui.back.OeuvreFormController;
 
+
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
+
 
 public class GalerieFrontController implements Initializable {
 
@@ -55,10 +58,10 @@ public class GalerieFrontController implements Initializable {
 
     private OeuvreService oeuvreService;
     private CategorieService categorieService;
-    
+
     private ObservableList<Oeuvre> allOeuvres;
     private ObservableList<Categorie> allCategories;
-    
+
     private boolean isCategoryMode = false;
     private User currentUser;
     private String userRole = "ROLE_PARTICIPANT";
@@ -67,7 +70,7 @@ public class GalerieFrontController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         oeuvreService = new OeuvreService();
         categorieService = new CategorieService();
-        
+
         SessionManager session = SessionManager.getInstance();
         currentUser = session.getCurrentUser();
         if (currentUser != null) {
@@ -77,15 +80,17 @@ public class GalerieFrontController implements Initializable {
             userRole = "ROLE_ANONYMOUS";
             System.out.println("[GalerieFront] Aucun user connecté");
         }
-        
+
         setupFilters();
+        setupRoleUI();
+        loadData();
     }
 
     private void setupRoleUI() {
         boolean isAdmin = userRole != null && userRole.toUpperCase().contains("ADMIN");
         boolean isArtiste = userRole != null && (userRole.toUpperCase().contains("ARTIST") || userRole.toUpperCase().contains("ARTISTE"));
         boolean canAddOeuvre = !isCategoryMode && (isAdmin || isArtiste);
-        
+
         addOeuvreBtn.setVisible(canAddOeuvre);
         addOeuvreBtn.setManaged(canAddOeuvre);
     }
@@ -122,13 +127,13 @@ public class GalerieFrontController implements Initializable {
         categoryFilter.valueProperty().addListener((obs, old, newValue) -> applyFilters());
         sortCombo.valueProperty().addListener((obs, old, newValue) -> applyFilters());
         orderCombo.valueProperty().addListener((obs, old, newValue) -> applyFilters());
-        
+
         // Recherche catégories en temps réel
         categorySearchField.textProperty().addListener((obs, old, newValue) -> filterCategories(newValue));
 
         sortCombo.setItems(FXCollections.observableArrayList("Titre", "Prix"));
         sortCombo.setValue("Titre");
-        
+
         orderCombo.setItems(FXCollections.observableArrayList("Asc", "Desc"));
         orderCombo.setValue("Asc");
     }
@@ -143,14 +148,14 @@ public class GalerieFrontController implements Initializable {
                 allOeuvres = FXCollections.observableArrayList(oeuvreService.recuperer());
                 allCategories = FXCollections.observableArrayList(categorieService.recuperer());
                 System.out.println("[GalerieFront] Oeuvres chargées: " + allOeuvres.size() + " | Catégories: " + allCategories.size());
-                
+
                 Categorie all = new Categorie();
                 all.setNomCategorie("Toutes");
                 categoryFilter.getItems().clear();
                 categoryFilter.getItems().add(all);
                 categoryFilter.getItems().addAll(allCategories);
                 categoryFilter.setValue(all);
-                
+
                 applyFilters();
             }
         } catch (SQLException e) {
@@ -164,16 +169,16 @@ public class GalerieFrontController implements Initializable {
      */
     private void filterCategories(String searchText) {
         if (!isCategoryMode || allCategories == null) return;
-        
+
         String search = (searchText == null) ? "" : searchText.toLowerCase().trim();
-        
+
         if (search.isEmpty()) {
             renderCategoryCards();
         } else {
             ObservableList<Categorie> filtered = FXCollections.observableArrayList(
-                allCategories.stream()
-                    .filter(c -> c.getNomCategorie().toLowerCase().contains(search))
-                    .collect(Collectors.toList())
+                    allCategories.stream()
+                            .filter(c -> c.getNomCategorie().toLowerCase().contains(search))
+                            .collect(Collectors.toList())
             );
             renderFilteredCategoryCards(filtered);
         }
@@ -185,11 +190,11 @@ public class GalerieFrontController implements Initializable {
         FilteredList<Oeuvre> filtered = new FilteredList<>(allOeuvres, o -> {
             String search = searchField.getText() == null ? "" : searchField.getText().toLowerCase();
             boolean matchesSearch = o.getTitre().toLowerCase().contains(search);
-            
+
             Categorie selected = categoryFilter.getValue();
-            boolean matchesCat = selected == null || selected.getNomCategorie().equals("Toutes") 
-                || (o.getCategorie() != null && o.getCategorie().getIdCategorie() == selected.getIdCategorie());
-            
+            boolean matchesCat = selected == null || selected.getNomCategorie().equals("Toutes")
+                    || (o.getCategorie() != null && o.getCategorie().getIdCategorie() == selected.getIdCategorie());
+
             return matchesSearch && matchesCat;
         });
 
@@ -199,14 +204,20 @@ public class GalerieFrontController implements Initializable {
         boolean isAsc = "Asc".equals(order);
 
         if (sort != null) {
-            switch (sort) {
-                case "Titre": 
-                    sorted.setComparator(isAsc ? Comparator.comparing(Oeuvre::getTitre) : Comparator.comparing(Oeuvre::getTitre).reversed()); 
-                    break;
-                case "Prix": 
-                    sorted.setComparator(isAsc ? Comparator.comparing(o -> o.getPrix() != null ? o.getPrix() : java.math.BigDecimal.ZERO) : Comparator.comparing((Oeuvre o) -> o.getPrix() != null ? o.getPrix() : java.math.BigDecimal.ZERO).reversed()); 
-                    break;
+            Comparator<Oeuvre> comparator;
+            
+            if ("Prix".equals(sort)) {
+                comparator = Comparator.comparing(o -> o.getPrix() != null ? o.getPrix() : BigDecimal.ZERO);
+            } else {
+                // Par défaut ou si "Titre"
+                comparator = Comparator.comparing(Oeuvre::getTitre, String.CASE_INSENSITIVE_ORDER);
             }
+
+            if (!isAsc) {
+                comparator = comparator.reversed();
+            }
+            
+            sorted.setComparator(comparator);
         }
 
         renderOeuvreCards(sorted);
@@ -264,21 +275,33 @@ public class GalerieFrontController implements Initializable {
         if (!isAdmin && !isArtiste) {
             return;
         }
-        
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/back/OeuvreFormDialog.fxml"));
             Parent root = loader.load();
             OeuvreFormController controller = loader.getController();
-            
+
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setTitle("Publier une œuvre");
             stage.setScene(new Scene(root));
             stage.showAndWait();
-            
+
             if (controller.isSaved()) loadData();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleViewFavoris() {
+        // Tenter de trouver le contentHost dans la scène actuelle pour changer de vue
+        javafx.scene.layout.Pane host = (javafx.scene.layout.Pane) searchField.getScene().lookup("#contentHost");
+        if (host != null) {
+            tn.rouhfan.ui.Router.setContent(host, "/ui/back/FavorisView.fxml");
+        } else {
+            // Fallback si on ne trouve pas (devrait pas arriver en back-office/front-base standard)
+            System.err.println("[GalerieFront] Impossible de trouver #contentHost pour charger les favoris");
         }
     }
 }

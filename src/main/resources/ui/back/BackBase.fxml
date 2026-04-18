@@ -36,6 +36,7 @@
                 <Button fx:id="navArticles" text="📦  Gestion Articles" mnemonicParsing="false" styleClass="sidebar-link" onAction="#openArticles" maxWidth="Infinity" />
                 <Button fx:id="navCours" text="🎨  Gestion Cours" mnemonicParsing="false" styleClass="sidebar-link" onAction="#openCours" maxWidth="Infinity" />
                 <Button fx:id="navCertificats" text="📜  Certificats" mnemonicParsing="false" styleClass="sidebar-link" onAction="#openCertificats" maxWidth="Infinity" />
+                <Button fx:id="navOeuvreStatistiques" text="📊  Statistiques Œuvres" mnemonicParsing="false" styleClass="sidebar-link" onAction="#openOeuvreStatistiques" maxWidth="Infinity" />
                 <Button fx:id="navAvis" text="💬  Avis &amp; Réclamations" mnemonicParsing="false" styleClass="sidebar-link" onAction="#openAvis" maxWidth="Infinity" />
             </VBox>
 

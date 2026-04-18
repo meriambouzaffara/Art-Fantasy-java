@@ -42,21 +42,11 @@ public class OeuvreFormController implements Initializable {
     @FXML private StackPane imageContainer;
     @FXML private Button saveBtn;
     @FXML private Button browseBtn;
-<<<<<<< HEAD
-    @FXML private Label titreError;
-    @FXML private Label descriptionError;
-    @FXML private Label prixError;
-    @FXML private Label categorieError;
-    @FXML private Label artisteError;
-    @FXML private Label imageError;
-=======
-    
     @FXML private Label titreErrorLabel;
     @FXML private Label descriptionErrorLabel;
     @FXML private Label prixErrorLabel;
     @FXML private Label categorieErrorLabel;
     @FXML private Label imageErrorLabel;
->>>>>>> origin/gestion-oeuvres-categories
 
     private OeuvreService oeuvreService;
     private CategorieService categorieService;
@@ -210,10 +200,6 @@ public class OeuvreFormController implements Initializable {
     }
 
     private boolean validateFields() {
-<<<<<<< HEAD
-        clearErrors();
-        boolean valid = true;
-=======
         boolean isValid = true;
 
         // Hide all error labels initially
@@ -228,29 +214,11 @@ public class OeuvreFormController implements Initializable {
         imageErrorLabel.setVisible(false);
         imageErrorLabel.setManaged(false);
 
->>>>>>> origin/gestion-oeuvres-categories
         String titre = titreField.getText().trim();
         String description = descriptionField.getText().trim();
         String prixStr = prixField.getText().trim();
 
         if (titre.isEmpty()) {
-<<<<<<< HEAD
-            showError(titreError, "Le titre est obligatoire.");
-            valid = false;
-        } else if (titre.length() < 2) {
-            showError(titreError, "Le titre doit faire au moins 2 caractères.");
-            valid = false;
-        }
-
-        if (description.isEmpty()) {
-            showError(descriptionError, "La description est obligatoire.");
-            valid = false;
-        }
-
-        if (prixStr.isEmpty()) {
-            showError(prixError, "Le prix est obligatoire.");
-            valid = false;
-=======
             titreErrorLabel.setText("Le titre est obligatoire.");
             titreErrorLabel.setVisible(true);
             titreErrorLabel.setManaged(true);
@@ -260,6 +228,30 @@ public class OeuvreFormController implements Initializable {
             titreErrorLabel.setVisible(true);
             titreErrorLabel.setManaged(true);
             isValid = false;
+        } else {
+            try {
+                // Créer une oeuvre temporaire pour le test
+                Oeuvre tempOeuvre = new Oeuvre();
+                tempOeuvre.setTitre(titre);
+                
+                // Utiliser l'utilisateur courant pour le test
+                User currentUser = SessionManager.getInstance().getCurrentUser();
+                if (currentOeuvre != null && currentOeuvre.getUser() != null) {
+                    tempOeuvre.setUser(currentOeuvre.getUser());
+                } else {
+                    tempOeuvre.setUser(currentUser);
+                }
+
+                int excludeId = (currentOeuvre != null) ? currentOeuvre.getId() : 0;
+                if (oeuvreService.isOeuvreExiste(tempOeuvre, excludeId)) {
+                    titreErrorLabel.setText("Vous avez déjà une œuvre avec ce titre.");
+                    titreErrorLabel.setVisible(true);
+                    titreErrorLabel.setManaged(true);
+                    isValid = false;
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
         if (description.isEmpty()) {
@@ -274,19 +266,10 @@ public class OeuvreFormController implements Initializable {
             prixErrorLabel.setVisible(true);
             prixErrorLabel.setManaged(true);
             isValid = false;
->>>>>>> origin/gestion-oeuvres-categories
         } else {
             try {
                 BigDecimal prix = new BigDecimal(prixStr);
                 if (prix.compareTo(BigDecimal.ZERO) <= 0) {
-<<<<<<< HEAD
-                    showError(prixError, "Le prix doit être supérieur à 0,00 DT.");
-                    valid = false;
-                }
-            } catch (NumberFormatException e) {
-                showError(prixError, "Le prix doit être un nombre valide.");
-                valid = false;
-=======
                     prixErrorLabel.setText("Le prix doit être supérieur à 0,00 DT.");
                     prixErrorLabel.setVisible(true);
                     prixErrorLabel.setManaged(true);
@@ -297,57 +280,18 @@ public class OeuvreFormController implements Initializable {
                 prixErrorLabel.setVisible(true);
                 prixErrorLabel.setManaged(true);
                 isValid = false;
->>>>>>> origin/gestion-oeuvres-categories
             }
         }
 
         if (categorieCombo.getValue() == null) {
-<<<<<<< HEAD
-            showError(categorieError, "Veuillez sélectionner une catégorie.");
-            valid = false;
-        }
-
-        if (artisteCombo.getValue() == null) {
-            showError(artisteError, "Veuillez sélectionner un artiste.");
-            valid = false;
-=======
             categorieErrorLabel.setText("Veuillez sélectionner une catégorie.");
             categorieErrorLabel.setVisible(true);
             categorieErrorLabel.setManaged(true);
             isValid = false;
->>>>>>> origin/gestion-oeuvres-categories
         }
 
         boolean hasImage = (selectedImageFile != null) || (currentOeuvre != null && currentOeuvre.getImage() != null && !currentOeuvre.getImage().isEmpty());
         if (!hasImage) {
-<<<<<<< HEAD
-            showError(imageError, "Veuillez sélectionner une image.");
-            valid = false;
-        }
-
-        return valid;
-    }
-
-    private void showError(Label errorLabel, String message) {
-        errorLabel.setText(message);
-        errorLabel.setVisible(true);
-        errorLabel.setManaged(true);
-    }
-
-    private void clearErrors() {
-        titreError.setVisible(false);
-        titreError.setManaged(false);
-        descriptionError.setVisible(false);
-        descriptionError.setManaged(false);
-        prixError.setVisible(false);
-        prixError.setManaged(false);
-        categorieError.setVisible(false);
-        categorieError.setManaged(false);
-        artisteError.setVisible(false);
-        artisteError.setManaged(false);
-        imageError.setVisible(false);
-        imageError.setManaged(false);
-=======
             imageErrorLabel.setText("Veuillez sélectionner une image.");
             imageErrorLabel.setVisible(true);
             imageErrorLabel.setManaged(true);
@@ -361,7 +305,6 @@ public class OeuvreFormController implements Initializable {
         });
 
         return isValid;
->>>>>>> origin/gestion-oeuvres-categories
     }
 
     @FXML private void cancel() { closeDialog(); }
@@ -379,3 +322,5 @@ public class OeuvreFormController implements Initializable {
         alert.showAndWait();
     }
 }
+
+

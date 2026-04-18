@@ -14,11 +14,7 @@
 <?import javafx.collections.FXCollections?>
 <?import java.lang.String?>
 
-<<<<<<< HEAD
-<VBox spacing="15.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.OeuvreFormController" styleClass="form-container" stylesheets="@oeuvres_categories.css,@../theme.css">
-=======
 <VBox spacing="15.0" prefWidth="650.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.OeuvreFormController" styleClass="form-container" stylesheets="@../theme.css">
->>>>>>> origin/gestion-oeuvres-categories
     <padding>
         <Insets top="30" right="30" bottom="30" left="30"/>
     </padding>
@@ -28,55 +24,6 @@
         <Label text="Veuillez remplir les informations de l'œuvre d'art." styleClass="text-subtitle" />
     </VBox>
     
-<<<<<<< HEAD
-    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background:transparent; -fx-background-color:transparent;">
-        <VBox spacing="20.0">
-            <HBox spacing="30.0">
-                <!-- Left Side: Fields -->
-                <VBox spacing="20.0" HBox.hgrow="ALWAYS">
-                    <VBox spacing="8.0">
-                        <Label text="Titre de l'œuvre" styleClass="form-label" />
-                        <TextField fx:id="titreField" promptText="Ex: La Nuit Étoilée" styleClass="form-control" />
-                        <Label fx:id="titreError" styleClass="error-label" managed="false" visible="false" />
-                    </VBox>
-
-                    <VBox spacing="8.0">
-                        <Label text="Description" styleClass="form-label" />
-                        <TextArea fx:id="descriptionField" promptText="Décrivez l'œuvre..." prefRowCount="4" styleClass="form-control" wrapText="true" />
-                        <Label fx:id="descriptionError" styleClass="error-label" managed="false" visible="false" />
-                    </VBox>
-
-                    <HBox spacing="15.0">
-                        <VBox spacing="8.0" HBox.hgrow="ALWAYS">
-                            <Label text="Prix (DT)" styleClass="form-label" />
-                            <TextField fx:id="prixField" promptText="0.00" styleClass="form-control" />
-                            <Label fx:id="prixError" styleClass="error-label" managed="false" visible="false" />
-                        </VBox>
-                        <VBox spacing="8.0" HBox.hgrow="ALWAYS">
-                            <Label text="Statut" styleClass="form-label" />
-                            <ComboBox fx:id="statutCombo" maxWidth="Infinity" styleClass="combo-box">
-                                <items>
-                                    <FXCollections fx:factory="observableArrayList">
-                                        <String fx:value="disponible" />
-                                        <String fx:value="vendue" />
-                                    </FXCollections>
-                                </items>
-                            </ComboBox>
-                        </VBox>
-                    </HBox>
-
-                    <VBox spacing="8.0">
-                        <Label text="Catégorie" styleClass="form-label" />
-                        <ComboBox fx:id="categorieCombo" maxWidth="Infinity" styleClass="combo-box" promptText="Choisir une catégorie" />
-                        <Label fx:id="categorieError" styleClass="error-label" managed="false" visible="false" />
-                    </VBox>
-
-                    <VBox spacing="8.0">
-                        <Label text="Artiste (Publié par)" styleClass="form-label" />
-                        <ComboBox fx:id="artisteCombo" maxWidth="Infinity" styleClass="combo-box" promptText="Sélectionner l'artiste" />
-                        <Label fx:id="artisteError" styleClass="error-label" managed="false" visible="false" />
-                    </VBox>
-=======
     <HBox spacing="30.0">
         <!-- Left Side: Fields -->
         <VBox spacing="20.0" HBox.hgrow="ALWAYS">
@@ -97,30 +44,25 @@
                     <Label text="Prix (DT)" styleClass="form-label" />
                     <TextField fx:id="prixField" promptText="0.00" styleClass="form-control" />
                     <Label fx:id="prixErrorLabel" style="-fx-text-fill: #ef4444; -fx-font-size: 12px; -fx-font-weight: bold;" managed="false" visible="false" />
->>>>>>> origin/gestion-oeuvres-categories
                 </VBox>
-
-                <!-- Right Side: Image Upload & Preview -->
-                <VBox spacing="15.0" alignment="TOP_CENTER" prefWidth="240.0">
-                    <Label text="Image de l'œuvre" styleClass="form-label" />
-                    <StackPane fx:id="imageContainer" prefHeight="240.0" prefWidth="240.0" styleClass="image-preview-container">
-                        <ImageView fx:id="imagePreview" fitHeight="230.0" fitWidth="230.0" preserveRatio="true" smooth="true" cache="true" />
-                        <Label fx:id="placeholderLabel" text="📷 Cliquez pour ajouter" style="-fx-text-fill: #94a3b8;" />
-                    </StackPane>
-                    <Button fx:id="browseBtn" text="📁 Choisir une oeuvre" onAction="#browseImage" styleClass="btn-secondary" maxWidth="Infinity" />
-                    <Label fx:id="imageError" styleClass="error-label" managed="false" visible="false" />
+                <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                    <Label text="Statut" styleClass="form-label" />
+                    <ComboBox fx:id="statutCombo" maxWidth="Infinity" styleClass="combo-box">
+                        <items>
+                            <FXCollections fx:factory="observableArrayList">
+                                <String fx:value="disponible" />
+                                <String fx:value="vendue" />
+                            </FXCollections>
+                        </items>
+                    </ComboBox>
                 </VBox>
             </HBox>
-<<<<<<< HEAD
-        </VBox>
-    </ScrollPane>
-=======
 
             <VBox spacing="8.0">
                 <Label text="Catégorie" styleClass="form-label" />
                 <ComboBox fx:id="categorieCombo" maxWidth="Infinity" styleClass="combo-box" promptText="Choisir une catégorie" />
                 <Label fx:id="categorieErrorLabel" style="-fx-text-fill: #ef4444; -fx-font-size: 12px; -fx-font-weight: bold;" managed="false" visible="false" />
-        </VBox>
+            </VBox>
         </VBox>
 
         <!-- Right Side: Image Upload & Preview -->
@@ -134,7 +76,6 @@
             <Label fx:id="imageErrorLabel" style="-fx-text-fill: #ef4444; -fx-font-size: 12px; -fx-font-weight: bold;" managed="false" visible="false" />
         </VBox>
     </HBox>
->>>>>>> origin/gestion-oeuvres-categories
     
     <HBox spacing="15.0" alignment="CENTER_RIGHT">
         <Button text="Annuler" onAction="#cancel" styleClass="btn-secondary" prefWidth="120" />

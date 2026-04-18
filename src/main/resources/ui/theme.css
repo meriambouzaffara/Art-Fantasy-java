@@ -398,9 +398,6 @@
     -fx-background-color: linear-gradient(to bottom right, #241197, #6c2a90);
     -fx-background-radius: 20;
 }
-<<<<<<< HEAD
-=======
-
 .hero-title {
     -fx-text-fill: #ffffff;
     -fx-font-size: 32px;
@@ -449,4 +446,3 @@
     -fx-border-radius: 12;
     -fx-padding: 10;
 }
->>>>>>> origin/gestion-oeuvres-categories

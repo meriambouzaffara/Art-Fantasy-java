@@ -56,6 +56,9 @@ public class BackBaseController {
     private Button navAvis;
 
     @FXML
+    private Button navOeuvreStatistiques;
+
+    @FXML
     public void initialize() {
         // ── GUARD DE SÉCURITÉ ──
         if (!SessionManager.getInstance().checkAccess("ROLE_ADMIN")) {
@@ -164,6 +167,13 @@ public class BackBaseController {
     }
 
     @FXML
+    private void openOeuvreStatistiques(ActionEvent event) {
+        setActive(navOeuvreStatistiques);
+        pageTitle.setText("Statistiques Œuvres");
+        Router.setContent(contentHost, "/ui/back/OeuvreStatistiquesView.fxml");
+    }
+
+    @FXML
     private void openProfile(ActionEvent event) {
         clearActive();
         pageTitle.setText("Mon Profil");
@@ -215,5 +225,6 @@ public class BackBaseController {
         navMagasin.getStyleClass().remove("active");
         navArticles.getStyleClass().remove("active");
         navAvis.getStyleClass().remove("active");
+        if (navOeuvreStatistiques != null) navOeuvreStatistiques.getStyleClass().remove("active");
     }
 }

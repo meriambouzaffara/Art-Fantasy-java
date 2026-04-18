@@ -11,7 +11,6 @@ public class Oeuvre {
     private BigDecimal prix;
     private String statut;
     private String image;
-    private boolean favori;
     private Date dateVente;
 
     // relations
@@ -20,13 +19,12 @@ public class Oeuvre {
 
     public Oeuvre() {}
 
-    public Oeuvre(String description, String titre, BigDecimal prix, String statut, String image, boolean favori, Date dateVente, User user, Categorie categorie) {
+    public Oeuvre(String description, String titre, BigDecimal prix, String statut, String image, Date dateVente, User user, Categorie categorie) {
         this.description = description;
         this.titre = titre;
         this.prix = prix;
         this.statut = statut;
         this.image = image;
-        this.favori = favori;
         this.dateVente = dateVente;
         this.user = user;
         this.categorie = categorie;
@@ -78,14 +76,6 @@ public class Oeuvre {
 
     public void setImage(String image) {
         this.image = image;
-    }
-
-    public boolean isFavori() {
-        return favori;
-    }
-
-    public void setFavori(boolean favori) {
-        this.favori = favori;
     }
 
     public Date getDateVente() {

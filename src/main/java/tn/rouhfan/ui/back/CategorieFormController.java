@@ -30,14 +30,8 @@ public class CategorieFormController implements Initializable {
     @FXML private ImageView imagePreview;
     @FXML private Label placeholderLabel;
     @FXML private StackPane imageContainer;
-<<<<<<< HEAD
-    @FXML private Label nomError;
-    @FXML private Label imageError;
-=======
-    
     @FXML private Label nomErrorLabel;
     @FXML private Label imageErrorLabel;
->>>>>>> origin/gestion-oeuvres-categories
 
     private CategorieService categorieService;
     private Categorie currentCategorie;
@@ -127,18 +121,6 @@ public class CategorieFormController implements Initializable {
     }
 
     private boolean validateFields() {
-<<<<<<< HEAD
-        clearErrors();
-        boolean valid = true;
-        String nom = nomField.getText().trim();
-
-        if (nom.isEmpty()) {
-            showError(nomError, "Le nom de la catégorie est obligatoire.");
-            valid = false;
-        } else if (nom.length() < 2) {
-            showError(nomError, "Le nom de la catégorie doit faire au moins 2 caractères.");
-            valid = false;
-=======
         boolean isValid = true;
         
         // Hide errors initially
@@ -159,31 +141,22 @@ public class CategorieFormController implements Initializable {
             nomErrorLabel.setVisible(true);
             nomErrorLabel.setManaged(true);
             isValid = false;
->>>>>>> origin/gestion-oeuvres-categories
+        } else {
+            try {
+                int excludeId = (currentCategorie != null) ? currentCategorie.getIdCategorie() : 0;
+                if (categorieService.isNomExiste(nom, excludeId)) {
+                    nomErrorLabel.setText("Cette catégorie existe déjà.");
+                    nomErrorLabel.setVisible(true);
+                    nomErrorLabel.setManaged(true);
+                    isValid = false;
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
         boolean hasImage = (selectedImageFile != null) || (currentCategorie != null && currentCategorie.getImageCategorie() != null && !currentCategorie.getImageCategorie().isEmpty());
         if (!hasImage) {
-<<<<<<< HEAD
-            showError(imageError, "Veuillez sélectionner une image.");
-            valid = false;
-        }
-
-        return valid;
-    }
-
-    private void showError(Label errorLabel, String message) {
-        errorLabel.setText(message);
-        errorLabel.setVisible(true);
-        errorLabel.setManaged(true);
-    }
-
-    private void clearErrors() {
-        nomError.setVisible(false);
-        nomError.setManaged(false);
-        imageError.setVisible(false);
-        imageError.setManaged(false);
-=======
             imageErrorLabel.setText("Veuillez sélectionner une image.");
             imageErrorLabel.setVisible(true);
             imageErrorLabel.setManaged(true);
@@ -197,7 +170,6 @@ public class CategorieFormController implements Initializable {
         });
 
         return isValid;
->>>>>>> origin/gestion-oeuvres-categories
     }
 
     @FXML private void cancel() { closeDialog(); }

@@ -56,8 +56,6 @@ public class CategoriesController implements Initializable {
 
     @FXML private TableView<Categorie> categorieTable;
 
-    @FXML private TableColumn<Categorie, Integer> colId;
-
     @FXML private TableColumn<Categorie, String> colNom;
 
     @FXML private TableColumn<Categorie, String> colImage;
@@ -91,12 +89,8 @@ public class CategoriesController implements Initializable {
 
 
     private void setupColumns() {
-
-        colId.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getIdCategorie()).asObject());
-
-
-
         colNom.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getNomCategorie()));
+        colNom.setStyle("-fx-alignment: CENTER;");
 
 
 

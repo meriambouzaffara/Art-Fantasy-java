@@ -23,7 +23,6 @@ import java.util.ResourceBundle;
 public class GalerieController implements Initializable {
 
     @FXML private TableView<Oeuvre> oeuvreTable;
-    @FXML private TableColumn<Oeuvre, Integer> colId;
     @FXML private TableColumn<Oeuvre, String> colImage;
     @FXML private TableColumn<Oeuvre, String> colTitre;
     @FXML private TableColumn<Oeuvre, String> colArtiste;
@@ -49,8 +48,6 @@ public class GalerieController implements Initializable {
     }
 
     private void setupColumns() {
-        colId.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getId()).asObject());
-
         // Image Column
         colImage.setCellFactory(param -> new TableCell<Oeuvre, String>() {
             private final ImageView imageView = new ImageView();
@@ -85,6 +82,7 @@ public class GalerieController implements Initializable {
         });
 
         colTitre.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getTitre()));
+        colTitre.setStyle("-fx-alignment: CENTER;");
         
         colArtiste.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
             cellData.getValue().getUser() != null ? 
