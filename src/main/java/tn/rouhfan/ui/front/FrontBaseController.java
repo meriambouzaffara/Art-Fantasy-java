@@ -152,7 +152,11 @@ public class FrontBaseController {
         contentHost.setVisible(true);
         contentHost.setManaged(true);
     }
-    @FXML private void goMagasin(ActionEvent event) { showHero(false); contentHost.getChildren().clear(); }
+    @FXML
+    private void goMagasin(ActionEvent event) {
+        showHero(false);
+        Router.setContent(contentHost, "/ui/front/front_magasins.fxml");
+    }
     @FXML
     private void goAvis(ActionEvent event) {
         showHero(false);

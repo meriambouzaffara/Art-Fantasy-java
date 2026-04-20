@@ -32,7 +32,6 @@ public class CertificatsController implements Initializable {
     @FXML private ComboBox<Cours> cbCours;
     @FXML private DatePicker dpDate;
 
-    // Cet élément doit correspondre au type et à l'ID du FXML
     @FXML private VBox formPane;
 
     private final CertificatService certService = new CertificatService();
@@ -48,7 +47,6 @@ public class CertificatsController implements Initializable {
         setupComboBoxes();
         loadData();
 
-        // Initialisation de l'affichage du formulaire
         if (formPane != null) {
             formPane.setVisible(false);
             formPane.setManaged(false);
@@ -70,17 +68,85 @@ public class CertificatsController implements Initializable {
     }
 
     private void setupComboBoxes() {
+        // Niveau
         cbNiveau.setItems(FXCollections.observableArrayList("Débutant", "Intermédiaire", "Avancé"));
+
+        // Participant - Personnaliser l'affichage
         try {
-            cbParticipant.setItems(FXCollections.observableArrayList(userService.recuperer()));
-            cbCours.setItems(FXCollections.observableArrayList(coursService.recuperer()));
-        } catch (SQLException e) { e.printStackTrace(); }
+            ObservableList<User> users = FXCollections.observableArrayList(userService.recuperer());
+            cbParticipant.setItems(users);
+
+            // Personnaliser l'affichage du ComboBox Participant
+            cbParticipant.setCellFactory(param -> new ListCell<User>() {
+                @Override
+                protected void updateItem(User user, boolean empty) {
+                    super.updateItem(user, empty);
+                    if (empty || user == null) {
+                        setText(null);
+                    } else {
+                        setText(user.getPrenom() + " " + user.getNom());
+                    }
+                }
+            });
+
+            cbParticipant.setButtonCell(new ListCell<User>() {
+                @Override
+                protected void updateItem(User user, boolean empty) {
+                    super.updateItem(user, empty);
+                    if (empty || user == null) {
+                        setText("Choisir un participant");
+                    } else {
+                        setText(user.getPrenom() + " " + user.getNom());
+                    }
+                }
+            });
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Cours - Personnaliser l'affichage (NE PLUS AFFICHER TOUTE LA BDD)
+        try {
+            ObservableList<Cours> cours = FXCollections.observableArrayList(coursService.recuperer());
+            cbCours.setItems(cours);
+
+            // Personnaliser l'affichage du ComboBox Cours
+            cbCours.setCellFactory(param -> new ListCell<Cours>() {
+                @Override
+                protected void updateItem(Cours cours, boolean empty) {
+                    super.updateItem(cours, empty);
+                    if (empty || cours == null) {
+                        setText(null);
+                    } else {
+                        // Afficher seulement le nom du cours
+                        setText(cours.getNom());
+                    }
+                }
+            });
+
+            cbCours.setButtonCell(new ListCell<Cours>() {
+                @Override
+                protected void updateItem(Cours cours, boolean empty) {
+                    super.updateItem(cours, empty);
+                    if (empty || cours == null) {
+                        setText("Choisir un cours");
+                    } else {
+                        setText(cours.getNom());
+                    }
+                }
+            });
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private void loadData() {
         try {
             certificatTable.setItems(FXCollections.observableArrayList(certService.recuperer()));
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -136,11 +202,33 @@ public class CertificatsController implements Initializable {
     private void deleteCertificat() {
         Certificat s = certificatTable.getSelectionModel().getSelectedItem();
         if (s != null) {
-            try { certService.supprimer(s.getId()); loadData(); } catch (SQLException e) { e.printStackTrace(); }
+            try {
+                certService.supprimer(s.getId());
+                loadData();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    @FXML private void handleAnnuler() { formPane.setVisible(false); formPane.setManaged(false); viderChamps(); }
-    @FXML private void refresh() { loadData(); }
-    private void viderChamps() { tfNom.clear(); tfScore.clear(); cbNiveau.setValue(null); dpDate.setValue(null); cbParticipant.setValue(null); cbCours.setValue(null); }
+    @FXML
+    private void handleAnnuler() {
+        formPane.setVisible(false);
+        formPane.setManaged(false);
+        viderChamps();
+    }
+
+    @FXML
+    private void refresh() {
+        loadData();
+    }
+
+    private void viderChamps() {
+        tfNom.clear();
+        tfScore.clear();
+        cbNiveau.setValue(null);
+        dpDate.setValue(null);
+        cbParticipant.setValue(null);
+        cbCours.setValue(null);
+    }
 }
