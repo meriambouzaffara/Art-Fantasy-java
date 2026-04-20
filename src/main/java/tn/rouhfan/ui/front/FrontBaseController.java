@@ -11,6 +11,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.scene.control.Alert;
 import tn.rouhfan.entities.User;
 import tn.rouhfan.tools.SessionManager;
 import tn.rouhfan.ui.Router;
@@ -135,7 +136,43 @@ public class FrontBaseController {
 
     @FXML private void goCours(ActionEvent event) { showHero(false); contentHost.getChildren().clear(); }
     @FXML private void goMagasin(ActionEvent event) { showHero(false); contentHost.getChildren().clear(); }
-    @FXML private void goAvis(ActionEvent event) { showHero(false); contentHost.getChildren().clear(); }
+    @FXML
+    private void goAvis(ActionEvent event) {
+        showHero(false);
+        contentHost.getChildren().clear();
+
+        // 🔐 Vérifier si utilisateur connecté
+        if (SessionManager.getInstance().getCurrentUser() == null) {
+
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Accès refusé");
+            alert.setHeaderText(null);
+            alert.setContentText("Vous devez vous connecter pour accéder aux réclamations !");
+            alert.showAndWait();
+
+            try {
+                Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+                Parent root = FXMLLoader.load(getClass().getResource("/ui/front/Login.fxml"));
+                stage.getScene().setRoot(root);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return;
+        }
+
+        // ✅ Charger la vue des réclamations
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/front/ReclamationFront.fxml"));
+            Parent root = loader.load();
+
+            contentHost.getChildren().add(root);
+
+        } catch (IOException e) {
+            System.err.println("[FrontBase] Erreur chargement Réclamations: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
     @FXML private void goAbout(ActionEvent event) { showHero(false); contentHost.getChildren().clear(); }
 
     // ==================== Auth ====================

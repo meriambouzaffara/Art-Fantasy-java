@@ -8,10 +8,10 @@ public class Qcm {
     private float scoreMinRequis;
     private int dureeMinutes;
 
-    // ✅ Clé étrangère en tant qu'objet
+    //  Clé étrangère en tant qu'objet
     private Cours cours;
 
-    // ✅ Relation OneToMany → liste de questions
+    //  Relation OneToMany → liste de questions
     private List<QcmQuestion> questions;
 
     // ======= Constructeurs =======
@@ -46,7 +46,7 @@ public class Qcm {
     public List<QcmQuestion> getQuestions() { return questions; }
     public void setQuestions(List<QcmQuestion> questions) { this.questions = questions; }
 
-    // ✅ Méthodes utilitaires comme en PHP
+    //  Méthodes utilitaires comme en PHP
     public void addQuestion(QcmQuestion question) {
         if (!questions.contains(question)) {
             questions.add(question);

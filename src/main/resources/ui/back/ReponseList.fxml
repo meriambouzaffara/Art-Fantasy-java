@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="10" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.rouhfan.ui.back.ReponseListController">
+
+    <TableView fx:id="table">
+        <columns>
+            <TableColumn fx:id="colId" text="ID"/>
+            <TableColumn fx:id="colMessage" text="Message"/>
+            <TableColumn fx:id="colDate" text="Date"/>
+        </columns>
+    </TableView>
+
+    <Button text="✏️ Modifier" styleClass="btn-primary"  onAction="#modifier"/>
+    <Button text="🗑️  Supprimer" styleClass="btn-primary"  onAction="#supprimer"/>
+
+</VBox>

@@ -4,8 +4,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
 import tn.rouhfan.entities.Reclamation;
 import tn.rouhfan.services.ReclamationService;
 
@@ -53,10 +57,10 @@ public class AvisController implements Initializable {
         colSujet.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getSujet()));
         colMessage.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getDescription()));
         colUtilisateur.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
-            String.valueOf(cellData.getValue().getAuteurId())
+                String.valueOf(cellData.getValue().getAuteurId())
         ));
         colDate.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
-            cellData.getValue().getCreatedAt() != null ? dateFormat.format(cellData.getValue().getCreatedAt()) : ""
+                cellData.getValue().getCreatedAt() != null ? dateFormat.format(cellData.getValue().getCreatedAt()) : ""
         ));
         colStatut.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getStatut()));
     }
@@ -82,7 +86,23 @@ public class AvisController implements Initializable {
             showAlert("Attention", "Veuillez sélectionner une réclamation");
             return;
         }
-        showAlert("Info", "Répondre à: " + selected.getSujet());
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/back/ReponsePopup.fxml"));
+            Parent root = loader.load();
+
+            ReponsePopupController controller = loader.getController();
+            controller.setReclamationId(selected.getId());
+
+            Stage stage = new Stage();
+            stage.setTitle("Répondre à: " + selected.getSujet());
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible d'ouvrir le popup: " + e.getMessage());
+        }
     }
 
     @FXML
@@ -106,6 +126,32 @@ public class AvisController implements Initializable {
                 }
             }
         });
+    }
+    @FXML
+    private void voirReponses(ActionEvent event) {
+
+        Reclamation selected = avisTable.getSelectionModel().getSelectedItem();
+
+        if (selected == null) {
+            showAlert("Attention", "Sélectionnez une réclamation");
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/back/ReponseList.fxml"));
+            Parent root = loader.load();
+
+            ReponseListController controller = loader.getController();
+            controller.setReclamationId(selected.getId());
+
+            Stage stage = new Stage();
+            stage.setTitle("Réponses");
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void showAlert(String title, String message) {
