@@ -121,9 +121,10 @@ public class OeuvreFormController implements Initializable {
             }
 
             if (oeuvre.getImage() != null && !oeuvre.getImage().isEmpty()) {
-                File file = new File(oeuvre.getImage());
-                if (file.exists()) {
-                    updateImagePreview(file);
+                String fullPath = tn.rouhfan.tools.ImageUtils.getAbsolutePath(oeuvre.getImage());
+                if (fullPath != null) {
+                    imagePreview.setImage(new Image(fullPath));
+                    placeholderLabel.setVisible(false);
                 }
             }
         }
@@ -134,9 +135,11 @@ public class OeuvreFormController implements Initializable {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choisir une image");
         
-        File uploadsDir = new File("uploads");
-        if (!uploadsDir.exists()) uploadsDir.mkdirs();
-        fileChooser.setInitialDirectory(uploadsDir);
+        // Ouvrir directement dans le dossier uploads/oeuvres
+        File initialDir = new File(tn.rouhfan.tools.ImageUtils.UPLOADS_DIR + "/oeuvres");
+        if (initialDir.exists()) {
+            fileChooser.setInitialDirectory(initialDir);
+        }
         
         fileChooser.getExtensionFilters().addAll(
             new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
@@ -150,8 +153,7 @@ public class OeuvreFormController implements Initializable {
     }
 
     private void updateImagePreview(File file) {
-        Image img = new Image(file.toURI().toString());
-        imagePreview.setImage(img);
+        imagePreview.setImage(new Image(file.toURI().toString()));
         placeholderLabel.setVisible(false);
     }
 
@@ -174,15 +176,10 @@ public class OeuvreFormController implements Initializable {
                 currentOeuvre.setUser(currentUser);
             }
 
-            // Gérer l'upload d'image
+            // Gérer l'upload d'image via ImageUtils
             if (selectedImageFile != null) {
-                String fileName = UUID.randomUUID().toString() + "_" + selectedImageFile.getName();
-                File destDir = new File("uploads/oeuvres");
-                if (!destDir.exists()) destDir.mkdirs();
-                
-                File destFile = new File(destDir, fileName);
-                Files.copy(selectedImageFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                currentOeuvre.setImage(destFile.getPath());
+                String dbPath = tn.rouhfan.tools.ImageUtils.saveUpload(selectedImageFile, "oeuvres");
+                currentOeuvre.setImage(dbPath);
             }
 
             if (currentOeuvre.getId() == 0) {

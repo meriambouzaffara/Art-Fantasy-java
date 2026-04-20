@@ -130,11 +130,11 @@ public class CategoriesController implements Initializable {
 
                     if (imagePath != null && !imagePath.isEmpty()) {
 
-                        File file = new File(imagePath);
+                        String fullPath = tn.rouhfan.tools.ImageUtils.getAbsolutePath(imagePath);
 
-                        if (file.exists()) {
+                        if (fullPath != null) {
 
-                            Image img = new Image(file.toURI().toString(), true);
+                            Image img = new Image(fullPath, true);
 
                             imageView.setImage(img);
 

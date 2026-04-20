@@ -66,9 +66,9 @@ public class GalerieController implements Initializable {
                     Oeuvre o = getTableRow().getItem();
                     String imagePath = o.getImage();
                     if (imagePath != null && !imagePath.isEmpty()) {
-                        File file = new File(imagePath);
-                        if (file.exists()) {
-                            Image img = new Image(file.toURI().toString(), true);
+                        String fullPath = tn.rouhfan.tools.ImageUtils.getAbsolutePath(imagePath);
+                        if (fullPath != null) {
+                            Image img = new Image(fullPath, true);
                             imageView.setImage(img);
                             setGraphic(imageView);
                         } else {

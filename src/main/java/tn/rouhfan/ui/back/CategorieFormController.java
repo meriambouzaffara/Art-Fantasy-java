@@ -50,9 +50,10 @@ public class CategorieFormController implements Initializable {
             nomField.setText(categorie.getNomCategorie());
             
             if (categorie.getImageCategorie() != null && !categorie.getImageCategorie().isEmpty()) {
-                File file = new File(categorie.getImageCategorie());
-                if (file.exists()) {
-                    updateImagePreview(file);
+                String fullPath = tn.rouhfan.tools.ImageUtils.getAbsolutePath(categorie.getImageCategorie());
+                if (fullPath != null) {
+                    imagePreview.setImage(new Image(fullPath));
+                    placeholderLabel.setVisible(false);
                 }
             }
         }
@@ -63,10 +64,11 @@ public class CategorieFormController implements Initializable {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choisir une image de catégorie");
         
-        // Ouvrir directement dans le dossier uploads
-        File uploadsDir = new File("uploads");
-        if (!uploadsDir.exists()) uploadsDir.mkdirs();
-        fileChooser.setInitialDirectory(uploadsDir);
+        // Ouvrir directement dans le dossier uploads/categories
+        File initialDir = new File(tn.rouhfan.tools.ImageUtils.UPLOADS_DIR + "/categories");
+        if (initialDir.exists()) {
+            fileChooser.setInitialDirectory(initialDir);
+        }
 
         // Accepter n'importe quel type d'image
         fileChooser.getExtensionFilters().addAll(
@@ -81,8 +83,7 @@ public class CategorieFormController implements Initializable {
     }
 
     private void updateImagePreview(File file) {
-        Image img = new Image(file.toURI().toString());
-        imagePreview.setImage(img);
+        imagePreview.setImage(new Image(file.toURI().toString()));
         placeholderLabel.setVisible(false);
     }
 
@@ -95,15 +96,10 @@ public class CategorieFormController implements Initializable {
             
             currentCategorie.setNomCategorie(nomField.getText());
 
-            // Gérer l'upload d'image
+            // Gérer l'upload d'image via ImageUtils
             if (selectedImageFile != null) {
-                String fileName = UUID.randomUUID().toString() + "_" + selectedImageFile.getName();
-                File destDir = new File("uploads/categories");
-                if (!destDir.exists()) destDir.mkdirs();
-                
-                File destFile = new File(destDir, fileName);
-                Files.copy(selectedImageFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                currentCategorie.setImageCategorie(destFile.getPath());
+                String dbPath = tn.rouhfan.tools.ImageUtils.saveUpload(selectedImageFile, "categories");
+                currentCategorie.setImageCategorie(dbPath);
             }
 
             if (currentCategorie.getIdCategorie() == 0) {

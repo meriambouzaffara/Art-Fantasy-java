@@ -39,12 +39,11 @@ public class OeuvreDetailsController {
             statusBadge.setStyle("-fx-background-color: #fee2e2; -fx-text-fill: #b91c1c; -fx-padding: 8 15; -fx-background-radius: 20; -fx-font-weight: bold;");
         }
 
-        // Image loading
+        // Image loading via ImageUtils
         if (o.getImage() != null && !o.getImage().isEmpty()) {
-            File file = new File(o.getImage());
-            if (file.exists()) {
-                Image img = new Image(file.toURI().toString());
-                oeuvreImage.setImage(img);
+            String fullPath = tn.rouhfan.tools.ImageUtils.getAbsolutePath(o.getImage());
+            if (fullPath != null) {
+                oeuvreImage.setImage(new Image(fullPath));
             }
         }
     }

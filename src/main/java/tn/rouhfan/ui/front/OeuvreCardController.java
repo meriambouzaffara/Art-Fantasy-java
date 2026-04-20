@@ -16,12 +16,16 @@ import javafx.stage.Stage;
 import tn.rouhfan.entities.Oeuvre;
 import tn.rouhfan.entities.User;
 import tn.rouhfan.services.FavorisService;
+import tn.rouhfan.services.OeuvrePaymentService;
 import tn.rouhfan.services.OeuvreService;
 import tn.rouhfan.tools.SessionManager;
 import tn.rouhfan.ui.back.OeuvreFormController;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 
 public class OeuvreCardController {
@@ -35,6 +39,7 @@ public class OeuvreCardController {
     @FXML private HBox actionsPane;
     @FXML private Button viewBtn;
     @FXML private Button buyBtn;
+    @FXML private Button favBtn;
     @FXML private Label favIcon;
 
     private Oeuvre oeuvre;
@@ -42,6 +47,7 @@ public class OeuvreCardController {
     private Runnable refreshCallback;
     private OeuvreService oeuvreService = new OeuvreService();
     private FavorisService favorisService = new FavorisService();
+    private OeuvrePaymentService paymentService = new OeuvrePaymentService();
 
     public void setOeuvre(Oeuvre o, String role, Runnable callback) {
         this.oeuvre = o;
@@ -61,12 +67,11 @@ public class OeuvreCardController {
             statusLabel.setStyle("-fx-background-color: #fee2e2; -fx-text-fill: #b91c1c; -fx-padding: 6 12; -fx-background-radius: 20; -fx-font-size: 11; -fx-font-weight: bold;");
         }
 
-        // Image loading
+        // Image loading via ImageUtils
         if (o.getImage() != null && !o.getImage().isEmpty()) {
-            File file = new File(o.getImage());
-            if (file.exists()) {
-                Image img = new Image(file.toURI().toString());
-                oeuvreImage.setImage(img);
+            String fullPath = tn.rouhfan.tools.ImageUtils.getAbsolutePath(o.getImage());
+            if (fullPath != null) {
+                oeuvreImage.setImage(new Image(fullPath));
             }
         }
 
@@ -98,7 +103,10 @@ public class OeuvreCardController {
     private void updateFavoriteIcon() {
         User currentUser = SessionManager.getInstance().getCurrentUser();
         if (currentUser == null) {
-            favIcon.getParent().setVisible(false);
+            if (favBtn != null) {
+                favBtn.setVisible(false);
+                favBtn.setManaged(false);
+            }
             return;
         }
         try {
@@ -154,30 +162,43 @@ public class OeuvreCardController {
     private void handleBuy() {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Acheter l'œuvre");
-        confirm.setHeaderText("🛒 Confirmer l'achat");
-        confirm.setContentText("Voulez-vous acheter \"" + oeuvre.getTitre() + "\" pour " + 
-            (oeuvre.getPrix() != null ? oeuvre.getPrix().toString() : "0") + " DT ?");
+        confirm.setHeaderText("🛒 Confirmer l'achat avec Stripe");
+        confirm.setContentText("Vous allez être redirigé vers une page de paiement sécurisée pour acheter \"" + 
+            oeuvre.getTitre() + "\" au prix de " + (oeuvre.getPrix() != null ? oeuvre.getPrix().toString() : "0") + " DT.");
         
         confirm.showAndWait().ifPresent(res -> {
             if (res == ButtonType.OK) {
                 try {
-                    // Marquer l'oeuvre comme vendue
-                    oeuvre.setStatut("vendue");
-                    oeuvre.setDateVente(new java.util.Date());
-                    oeuvreService.modifier(oeuvre);
+                    // 1. Créer la session de paiement avec le service personnalisé
+                    String checkoutUrl = paymentService.createCheckoutSession(oeuvre);
                     
-                    Alert success = new Alert(Alert.AlertType.INFORMATION);
-                    success.setTitle("Achat réussi");
-                    success.setHeaderText(null);
-                    success.setContentText("✅ Vous avez acheté \"" + oeuvre.getTitre() + "\" avec succès !");
-                    success.showAndWait();
-                    
-                    if (refreshCallback != null) refreshCallback.run();
-                } catch (SQLException e) {
+                    // 2. Ouvrir le navigateur
+                    if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                        Desktop.getDesktop().browse(new URI(checkoutUrl));
+                        
+                        // 3. Informer l'utilisateur
+                        Alert info = new Alert(Alert.AlertType.INFORMATION);
+                        info.setTitle("Paiement en cours");
+                        info.setHeaderText("🔄 Finalisation requise");
+                        info.setContentText("Veuillez finaliser le paiement dans votre navigateur.\nUne fois terminé, cliquez sur OK pour valider l'achat dans l'application.");
+                        info.showAndWait();
+
+                        // 4. Mettre à jour l'état (Simulation de succès après retour browser)
+                        oeuvre.setStatut("vendue");
+                        oeuvre.setDateVente(new java.util.Date());
+                        oeuvreService.modifier(oeuvre);
+                        
+                        if (refreshCallback != null) refreshCallback.run();
+                    } else {
+                        throw new IOException("Navigateur non supporté sur ce système.");
+                    }
+                } catch (Exception e) {
                     Alert error = new Alert(Alert.AlertType.ERROR);
-                    error.setTitle("Erreur");
-                    error.setContentText("Erreur lors de l'achat: " + e.getMessage());
+                    error.setTitle("Erreur de paiement");
+                    error.setHeaderText("Désolé, une erreur est survenue");
+                    error.setContentText(e.getMessage());
                     error.showAndWait();
+                    e.printStackTrace();
                 }
             }
         });
