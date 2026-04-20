@@ -134,7 +134,24 @@ public class FrontBaseController {
         }
     }
 
-    @FXML private void goCours(ActionEvent event) { showHero(false); contentHost.getChildren().clear(); }
+    @FXML
+    private void goCours() {
+        showContent();
+        // Utilisation du chemin relatif géré par votre Router
+        Router.setContent(contentHost, "/ui/front/Cours2View.fxml");
+    }
+    @FXML
+    private void goCertificats() {
+        showContent();
+        Router.setContent(contentHost, "/ui/front/Certificats2View.fxml");
+    }
+    private void showContent() {
+        heroSection.setVisible(false);
+        heroSection.setManaged(false);
+
+        contentHost.setVisible(true);
+        contentHost.setManaged(true);
+    }
     @FXML private void goMagasin(ActionEvent event) { showHero(false); contentHost.getChildren().clear(); }
     @FXML
     private void goAvis(ActionEvent event) {
