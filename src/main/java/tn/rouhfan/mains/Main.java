@@ -136,8 +136,7 @@ public class Main {
                     new BigDecimal("100.00"),
                     "disponible",
                     "uploads/oeuvres/test.png",
-                    false,
-                    null,
+                    new Date(),
                     dbUser,
                     c
             );

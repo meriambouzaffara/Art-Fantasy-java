@@ -15,7 +15,6 @@ import tn.rouhfan.entities.Evenement;
 import tn.rouhfan.entities.Sponsor;
 import tn.rouhfan.services.EvenementService;
 import tn.rouhfan.services.SponsorService;
-import tn.rouhfan.services.TwilioSmsService;
 import tn.rouhfan.tools.ImageUtils;
 
 import java.io.File;
@@ -40,8 +39,8 @@ public class EvenementFormDialog {
     private ComboBox<String> typeCombo;
     private ComboBox<String> statutCombo;
     private DatePicker dateEvenementPicker;
-    private ComboBox<Integer> heureCombo;
-    private ComboBox<Integer> minuteCombo;
+    private ComboBox<String> hourCombo;
+    private ComboBox<String> minuteCombo;
     private TextField lieuField;
     private Spinner<Integer> capaciteSpinner;
     private Spinner<Integer> participantsSpinner;
@@ -64,7 +63,7 @@ public class EvenementFormDialog {
 
         // Form Content
         GridPane grid = createFormGrid();
-        
+
         // Buttons
         HBox buttonBox = new HBox(10);
         buttonBox.setPadding(new Insets(10));
@@ -115,14 +114,14 @@ public class EvenementFormDialog {
         Button browseBtn = new Button("📁 Parcourir");
         browseBtn.setStyle("-fx-font-size: 11; -fx-padding: 5 10;");
         browseBtn.setOnAction(e -> handleBrowseImage());
-        
+
         Label imagePathLabel = new Label("Aucune image sélectionnée");
         imagePathLabel.setStyle("-fx-text-fill: #999; -fx-font-size: 10;");
-        
+
         imageBox.getChildren().addAll(browseBtn, imagePathLabel);
         grid.add(createLabel("Image"), 0, 2);
         grid.add(imageBox, 1, 2);
-        
+
         // Image Preview
         imagePreview = new ImageView();
         imagePreview.setFitWidth(200);
@@ -146,24 +145,21 @@ public class EvenementFormDialog {
         grid.add(statutCombo, 1, 5);
 
         // Date & Heure
-        HBox dateBox = new HBox(5);
-        dateBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         dateEvenementPicker = new DatePicker();
         
-        heureCombo = new ComboBox<>();
-        for (int i=0; i<24; i++) heureCombo.getItems().add(i);
-        heureCombo.setPromptText("Heure");
-        heureCombo.setPrefWidth(80);
+        hourCombo = new ComboBox<>();
+        for (int i = 0; i < 24; i++) hourCombo.getItems().add(String.format("%02d", i));
+        hourCombo.setPromptText("HH");
         
         minuteCombo = new ComboBox<>();
-        for (int i=0; i<60; i+=5) minuteCombo.getItems().add(i);
-        minuteCombo.setPromptText("Min");
-        minuteCombo.setPrefWidth(80);
+        for (int i = 0; i < 60; i += 5) minuteCombo.getItems().add(String.format("%02d", i));
+        minuteCombo.setPromptText("MM");
 
-        dateBox.getChildren().addAll(dateEvenementPicker, heureCombo, new Label(":"), minuteCombo);
+        HBox dateTimeBox = new HBox(5, dateEvenementPicker, new Label(" à "), hourCombo, new Label(":"), minuteCombo);
+        dateTimeBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
         grid.add(createLabel("Date & Heure *"), 0, 6);
-        grid.add(dateBox, 1, 6);
+        grid.add(dateTimeBox, 1, 6);
 
         // Lieu
         lieuField = new TextField();
@@ -223,7 +219,7 @@ public class EvenementFormDialog {
     private void populateFields() {
         titreField.setText(evenement.getTitre() != null ? evenement.getTitre() : "");
         descriptionArea.setText(evenement.getDescription() != null ? evenement.getDescription() : "");
-        
+
         // Load image if exists
         if (evenement.getImage() != null && !evenement.getImage().isEmpty()) {
             selectedImagePath = evenement.getImage();
@@ -235,8 +231,8 @@ public class EvenementFormDialog {
                 System.err.println("Erreur chargement image: " + e.getMessage());
             }
         }
-        
-typeCombo.setValue(evenement.getType() != null ? evenement.getType() : null);
+
+        typeCombo.setValue(evenement.getType() != null ? evenement.getType() : null);
         statutCombo.setValue(evenement.getStatut() != null ? evenement.getStatut() : "PLANIFIÉ");
 
         if (evenement.getDateEvent() != null) {
@@ -244,9 +240,17 @@ typeCombo.setValue(evenement.getType() != null ? evenement.getType() : null);
                     .atZone(java.time.ZoneId.systemDefault())
                     .toLocalDateTime();
             dateEvenementPicker.setValue(ldt.toLocalDate());
-            heureCombo.setValue(ldt.getHour());
-            // Arrondir aux 5 minutes
-            minuteCombo.setValue((ldt.getMinute() / 5) * 5);
+            
+            String hh = String.format("%02d", ldt.getHour());
+            String mm = String.format("%02d", ldt.getMinute());
+            
+            // Corriger l'arrondi des minutes au 5 supérieur/inférieur le plus proche si non présent dans la liste
+            if (!minuteCombo.getItems().contains(mm)) {
+                minuteCombo.getItems().add(mm);
+            }
+            
+            hourCombo.setValue(hh);
+            minuteCombo.setValue(mm);
         }
 
         lieuField.setText(evenement.getLieu() != null ? evenement.getLieu() : "");
@@ -262,6 +266,7 @@ typeCombo.setValue(evenement.getType() != null ? evenement.getType() : null);
         try {
             errorLabel.setText("");
 
+            // Collect data
             if (evenement == null) {
                 evenement = new Evenement();
             }
@@ -274,50 +279,27 @@ typeCombo.setValue(evenement.getType() != null ? evenement.getType() : null);
 
             if (dateEvenementPicker.getValue() != null) {
                 java.time.LocalDate ld = dateEvenementPicker.getValue();
-                int h = heureCombo.getValue() != null ? heureCombo.getValue() : 0;
-                int m = minuteCombo.getValue() != null ? minuteCombo.getValue() : 0;
+                int hour = 0;
+                int minute = 0;
+                if (hourCombo.getValue() != null) hour = Integer.parseInt(hourCombo.getValue());
+                if (minuteCombo.getValue() != null) minute = Integer.parseInt(minuteCombo.getValue());
                 
-                java.time.LocalDateTime ldt = java.time.LocalDateTime.of(ld, java.time.LocalTime.of(h, m));
-                java.util.Date dateWithTime = java.util.Date.from(ldt.atZone(java.time.ZoneId.systemDefault()).toInstant());
-                evenement.setDateEvent(dateWithTime);
+                java.time.LocalDateTime ldt = ld.atTime(hour, minute);
+                evenement.setDateEvent(Date.from(ldt.atZone(java.time.ZoneId.systemDefault()).toInstant()));
             }
 
             evenement.setLieu(lieuField.getText());
-
-            // 🔥 FIX ICI
-            capaciteSpinner.commitValue();
-            participantsSpinner.commitValue();
-
-            Integer capacite = capaciteSpinner.getValue();
-            Integer participants = participantsSpinner.getValue();
-
-            if (capacite == null || participants == null) {
-                errorLabel.setText("❌ Valeurs numériques invalides !");
-                return;
-            }
-
-            evenement.setCapacite(capacite);
-            evenement.setNbParticipants(participants);
-
+            evenement.setCapacite(capaciteSpinner.getValue());
+            evenement.setNbParticipants(participantsSpinner.getValue());
             evenement.setSponsor(sponsorCombo.getValue());
 
+            // Validate and save
             evenementService.valider(evenement);
 
             if (evenement.getId() > 0) {
                 evenementService.modifier(evenement);
             } else {
                 evenementService.ajouter(evenement);
-                
-                // Envoi d'un SMS au sponsor si présent
-                if (evenement.getSponsor() != null && evenement.getSponsor().getTel() != null) {
-                    try {
-                        TwilioSmsService smsService = new TwilioSmsService();
-                        String msg = "Rouh'El Fann: Bonjour " + evenement.getSponsor().getNom() + ", l'événement '" + evenement.getTitre() + "' est planifié avec vous comme principal sponsor!";
-                        smsService.sendSms(evenement.getSponsor().getTel(), msg);
-                    } catch (Exception smsEx) {
-                        System.err.println("Le SMS n'a pas pu être envoyé: " + smsEx.getMessage());
-                    }
-                }
             }
 
             approved = true;
@@ -333,29 +315,29 @@ typeCombo.setValue(evenement.getType() != null ? evenement.getType() : null);
     private void handleBrowseImage() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Sélectionner une image");
-        
+
         // Add image file filters
         fileChooser.getExtensionFilters().addAll(
-            new FileChooser.ExtensionFilter("Images", "*.jpg", "*.jpeg", "*.png", "*.gif", "*.bmp"),
-            new FileChooser.ExtensionFilter("All Files", "*.*")
+                new FileChooser.ExtensionFilter("Images", "*.jpg", "*.jpeg", "*.png", "*.gif", "*.bmp"),
+                new FileChooser.ExtensionFilter("All Files", "*.*")
         );
-        
+
         File selectedFile = fileChooser.showOpenDialog(stage);
-        
+
         if (selectedFile != null) {
             if (ImageUtils.isValidImageFile(selectedFile)) {
                 try {
-                    String relativePath = ImageUtils.copyImage(selectedFile.getAbsolutePath());
+                    String relativePath = ImageUtils.saveUpload(selectedFile, "evenements");
                     selectedImagePath = relativePath;
-                    
+
                     // Update preview
                     String imageUrl = ImageUtils.getImageUrl(relativePath);
                     Image img = new Image(imageUrl);
                     imagePreview.setImage(img);
-                    
+
                     errorLabel.setText("✓ Image chargée avec succès");
                     errorLabel.setStyle("-fx-text-fill: green; -fx-font-size: 11;");
-                    
+
                 } catch (Exception e) {
                     errorLabel.setText("❌ Erreur lors du chargement: " + e.getMessage());
                     errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 11;");

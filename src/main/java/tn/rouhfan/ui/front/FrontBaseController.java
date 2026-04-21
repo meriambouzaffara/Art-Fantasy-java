@@ -115,8 +115,8 @@ public class FrontBaseController {
         showHero(false);
         contentHost.getChildren().clear();
         try {
-            VBox view = Router.loadView("/ui/front/EvenementsFront.fxml");
-            contentHost.getChildren().add(view);
+            Parent root = FXMLLoader.load(getClass().getResource("/ui/front/EvenementsFront.fxml"));
+            contentHost.getChildren().add(root);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -23,7 +23,6 @@ import java.util.ResourceBundle;
 public class GalerieController implements Initializable {
 
     @FXML private TableView<Oeuvre> oeuvreTable;
-    @FXML private TableColumn<Oeuvre, Integer> colId;
     @FXML private TableColumn<Oeuvre, String> colImage;
     @FXML private TableColumn<Oeuvre, String> colTitre;
     @FXML private TableColumn<Oeuvre, String> colArtiste;
@@ -49,8 +48,6 @@ public class GalerieController implements Initializable {
     }
 
     private void setupColumns() {
-        colId.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getId()).asObject());
-
         // Image Column
         colImage.setCellFactory(param -> new TableCell<Oeuvre, String>() {
             private final ImageView imageView = new ImageView();
@@ -69,9 +66,9 @@ public class GalerieController implements Initializable {
                     Oeuvre o = getTableRow().getItem();
                     String imagePath = o.getImage();
                     if (imagePath != null && !imagePath.isEmpty()) {
-                        File file = new File(imagePath);
-                        if (file.exists()) {
-                            Image img = new Image(file.toURI().toString(), true);
+                        String fullPath = tn.rouhfan.tools.ImageUtils.getAbsolutePath(imagePath);
+                        if (fullPath != null) {
+                            Image img = new Image(fullPath, true);
                             imageView.setImage(img);
                             setGraphic(imageView);
                         } else {
@@ -85,6 +82,7 @@ public class GalerieController implements Initializable {
         });
 
         colTitre.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getTitre()));
+        colTitre.setStyle("-fx-alignment: CENTER;");
 
         colArtiste.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
                 cellData.getValue().getUser() != null ?

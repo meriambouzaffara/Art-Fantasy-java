@@ -97,6 +97,11 @@ public class DashboardHomeController implements Initializable {
         triggerNavigation("navAvis");
     }
 
+    @FXML
+    private void openOeuvreStatistiques(Event event) {
+        triggerNavigation("navOeuvreStatistiques");
+    }
+
     private void triggerNavigation(String buttonId) {
         try {
             Parent root = rootNode.getScene().getRoot();

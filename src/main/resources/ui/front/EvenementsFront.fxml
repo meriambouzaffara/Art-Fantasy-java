@@ -8,26 +8,47 @@
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.Region?>
 
-<VBox spacing="14.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.front.EvenementsFrontController">
-    <VBox spacing="4.0">
+<?import javafx.geometry.Insets?>
+
+<ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.front.EvenementsFrontController" vbarPolicy="AS_NEEDED" hbarPolicy="NEVER">
+    <VBox spacing="25.0" styleClass="content" stylesheets="@../back/oeuvres_categories.css" style="-fx-padding: 30;">
+        <VBox spacing="5.0">
         <Label text="📅 Événements Artistiques" styleClass="text-title" />
         <Label text="Découvrez les événements à venir et participez aux expériences artistiques." styleClass="text-subtitle" />
     </VBox>
 
-    <!-- TOP Row: Search and Buttons -->
-    <HBox spacing="10.0" alignment="CENTER_LEFT">
-        <TextField fx:id="searchField" promptText="🔍 Rechercher un événement..." prefWidth="280" />
-        <Label text="Tri:" />
-        <ComboBox fx:id="sortCombo" prefWidth="180" />
-        <Button text="🔄 Rafraîchir" onAction="#refresh" styleClass="btn-secondary" />
-        <Button fx:id="aiRecButton" text="✨ Recommandations IA" onAction="#showAiRecommendations" style="-fx-background-color: linear-gradient(to right, #6c2a90, #9b59b6); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;" visible="false" managed="false" />
-        <HBox HBox.hgrow="ALWAYS" />
-        <Button fx:id="addButton" text="➕ Ajouter Événement" onAction="#addEvenement" styleClass="btn-primary" visible="false" managed="false" />
-    </HBox>
+        <!-- AI Recommendations Container (hidden by default) -->
+        <VBox fx:id="recommendationsBox" spacing="15.0" visible="false" managed="false" style="-fx-background-color: rgba(36, 17, 151, 0.03); -fx-padding: 25; -fx-background-radius: 20;">
+            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                <Label text="✨ Juste pour vous" style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #241197;" />
+                <Button text="🔍 Pourquoi ces choix ?" onAction="#handleViewAnalysis" style="-fx-background-color: transparent; -fx-border-color: #241197; -fx-border-radius: 20; -fx-text-fill: #241197; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 5 15;" />
+            </HBox>
+            <FlowPane fx:id="recommendationsPane" hgap="25.0" vgap="25.0" prefWrapLength="1100.0" alignment="TOP_LEFT" />
+        </VBox>
 
-    <!-- Cards Container -->
-    <ScrollPane fitToWidth="true" style="-fx-control-inner-background: transparent; -fx-padding: 0;">
-        <FlowPane fx:id="cardsContainer" prefWidth="1000" prefHeight="600" hgap="20" vgap="20" style="-fx-padding: 15;" />
-    </ScrollPane>
-</VBox>
+        <!-- TOP Row: Search and Buttons -->
+        <HBox spacing="20.0" alignment="BOTTOM_LEFT" styleClass="surface" style="-fx-padding: 25; -fx-background-radius: 20;">
+            <VBox spacing="8.0">
+                <Label text="Titre de l'événement" styleClass="filter-label" />
+                <TextField fx:id="searchField" promptText="Rechercher..." prefWidth="240" styleClass="text-field" />
+            </VBox>
+            <VBox spacing="8.0">
+                <Label text="Tri" styleClass="filter-label" />
+                <ComboBox fx:id="sortCombo" prefWidth="180" styleClass="combo-box" />
+            </VBox>
+            <Button text="🔄 Rafraîchir" onAction="#refresh" styleClass="btn-secondary" style="-fx-background-color: white; -fx-text-fill: #241197; -fx-border-color: #241197; -fx-border-radius: 25; -fx-background-radius: 25; -fx-padding: 10 25; -fx-font-weight: bold; -fx-border-width: 1.5; -fx-cursor: hand;" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="addButton" text="➕ Ajouter Événement" onAction="#addEvenement" styleClass="btn-front-primary" visible="false" managed="false" />
+        </HBox>
+
+        <!-- LA GALLERY GÉNÉRALE -->
+        <VBox spacing="15.0">
+            <Label text="📅 Tous les Événements" style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+            <FlowPane fx:id="cardsContainer" hgap="25.0" vgap="25.0" prefWrapLength="1100.0" alignment="TOP_LEFT" />
+        </VBox>
+    </VBox>
+</ScrollPane>
+
+ 

@@ -67,5 +67,10 @@
             <Label text="Articles" styleClass="dash-card-title, color-articles" />
             <Label text="Inventaire et produits" styleClass="dash-card-subtitle" />
         </VBox>
+        <VBox styleClass="dash-card" prefWidth="280.0" onMouseClicked="#openOeuvreStatistiques" GridPane.columnIndex="2" GridPane.rowIndex="2">
+            <Label text="📊" styleClass="dash-card-icon" style="-fx-text-fill: #241197;" />
+            <Label text="Statistiques Œuvres" styleClass="dash-card-title" style="-fx-text-fill: #241197;" />
+            <Label text="Ventes et analyses" styleClass="dash-card-subtitle" />
+        </VBox>
     </GridPane>
 </VBox>
