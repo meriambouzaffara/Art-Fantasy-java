@@ -51,9 +51,9 @@ public class DetailsDialogController {
 
     private void loadImage(String imagePath) {
         if (imagePath != null && !imagePath.isEmpty()) {
-            File file = new File(imagePath);
-            if (file.exists()) {
-                Image img = new Image(file.toURI().toString(), true);
+            String fullPath = tn.rouhfan.tools.ImageUtils.getAbsolutePath(imagePath);
+            if (fullPath != null) {
+                Image img = new Image(fullPath, true);
                 imageView.setImage(img);
             }
         }

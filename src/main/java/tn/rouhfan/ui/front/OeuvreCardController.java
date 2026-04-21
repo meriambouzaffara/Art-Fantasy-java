@@ -169,26 +169,57 @@ public class OeuvreCardController {
         confirm.showAndWait().ifPresent(res -> {
             if (res == ButtonType.OK) {
                 try {
-                    // 1. Créer la session de paiement avec le service personnalisé
-                    String checkoutUrl = paymentService.createCheckoutSession(oeuvre);
+                    // 1. Créer la session de paiement complexe
+                    com.stripe.model.checkout.Session session = paymentService.createSession(oeuvre);
+                    String checkoutUrl = session.getUrl();
+                    String sessionId = session.getId();
                     
                     // 2. Ouvrir le navigateur
                     if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                         Desktop.getDesktop().browse(new URI(checkoutUrl));
                         
-                        // 3. Informer l'utilisateur
+                        // 3. Informer l'utilisateur (Non-bloquant si possible)
                         Alert info = new Alert(Alert.AlertType.INFORMATION);
                         info.setTitle("Paiement en cours");
-                        info.setHeaderText("🔄 Finalisation requise");
-                        info.setContentText("Veuillez finaliser le paiement dans votre navigateur.\nUne fois terminé, cliquez sur OK pour valider l'achat dans l'application.");
-                        info.showAndWait();
-
-                        // 4. Mettre à jour l'état (Simulation de succès après retour browser)
-                        oeuvre.setStatut("vendue");
-                        oeuvre.setDateVente(new java.util.Date());
-                        oeuvreService.modifier(oeuvre);
+                        info.setHeaderText("🔄 Synchronisation automatique");
+                        info.setContentText("Veuillez finaliser le paiement dans votre navigateur.\nL'application détectera automatiquement le succès du paiement.");
+                        info.getButtonTypes().setAll(ButtonType.CANCEL);
                         
-                        if (refreshCallback != null) refreshCallback.run();
+                        // Démarrer le polling en arrière-plan
+                        javafx.concurrent.Task<Boolean> pollTask = new javafx.concurrent.Task<Boolean>() {
+                            @Override
+                            protected Boolean call() throws Exception {
+                                int attempts = 0;
+                                while (attempts < 60) { // Timeout après 3 minutes (60 * 3s)
+                                    if (isCancelled()) return false;
+                                    if (paymentService.isPaymentSuccessful(sessionId)) return true;
+                                    Thread.sleep(3000);
+                                    attempts++;
+                                }
+                                return false;
+                            }
+                        };
+
+                        pollTask.setOnSucceeded(e -> {
+                            if (pollTask.getValue()) {
+                                try {
+                                    finaliserAchat();
+                                    info.close();
+                                    
+                                    Alert success = new Alert(Alert.AlertType.INFORMATION);
+                                    success.setTitle("Succès");
+                                    success.setHeaderText("✅ Paiement confirmé");
+                                    success.setContentText("Merci ! L'œuvre est maintenant marquée comme vendue.");
+                                    success.show();
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                            }
+                        });
+
+                        new Thread(pollTask).start();
+                        info.show();
+
                     } else {
                         throw new IOException("Navigateur non supporté sur ce système.");
                     }
@@ -202,6 +233,13 @@ public class OeuvreCardController {
                 }
             }
         });
+    }
+
+    private void finaliserAchat() throws SQLException {
+        oeuvre.setStatut("vendue");
+        oeuvre.setDateVente(new java.util.Date());
+        oeuvreService.modifier(oeuvre);
+        if (refreshCallback != null) refreshCallback.run();
     }
 
     @FXML

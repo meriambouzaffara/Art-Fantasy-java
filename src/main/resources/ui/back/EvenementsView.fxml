@@ -9,26 +9,59 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="14.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.EvenementsController">
+
+
+<VBox spacing="14.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.EvenementsController" styleClass="content" stylesheets="@oeuvres_categories.css">
     <VBox spacing="4.0">
         <Label text="📅 Gestion des Événements" styleClass="text-title" />
         <Label text="Planifiez et gérez les événements artistiques." styleClass="text-subtitle" />
     </VBox>
+    <HBox spacing="20.0" alignment="CENTER">
+        <VBox style="-fx-background-color: #fce4ec; -fx-padding: 15; -fx-background-radius: 10;" prefWidth="200" alignment="CENTER">
+            <Label text="Total Événements" style="-fx-text-fill: #e91e63; -fx-font-weight: bold;" />
+            <Label fx:id="statTotalEvents" text="0" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #e91e63;" />
+        </VBox>
 
-    <!-- TOP Row: Search and Buttons -->
-    <HBox spacing="10.0" alignment="CENTER_LEFT">
-        <TextField fx:id="searchField" promptText="🔍 Rechercher un événement..." prefWidth="280" />
-        <Label text="Tri:" />
-        <ComboBox fx:id="sortCombo" prefWidth="180" />
-        <Button text="🔄 Rafraîchir" onAction="#refresh" styleClass="btn-secondary" />
+        <VBox style="-fx-background-color: #e3f2fd; -fx-padding: 15; -fx-background-radius: 10;" prefWidth="200" alignment="CENTER">
+            <Label text="Capacité Totale" style="-fx-text-fill: #1976d2; -fx-font-weight: bold;" />
+            <Label fx:id="statTotalCapacity" text="0" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #1976d2;" />
+        </VBox>
+
+        <VBox style="-fx-background-color: #e8f5e9; -fx-padding: 15; -fx-background-radius: 10;" prefWidth="200" alignment="CENTER">
+            <Label text="Participants Inscrits" style="-fx-text-fill: #388e3c; -fx-font-weight: bold;" />
+            <Label fx:id="statTotalParticipants" text="0" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #388e3c;" />
+        </VBox>
+    </HBox>
+    <!-- TOP Row 1: Recherche + Tri + Agenda -->
+    <HBox spacing="15.0" alignment="CENTER_LEFT" styleClass="surface" style="-fx-padding: 10;">
+        <TextField fx:id="searchField" promptText="🔍 Rechercher un événement..." prefWidth="280" styleClass="text-field" />
+
+        <Label text="Tri:" styleClass="filter-label" />
+        <ComboBox fx:id="sortCombo" prefWidth="180" styleClass="combo-box" />
+
+        <Button text="🔄Rafraîchir" onAction="#refresh" styleClass="btn-search" />
+
         <HBox HBox.hgrow="ALWAYS" />
-        <Button text="➕ Ajouter" onAction="#addEvenement" styleClass="btn-primary" />
-        <Button text="✏️ Modifier" onAction="#editEvenement" styleClass="btn-secondary" />
-        <Button text="🗑️ Supprimer" onAction="#deleteEvenement" styleClass="btn-secondary" />
+
     </HBox>
 
+    <!-- TOP Row 2: Actions -->
+    <HBox spacing="15.0" alignment="CENTER_RIGHT" styleClass="surface" style="-fx-padding: 10;">
+        <Button text="📅Agenda" onAction="#openGoogleCalendar" styleClass="btn-view-reflet" />
+        <Button onAction="#addEvenement" styleClass="btn-add">
+            <graphic>
+                <HBox alignment="CENTER" spacing="8.0">
+                    <Label text="+" styleClass="btn-add-icon" />
+                    <Label text="Ajouter" />
+                </HBox>
+            </graphic>
+        </Button>
+
+        <Button text="✏️Modifier" onAction="#editEvenement" styleClass="btn-edit-reflet" />
+        <Button text="🗑️Supprimer" onAction="#deleteEvenement" styleClass="btn-delete-reflet" />
+    </HBox>
     <!-- Table -->
-    <TableView fx:id="evenementTable" VBox.vgrow="ALWAYS" styleClass="surface">
+    <TableView fx:id="evenementTable" VBox.vgrow="ALWAYS" styleClass="table-art-fantasy">
         <columns>
             <TableColumn fx:id="colId" text="ID" prefWidth="50" />
             <TableColumn fx:id="colTitre" text="Titre" prefWidth="180" />

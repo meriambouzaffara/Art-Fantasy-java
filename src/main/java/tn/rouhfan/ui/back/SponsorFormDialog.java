@@ -234,7 +234,7 @@ public class SponsorFormDialog {
         if (selectedFile != null) {
             if (ImageUtils.isValidImageFile(selectedFile)) {
                 try {
-                    String relativePath = ImageUtils.copyImage(selectedFile.getAbsolutePath());
+                    String relativePath = ImageUtils.saveUpload(selectedFile, "sponsors");
                     selectedLogoPath = relativePath;
                     
                     // Update preview

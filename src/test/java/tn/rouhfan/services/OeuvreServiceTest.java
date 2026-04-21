@@ -23,8 +23,25 @@ public class OeuvreServiceTest {
     static void setup() throws SQLException {
         service = new OeuvreService();
 
-        // Récupérer un utilisateur existant (supposé déjà présent en base)
-        testUser = new UserService().recuperer().get(0);
+        // Créer un utilisateur de test s'il n'existe pas
+        UserService userService = new UserService();
+        List<User> users = userService.recuperer();
+        if (users.isEmpty()) {
+            testUser = new User();
+            testUser.setNom("NomTest");
+            testUser.setPrenom("PrenomTest");
+            testUser.setEmail("test" + System.currentTimeMillis() + "@gmail.com");
+            testUser.setPassword("password");
+            testUser.setRoles("ROLE_USER");
+            testUser.setStatut("actif");
+            testUser.setType("PARTICIPANT");
+            userService.ajouter(testUser);
+            // Re-récupérer pour avoir l'ID généré si possible, 
+            // ou adapter UserService.ajouter pour retourner l'ID
+            testUser = userService.recuperer().get(0);
+        } else {
+            testUser = users.get(0);
+        }
 
         // Créer une catégorie de test si elle n'existe pas
         CategorieService categorieService = new CategorieService();
@@ -49,13 +66,13 @@ public class OeuvreServiceTest {
         o.setPrix(new BigDecimal("150.00"));
         o.setStatut("disponible");
         o.setImage("image.png");
-
+        
         o.setUser(testUser);
         o.setCategorie(testCategorie);
-
+        
         service.ajouter(o);
         testId = o.getId();
-
+        
         assertTrue(testId > 0, "L'ID doit être généré");
     }
 
@@ -68,6 +85,31 @@ public class OeuvreServiceTest {
 
     @Test
     @Order(3)
+    void testUnicite() {
+        Oeuvre o1 = new Oeuvre();
+        String titre = "Oeuvre Unique " + System.currentTimeMillis();
+        String desc = "Desc Unique " + System.currentTimeMillis();
+        
+        o1.setUser(testUser);
+        o1.setCategorie(testCategorie);
+        o1.setTitre(titre);
+        o1.setDescription(desc);
+        o1.setStatut("disponible");
+        
+        assertDoesNotThrow(() -> service.ajouter(o1));
+        
+        Oeuvre o2 = new Oeuvre();
+        o2.setTitre(titre);
+        o2.setDescription(desc);
+        o2.setUser(testUser);
+        o2.setStatut("disponible");
+        o2.setCategorie(testCategorie);
+        
+        assertThrows(SQLException.class, () -> service.ajouter(o2), "Devrait lever une exception pour œuvre en double");
+    }
+
+    @Test
+    @Order(4)
     void testModifier() throws SQLException {
         Oeuvre o = service.findById(testId);
         assertNotNull(o);
@@ -80,21 +122,10 @@ public class OeuvreServiceTest {
     }
 
     @Test
-    @Order(4)
+    @Order(5)
     void testSupprimer() throws SQLException {
         service.supprimer(testId);
         Oeuvre o = service.findById(testId);
         assertNull(o, "L'œuvre devrait être supprimée");
-    }
-
-    @AfterAll
-    static void cleanup() throws SQLException {
-        if (testId > 0) {
-            Oeuvre existing = service.findById(testId);
-            if (existing != null) {
-                service.supprimer(testId);
-                System.out.println("Nettoyage final : Œuvre supprimée (" + testId + ")");
-            }
-        }
     }
 }

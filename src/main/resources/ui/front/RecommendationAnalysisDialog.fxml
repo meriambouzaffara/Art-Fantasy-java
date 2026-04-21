@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.shape.Circle?>
+
+<VBox prefWidth="760.0" prefHeight="700.0" spacing="25.0" style="-fx-background-color: white; -fx-background-radius: 25;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.front.RecommendationAnalysisController">
+    <padding>
+        <Insets top="30" right="35" bottom="30" left="35" />
+    </padding>
+
+    <!-- Header Section -->
+    <HBox spacing="15.0" alignment="CENTER_LEFT">
+        <Label text="💡" style="-fx-font-size: 28;" />
+        <VBox spacing="5.0">
+            <Label text="Votre Analyse de Profil" style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #241197;" />
+        </VBox>
+    </HBox>
+
+    <VBox spacing="10.0" style="-fx-background-color: #f8fafc; -fx-padding: 20; -fx-background-radius: 15;">
+        <Label fx:id="profileAnalysisLabel" text="Chargement de l'analyse IA..." wrapText="true" style="-fx-font-size: 14; -fx-line-spacing: 1.5; -fx-text-fill: #334155; -fx-font-style: italic;" />
+    </VBox>
+
+    <Label text="Détails de la Sélection :" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+    <Separator />
+
+    <ScrollPane fx:id="analysisScrollPane" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
+        <VBox fx:id="analysisContainer" spacing="25.0" style="-fx-background-color: transparent;">
+            <!-- Individual analysis cards will be injected here -->
+        </VBox>
+    </ScrollPane>
+
+    <HBox alignment="CENTER_RIGHT" spacing="10.0">
+        <Button text="Fermer l'Analyse" onAction="#handleClose" style="-fx-background-color: linear-gradient(to right, #241197, #5b21b6); -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 12 30; -fx-background-radius: 25; -fx-cursor: hand;" />
+    </HBox>
+
+</VBox>

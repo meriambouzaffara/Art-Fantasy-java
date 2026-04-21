@@ -42,11 +42,11 @@ public class UserFormDialog {
 
     private static final String STYLE_FIELD_NORMAL =
             "-fx-background-radius: 12; -fx-border-radius: 12; " +
-            "-fx-border-color: rgba(36,17,151,0.15); -fx-padding: 10; -fx-font-size: 13px;";
+                    "-fx-border-color: rgba(36,17,151,0.15); -fx-padding: 10; -fx-font-size: 13px;";
 
     private static final String STYLE_FIELD_ERROR =
             "-fx-background-radius: 12; -fx-border-radius: 12; " +
-            "-fx-border-color: #d63031; -fx-border-width: 2; -fx-padding: 10; -fx-font-size: 13px;";
+                    "-fx-border-color: #d63031; -fx-border-width: 2; -fx-padding: 10; -fx-font-size: 13px;";
 
     private static final String STYLE_LABEL =
             "-fx-font-weight: 600; -fx-text-fill: #2d1b4e; -fx-font-size: 13px;";
@@ -91,14 +91,14 @@ public class UserFormDialog {
         Button saveButton = (Button) dialog.getDialogPane().lookupButton(saveButtonType);
         saveButton.setStyle(
                 "-fx-background-color: #241197; -fx-text-fill: white; -fx-font-weight: bold; " +
-                "-fx-background-radius: 12; -fx-padding: 10 24; -fx-cursor: hand;"
+                        "-fx-background-radius: 12; -fx-padding: 10 24; -fx-cursor: hand;"
         );
 
         Button cancelButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
         cancelButton.setStyle(
                 "-fx-background-color: #f0eef5; -fx-text-fill: #2d1b4e; -fx-font-weight: bold; " +
-                "-fx-background-radius: 12; -fx-padding: 10 24; -fx-cursor: hand; " +
-                "-fx-border-color: rgba(36,17,151,0.1); -fx-border-radius: 12;"
+                        "-fx-background-radius: 12; -fx-padding: 10 24; -fx-cursor: hand; " +
+                        "-fx-border-color: rgba(36,17,151,0.1); -fx-border-radius: 12;"
         );
 
         // ═══ CHAMPS ═══
@@ -303,7 +303,7 @@ public class UserFormDialog {
                             if (!isEdit || existingByEmail.getId() != existing.getId()) {
                                 setFieldError(emailField, emailError,
                                         "Cet email est déjà utilisé par " +
-                                        existingByEmail.getPrenom() + " " + existingByEmail.getNom() + ".");
+                                                existingByEmail.getPrenom() + " " + existingByEmail.getNom() + ".");
                                 hasError = true;
                             }
                         }
@@ -419,7 +419,7 @@ public class UserFormDialog {
     private static void styleCombo(ComboBox<String> cb) {
         cb.setStyle(
                 "-fx-background-color: #ffffff; -fx-background-radius: 12; " +
-                "-fx-border-color: rgba(36,17,151,0.15); -fx-border-radius: 12; -fx-padding: 8;"
+                        "-fx-border-color: rgba(36,17,151,0.15); -fx-border-radius: 12; -fx-padding: 8;"
         );
         cb.setPrefWidth(320);
     }

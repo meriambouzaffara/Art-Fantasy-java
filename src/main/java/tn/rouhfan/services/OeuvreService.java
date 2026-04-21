@@ -257,4 +257,3 @@ public class OeuvreService implements IService<Oeuvre> {
         }
     }
 }
-

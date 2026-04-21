@@ -38,9 +38,6 @@ public class ParticipantBaseController {
     private Button navMagasin;
 
     @FXML
-    private Button navFavoris;
-
-    @FXML
     public void initialize() {
         // ── GUARD DE SÉCURITÉ ──
         if (!SessionManager.getInstance().checkAccess("ROLE_PARTICIPANT")) {
@@ -105,13 +102,6 @@ public class ParticipantBaseController {
     }
 
     @FXML
-    private void openFavoris(ActionEvent event) {
-        setActive(navFavoris);
-        pageTitle.setText("Mes Favoris");
-        Router.setContent(contentHost, "/ui/back/FavorisView.fxml");
-    }
-
-    @FXML
     private void openProfile(ActionEvent event) {
         clearActive();
         pageTitle.setText("Mon Profil");
@@ -157,6 +147,5 @@ public class ParticipantBaseController {
         navCertificats.getStyleClass().remove("active");
         navEvenements.getStyleClass().remove("active");
         navMagasin.getStyleClass().remove("active");
-        if (navFavoris != null) navFavoris.getStyleClass().remove("active");
     }
 }

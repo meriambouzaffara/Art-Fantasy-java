@@ -16,13 +16,13 @@ public class Evenement {
     private int nbParticipants;
     private String googleEventId;
 
-    // Relation avec Sponsor
     private Sponsor sponsor;
 
-    // Constructeur vide
+    private int createurId;
+    private User createur;
+
     public Evenement() {}
 
-    // Constructeur paramétré
     public Evenement(String titre, String description, String image, String type,
                      String statut, Date dateEvent, String lieu, Integer capacite,
                      int nbParticipants, String googleEventId, Sponsor sponsor) {
@@ -40,7 +40,6 @@ public class Evenement {
         this.sponsor = sponsor;
     }
 
-    // Getters & Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -77,7 +76,12 @@ public class Evenement {
     public Sponsor getSponsor() { return sponsor; }
     public void setSponsor(Sponsor sponsor) { this.sponsor = sponsor; }
 
-    // toString
+    public int getCreateurId() { return createurId; }
+    public void setCreateurId(int createurId) { this.createurId = createurId; }
+
+    public User getCreateur() { return createur; }
+    public void setCreateur(User createur) { this.createur = createur; }
+
     @Override
     public String toString() {
         return "Evenement{" +

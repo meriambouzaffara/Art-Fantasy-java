@@ -13,6 +13,8 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ResourceBundle;
+import java.awt.Desktop;
+import java.net.URI;
 
 public class EvenementsController implements Initializable {
 
@@ -24,8 +26,14 @@ public class EvenementsController implements Initializable {
     @FXML private TableColumn<Evenement, String> colType;
     @FXML private TableColumn<Evenement, Integer> colCapacite;
     @FXML private TableColumn<Evenement, String> colStatut;
+
     @FXML private TextField searchField;
     @FXML private ComboBox<String> sortCombo;
+
+    // ✅ Stats
+    @FXML private Label statTotalEvents;
+    @FXML private Label statTotalCapacity;
+    @FXML private Label statTotalParticipants;
 
     private EvenementService evenementService;
     private ObservableList<Evenement> evenementsList;
@@ -44,45 +52,70 @@ public class EvenementsController implements Initializable {
         colId.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getId()).asObject());
         colTitre.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getTitre()));
         colDate.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
-            cellData.getValue().getDateEvent() != null ? dateFormat.format(cellData.getValue().getDateEvent()) : ""
+                cellData.getValue().getDateEvent() != null ? dateFormat.format(cellData.getValue().getDateEvent()) : ""
         ));
         colLieu.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getLieu()));
-        colType.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getType() != null ? cellData.getValue().getType() : ""));
-        colCapacite.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getCapacite() != null ? cellData.getValue().getCapacite() : 0).asObject());
-        colStatut.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getStatut() != null ? cellData.getValue().getStatut() : ""));
+        colType.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
+                cellData.getValue().getType() != null ? cellData.getValue().getType() : ""
+        ));
+        colCapacite.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(
+                cellData.getValue().getCapacite() != null ? cellData.getValue().getCapacite() : 0
+        ).asObject());
+        colStatut.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
+                cellData.getValue().getStatut() != null ? cellData.getValue().getStatut() : ""
+        ));
     }
 
     private void setupSortCombo() {
-        if (sortCombo != null) {
-            sortCombo.getItems().addAll("Titre (A-Z)", "Titre (Z-A)", "Date Croissante", "Date Décroissante", "Lieu (A-Z)", "Capacité");
-            sortCombo.setValue("Titre (A-Z)");
-            sortCombo.setOnAction(e -> handleSort());
-        }
+        sortCombo.getItems().addAll(
+                "Titre (A-Z)", "Titre (Z-A)",
+                "Date Croissante", "Date Décroissante",
+                "Lieu (A-Z)", "Capacité"
+        );
+        sortCombo.setValue("Titre (A-Z)");
+        sortCombo.setOnAction(e -> handleSort());
     }
 
     private void setupSearch() {
-        if (searchField != null) {
-            searchField.textProperty().addListener((observable, oldValue, newValue) -> handleSearch());
-        }
+        searchField.textProperty().addListener((obs, oldVal, newVal) -> handleSearch());
     }
 
     private void loadEvenements() {
         try {
             evenementsList = FXCollections.observableArrayList(evenementService.recuperer());
             evenementTable.setItems(evenementsList);
+            updateStats(evenementsList); // ✅ stats
         } catch (SQLException e) {
             showAlert("Erreur", "❌ Impossible de charger les événements: " + e.getMessage());
-            e.printStackTrace();
         }
+    }
+
+    // ✅ STATISTIQUES
+    private void updateStats(ObservableList<Evenement> list) {
+        if (statTotalEvents == null) return;
+
+        statTotalEvents.setText(String.valueOf(list.size()));
+
+        int capacity = 0;
+        int participants = 0;
+
+        for (Evenement e : list) {
+            if (e.getCapacite() != null) capacity += e.getCapacite();
+            participants += e.getNbParticipants();
+        }
+
+        statTotalCapacity.setText(String.valueOf(capacity));
+        statTotalParticipants.setText(String.valueOf(participants));
     }
 
     private void handleSearch() {
         try {
             String keyword = searchField.getText();
             ObservableList<Evenement> results = FXCollections.observableArrayList(
-                evenementService.rechercher(keyword)
+                    evenementService.rechercher(keyword)
             );
             evenementTable.setItems(results);
+            updateStats(results); // ✅ stats
         } catch (SQLException e) {
             showAlert("Erreur", "❌ Erreur lors de la recherche: " + e.getMessage());
         }
@@ -98,39 +131,41 @@ public class EvenementsController implements Initializable {
             switch (sortOption) {
                 case "Titre (A-Z)":
                     results = FXCollections.observableArrayList(
-                        evenementService.rechercherEtTrier(keyword, "titre", true)
+                            evenementService.rechercherEtTrier(keyword, "titre", true)
                     );
                     break;
                 case "Titre (Z-A)":
                     results = FXCollections.observableArrayList(
-                        evenementService.rechercherEtTrier(keyword, "titre", false)
+                            evenementService.rechercherEtTrier(keyword, "titre", false)
                     );
                     break;
                 case "Date Croissante":
                     results = FXCollections.observableArrayList(
-                        evenementService.rechercherEtTrier(keyword, "date", true)
+                            evenementService.rechercherEtTrier(keyword, "date", true)
                     );
                     break;
                 case "Date Décroissante":
                     results = FXCollections.observableArrayList(
-                        evenementService.rechercherEtTrier(keyword, "date", false)
+                            evenementService.rechercherEtTrier(keyword, "date", false)
                     );
                     break;
                 case "Lieu (A-Z)":
                     results = FXCollections.observableArrayList(
-                        evenementService.rechercherEtTrier(keyword, "lieu", true)
+                            evenementService.rechercherEtTrier(keyword, "lieu", true)
                     );
                     break;
                 case "Capacité":
                     results = FXCollections.observableArrayList(
-                        evenementService.rechercherEtTrier(keyword, "capacite", true)
+                            evenementService.rechercherEtTrier(keyword, "capacite", true)
                     );
                     break;
             }
 
             if (results != null) {
                 evenementTable.setItems(results);
+                updateStats(results); // ✅ IMPORTANT
             }
+
         } catch (SQLException e) {
             showAlert("Erreur", "❌ Erreur lors du tri: " + e.getMessage());
         }
@@ -143,22 +178,33 @@ public class EvenementsController implements Initializable {
         loadEvenements();
     }
 
+    // ✅ GOOGLE CALENDAR
+    @FXML
+    private void openGoogleCalendar(ActionEvent event) {
+        try {
+            Desktop.getDesktop().browse(new URI("https://calendar.google.com/"));
+        } catch (Exception e) {
+            showAlert("Erreur", "❌ Impossible d'ouvrir Google Calendar");
+        }
+    }
+
     @FXML
     private void addEvenement(ActionEvent event) {
         EvenementFormDialog dialog = new EvenementFormDialog(null);
         dialog.show();
-        
+
         if (dialog.isApproved()) {
             loadEvenements();
-            showAlert("Succès", "✅ Événement ajouté avec succès!");
+            showAlert("Succès", "✅ Événement ajouté !");
         }
     }
 
     @FXML
     private void editEvenement(ActionEvent event) {
         Evenement selected = evenementTable.getSelectionModel().getSelectedItem();
+
         if (selected == null) {
-            showAlert("Attention", "⚠️ Veuillez sélectionner un événement à modifier");
+            showAlert("Attention", "⚠️ Sélectionnez un événement");
             return;
         }
 
@@ -166,37 +212,38 @@ public class EvenementsController implements Initializable {
             Evenement fullEvent = evenementService.findById(selected.getId());
             EvenementFormDialog dialog = new EvenementFormDialog(fullEvent);
             dialog.show();
-            
+
             if (dialog.isApproved()) {
                 loadEvenements();
-                showAlert("Succès", "✅ Événement modifié avec succès!");
+                showAlert("Succès", "✅ Modifié !");
             }
+
         } catch (SQLException e) {
-            showAlert("Erreur", "❌ Impossible de charger l'événement: " + e.getMessage());
+            showAlert("Erreur", "❌ " + e.getMessage());
         }
     }
 
     @FXML
     private void deleteEvenement(ActionEvent event) {
         Evenement selected = evenementTable.getSelectionModel().getSelectedItem();
+
         if (selected == null) {
-            showAlert("Attention", "⚠️ Veuillez sélectionner un événement à supprimer");
+            showAlert("Attention", "⚠️ Sélectionnez un événement");
             return;
         }
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Confirmation de suppression");
-        confirm.setHeaderText("Supprimer l'événement");
-        confirm.setContentText("Êtes-vous sûr de vouloir supprimer: \"" + selected.getTitre() + "\" ?");
-        
-        confirm.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
+        confirm.setTitle("Confirmation");
+        confirm.setContentText("Supprimer \"" + selected.getTitre() + "\" ?");
+
+        confirm.showAndWait().ifPresent(res -> {
+            if (res == ButtonType.OK) {
                 try {
                     evenementService.supprimer(selected.getId());
                     loadEvenements();
-                    showAlert("Succès", "✅ Événement supprimé avec succès!");
+                    showAlert("Succès", "✅ Supprimé !");
                 } catch (SQLException e) {
-                    showAlert("Erreur", "❌ Impossible de supprimer: " + e.getMessage());
+                    showAlert("Erreur", "❌ " + e.getMessage());
                 }
             }
         });

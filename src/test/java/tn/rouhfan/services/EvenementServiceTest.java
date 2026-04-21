@@ -16,6 +16,7 @@ public class EvenementServiceTest {
     static SponsorService sponsorService;
     static int evenementId;
     static int sponsorId;
+    static java.util.Date evenementDate;
 
     @BeforeAll
     static void setup() throws SQLException {
@@ -41,13 +42,14 @@ public class EvenementServiceTest {
         Sponsor sponsor = sponsorService.findById(sponsorId);
         assertNotNull(sponsor);
 
+        evenementDate = new java.util.Date(System.currentTimeMillis() + 86400000L);
         Evenement evenement = new Evenement(
                 "Concert de Test",
                 "Description du concert de test",
                 "event-test.jpg",
                 "Concert",
                 "PLANIFIÉ",
-                new Date(System.currentTimeMillis() + 86400000L),
+                evenementDate,
                 "Palais des congrès",
                 150,
                 0,
@@ -64,7 +66,7 @@ public class EvenementServiceTest {
     }
 
     @Test
-    @Order(2)
+    @Order(3)
     void testModifierEvenement() throws SQLException {
         Evenement evenement = evenementService.findById(evenementId);
         assertNotNull(evenement);
@@ -80,7 +82,48 @@ public class EvenementServiceTest {
     }
 
     @Test
-    @Order(3)
+    @Order(2)
+    void testAjouterEvenementEnDouble() throws SQLException {
+        Sponsor sponsor = sponsorService.findById(sponsorId);
+        assertNotNull(sponsor);
+
+        Evenement duplicate = new Evenement(
+                "Concert de Test",
+                "Description du concert de test",
+                "event-test.jpg",
+                "Concert",
+                "PLANIFIÉ",
+                evenementDate,
+                "Palais des congrès",
+                150,
+                0,
+                null,
+                sponsor
+        );
+
+        SQLException exception = assertThrows(SQLException.class,
+                () -> evenementService.ajouter(duplicate));
+        assertTrue(exception.getMessage().contains("Événement déjà existant"));
+    }
+
+    @Test
+    @Order(4)
+    void testValiderCapaciteNegative() {
+        Evenement invalidEvent = new Evenement();
+        invalidEvent.setTitre("Titre test");
+        invalidEvent.setDateEvent(new Date(System.currentTimeMillis() + 86400000L));
+        invalidEvent.setLieu("Test lieu");
+        invalidEvent.setType("Concert");
+        invalidEvent.setCapacite(-10);
+        invalidEvent.setNbParticipants(0);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> evenementService.valider(invalidEvent));
+        assertTrue(exception.getMessage().contains("capacité ne peut pas être négative"));
+    }
+
+    @Test
+    @Order(5)
     void testSupprimerEvenement() throws SQLException {
         evenementService.supprimer(evenementId);
         Evenement deleted = evenementService.findById(evenementId);
@@ -88,7 +131,7 @@ public class EvenementServiceTest {
     }
 
     @Test
-    @Order(4)
+    @Order(6)
     void testValiderTypeEvenementInvalide() {
         Evenement invalidEvent = new Evenement();
         invalidEvent.setTitre("Titre test");

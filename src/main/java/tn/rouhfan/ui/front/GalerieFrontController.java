@@ -23,10 +23,11 @@ import tn.rouhfan.entities.Categorie;
 import tn.rouhfan.entities.Oeuvre;
 import tn.rouhfan.entities.User;
 import tn.rouhfan.services.CategorieService;
+import tn.rouhfan.services.OeuvreRecommendationService;
 import tn.rouhfan.services.OeuvreService;
 import tn.rouhfan.tools.SessionManager;
 import tn.rouhfan.ui.back.OeuvreFormController;
-
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -47,6 +48,7 @@ public class GalerieFrontController implements Initializable {
     @FXML private ComboBox<String> orderCombo;
     @FXML private FlowPane cardsPane;
     @FXML private Button addOeuvreBtn;
+    @FXML private Button viewFavorisBtn;
     @FXML private HBox filterBar;
     @FXML private VBox categoryFilterBox;
     @FXML private VBox sortBox;
@@ -56,8 +58,12 @@ public class GalerieFrontController implements Initializable {
     @FXML private HBox categorySearchBar;
     @FXML private TextField categorySearchField;
 
+    @FXML private VBox recommendationsBox;
+    @FXML private FlowPane recommendationsPane;
+
     private OeuvreService oeuvreService;
     private CategorieService categorieService;
+    private OeuvreRecommendationService recommendationService;
 
     private ObservableList<Oeuvre> allOeuvres;
     private ObservableList<Categorie> allCategories;
@@ -70,6 +76,7 @@ public class GalerieFrontController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         oeuvreService = new OeuvreService();
         categorieService = new CategorieService();
+        recommendationService = new OeuvreRecommendationService();
 
         SessionManager session = SessionManager.getInstance();
         currentUser = session.getCurrentUser();
@@ -93,6 +100,11 @@ public class GalerieFrontController implements Initializable {
 
         addOeuvreBtn.setVisible(canAddOeuvre);
         addOeuvreBtn.setManaged(canAddOeuvre);
+
+        // Mes Favoris : masqué si non connecté
+        boolean isLoggedIn = currentUser != null;
+        viewFavorisBtn.setVisible(isLoggedIn);
+        viewFavorisBtn.setManaged(isLoggedIn);
     }
 
     public void setCategoryMode(boolean isCategoryMode) {
@@ -158,6 +170,7 @@ public class GalerieFrontController implements Initializable {
 
                 applyFilters();
             }
+            loadRecommendations();
         } catch (SQLException e) {
             System.err.println("[GalerieFront] ERREUR SQL: " + e.getMessage());
             e.printStackTrace();
@@ -302,6 +315,64 @@ public class GalerieFrontController implements Initializable {
         } else {
             // Fallback si on ne trouve pas (devrait pas arriver en back-office/front-base standard)
             System.err.println("[GalerieFront] Impossible de trouver #contentHost pour charger les favoris");
+        }
+    }
+
+    private void loadRecommendations() {
+        if (isCategoryMode || currentUser == null || userRole == null || !userRole.toUpperCase().contains("PARTICIPANT")) {
+            recommendationsBox.setVisible(false);
+            recommendationsBox.setManaged(false);
+            return;
+        }
+
+        recommendationsPane.getChildren().clear();
+        java.util.List<Oeuvre> recommendations = recommendationService.getRecommendations(currentUser.getId());
+
+        if (recommendations.isEmpty()) {
+            recommendationsBox.setVisible(false);
+            recommendationsBox.setManaged(false);
+            return;
+        }
+
+        recommendationsBox.setVisible(true);
+        recommendationsBox.setManaged(true);
+
+        for (Oeuvre o : recommendations) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/front/OeuvreCard.fxml"));
+                Parent card = loader.load();
+                OeuvreCardController controller = loader.getController();
+                
+                // On passe le même callback loadData pour rafraîchir en cas de favori
+                controller.setOeuvre(o, userRole, this::loadData);
+                
+                recommendationsPane.getChildren().add(card);
+            } catch (IOException e) {
+                System.err.println("[GalerieFront] Erreur recommandation: " + e.getMessage());
+            }
+        }
+    }
+
+    @FXML
+    private void handleViewAnalysis() {
+        if (currentUser == null) return;
+        
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/front/RecommendationAnalysisDialog.fxml"));
+            Parent root = loader.load();
+            RecommendationAnalysisController controller = loader.getController();
+            
+            // On récupère les recos actuelles
+            java.util.List<Oeuvre> recos = recommendationService.getRecommendations(currentUser.getId());
+            controller.initData(currentUser, recos, recommendationService);
+            
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("Analyse de Recommandations");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

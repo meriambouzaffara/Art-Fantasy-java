@@ -3,8 +3,6 @@ package tn.rouhfan.tools;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
@@ -15,83 +13,86 @@ public class ImageUtils {
     private static final String IMAGES_RELATIVE = "/images/";
 
     static {
-        // Créer les répertoires s'ils n'existent pas
+        // Créer le répertoire de base s'il n'existe pas
         File uploadsDir = new File(UPLOADS_DIR);
         if (!uploadsDir.exists()) uploadsDir.mkdirs();
         
-        new File(UPLOADS_DIR + "/oeuvres").mkdirs();
-        new File(UPLOADS_DIR + "/categories").mkdirs();
+        // Sous-répertoires par défaut
+        String[] defaults = {"oeuvres", "categories", "evenements", "sponsors", "misc"};
+        for (String sub : defaults) {
+            new File(UPLOADS_DIR + File.separator + sub).mkdirs();
+        }
     }
 
     /**
-     * Résout un chemin de la base de données vers un chemin absolu/URL pour l'affichage
-     * Gère les anciens chemins "/images/..." et les nouveaux "uploads/..."
+     * Résout un chemin de la base de données vers un chemin absolu/URL pour l'affichage.
+     * Supporte :
+     * - Anciens chemins "/images/..." (redirigés vers uploads/misc/)
+     * - Nouveaux chemins "uploads/..."
+     * - Recherche dynamique par nom de fichier dans tout le dossier uploads/
      */
     public static String getAbsolutePath(String dbPath) {
-        if (dbPath == null || dbPath.isEmpty()) return null;
+        if (dbPath == null || dbPath.trim().isEmpty()) return null;
 
-        // Nettoyer le chemin (remplacer les antislashes par des slashes)
+        // Nettoyer le chemin
         String normalizedPath = dbPath.replace("\\", "/");
+        if (normalizedPath.startsWith("/")) normalizedPath = normalizedPath.substring(1);
         
-        // Liste des dossiers racines possibles où chercher l'image
-        String[] possibleRoots = {
-            "src/main/resources",
-            "target/classes",
-            "." // Racine du projet
-        };
+        // Liste des dossiers racines possibles
+        String[] possibleRoots = {"src/main/resources", "target/classes", "."};
 
-        // Heuristique pour les anciens chemins absolus : 
-        // Si le chemin contient "uploads/" ou "images/", on extrait la partie intéressante
+        // Heuristique pour extraire le chemin relatif de recherche (searchPath)
         String searchPath = normalizedPath;
-        if (normalizedPath.contains("/uploads/")) {
+        if (normalizedPath.contains("uploads/")) {
             searchPath = normalizedPath.substring(normalizedPath.indexOf("uploads/"));
-        } else if (normalizedPath.contains("/images/")) {
-            searchPath = normalizedPath.substring(normalizedPath.indexOf("images/"));
-        } else if (normalizedPath.contains("uploads/")) {
-            searchPath = normalizedPath.substring(normalizedPath.indexOf("uploads/"));
+        } else if (normalizedPath.contains("images/")) {
+            // Mapping spécial legacy: images/ -> uploads/misc/
+            searchPath = "uploads/misc/" + normalizedPath.substring(normalizedPath.indexOf("images/") + 7);
         }
 
+        // 1. Essai direct
         for (String root : possibleRoots) {
             File file = new File(root + File.separator + searchPath);
-            if (file.exists()) {
-                return file.toURI().toString();
-            }
+            if (file.exists()) return file.toURI().toString();
         }
         
-        // --- NOUVEAU : Fallback de recherche par nom de fichier dans uploads ---
-        // Si l'image n'est pas trouvée au chemin exact, on cherche si elle existe dans uploads/oeuvres ou uploads/categories
-        if (searchPath.contains("/")) {
-            String fileName = searchPath.substring(searchPath.lastIndexOf("/") + 1);
-            String[] subDirs = {"uploads/oeuvres", "uploads/categories", "uploads", "images"};
-            
-            for (String root : possibleRoots) {
-                for (String subDir : subDirs) {
-                    File fallbackFile = new File(root + File.separator + subDir + File.separator + fileName);
-                    if (fallbackFile.exists()) {
-                        return fallbackFile.toURI().toString();
+        // 2. Recherche par nom de fichier dans TOUS les sous-dossiers de uploads
+        String fileName = searchPath.contains("/") ? searchPath.substring(searchPath.lastIndexOf("/") + 1) : searchPath;
+        
+        for (String root : possibleRoots) {
+            File uploadsDir = new File(root + File.separator + "uploads");
+            if (uploadsDir.exists() && uploadsDir.isDirectory()) {
+                // Tenter à la racine de uploads
+                File directFile = new File(uploadsDir, fileName);
+                if (directFile.exists()) return directFile.toURI().toString();
+                
+                // Tenter dans tous les sous-dossiers
+                File[] subDirs = uploadsDir.listFiles(File::isDirectory);
+                if (subDirs != null) {
+                    for (File subDir : subDirs) {
+                        File fallbackFile = new File(subDir, fileName);
+                        if (fallbackFile.exists()) return fallbackFile.toURI().toString();
                     }
                 }
             }
+            
+            // Tenter aussi dans l'ancien dossier images si présent
+            File oldImagesDir = new File(root + File.separator + "images");
+            if (oldImagesDir.exists()) {
+                File fallbackFile = new File(oldImagesDir, fileName);
+                if (fallbackFile.exists()) return fallbackFile.toURI().toString();
+            }
         }
 
-        // Si non trouvé, tenter le chemin d'origine tel quel (cas des absolus encore valides)
-        File originalFile = new File(dbPath);
-        if (originalFile.exists()) {
-            return originalFile.toURI().toString();
-        }
-
-        // Si non trouvé dans les dossiers racines, essayer via le ClassLoader (pour les JARs)
+        // 3. Essai ClassLoader
         try {
             var resource = ImageUtils.class.getResource("/" + searchPath);
             if (resource != null) return resource.toExternalForm();
-            
-            resource = ImageUtils.class.getResource(searchPath);
+            resource = ImageUtils.class.getResource("/" + normalizedPath);
             if (resource != null) return resource.toExternalForm();
-        } catch (Exception e) {
-            // Ignorer les erreurs de ressource
-        }
+        } catch (Exception ignored) {}
 
-        System.err.println("⚠️ Image non trouvée (Tentatives sur : " + searchPath + ") | Path d'origine : " + dbPath);
+        System.err.println("⚠️ Image non trouvée : " + dbPath + " (Cherché : " + searchPath + ")");
         return null;
     }
 
@@ -103,10 +104,10 @@ public class ImageUtils {
     }
 
     /**
-     * Sauvegarde une image uploadée dans le dossier approprié dans resources
+     * Sauvegarde une image uploadée dans le dossier approprié dans resources.
      * @param sourceFile Le fichier source choisi par l'utilisateur
-     * @param subDir "oeuvres" ou "categories"
-     * @return Le chemin relatif à stocker en base de données (ex: uploads/oeuvres/name.png)
+     * @param subDir Nom du dossier cible (ex: "oeuvres", "categories", "evenements", "sponsors")
+     * @return Le chemin relatif à stocker en base de données (ex: uploads/evenements/name.png)
      */
     public static String saveUpload(File sourceFile, String subDir) throws IOException {
         if (sourceFile == null || !sourceFile.exists()) return null;
@@ -125,11 +126,6 @@ public class ImageUtils {
         return "uploads" + "/" + subDir + "/" + fileName;
     }
 
-    /**
-     * Pour compatibilité avec l'ancien code si nécessaire
-     * @deprecated Utiliser saveUpload pour les nouvelles oeuvres/categories
-     */
-    @Deprecated
     public static String copyImage(String sourcePath) {
         if (sourcePath == null || sourcePath.trim().isEmpty()) return "";
         try {
@@ -139,13 +135,6 @@ public class ImageUtils {
             System.err.println("❌ Erreur copie image: " + e.getMessage());
             return "";
         }
-    }
-
-    private static String getFileExtension(File file) {
-        String name = file.getName();
-        int lastIndexOf = name.lastIndexOf(".");
-        if (lastIndexOf == -1) return "png";
-        return name.substring(lastIndexOf + 1).toLowerCase();
     }
 
     public static void deleteImage(String dbPath) {

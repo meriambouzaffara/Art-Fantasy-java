@@ -21,6 +21,7 @@
         <Label text="Tri:" />
         <ComboBox fx:id="sortCombo" prefWidth="180" />
         <Button text="🔄 Rafraîchir" onAction="#refresh" styleClass="btn-secondary" />
+        <Button fx:id="aiRecButton" text="✨ Recommandations IA" onAction="#showAiRecommendations" style="-fx-background-color: linear-gradient(to right, #6c2a90, #9b59b6); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;" visible="false" managed="false" />
         <HBox HBox.hgrow="ALWAYS" />
         <Button fx:id="addButton" text="➕ Ajouter Événement" onAction="#addEvenement" styleClass="btn-primary" visible="false" managed="false" />
     </HBox>
@@ -30,4 +31,3 @@
         <FlowPane fx:id="cardsContainer" prefWidth="1000" prefHeight="600" hgap="20" vgap="20" style="-fx-padding: 15;" />
     </ScrollPane>
 </VBox>
-

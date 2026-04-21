@@ -319,5 +319,3 @@ public class OeuvreFormController implements Initializable {
         alert.showAndWait();
     }
 }
-
-

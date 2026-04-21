@@ -111,6 +111,71 @@ public class FavorisService {
         return favoris;
     }
 
+    public List<Oeuvre> getFavoriteOeuvres(int userId) throws SQLException {
+        List<Favoris> favoris = recupererParUser(userId);
+        List<Oeuvre> oeuvres = new ArrayList<>();
+        for (Favoris f : favoris) {
+            oeuvres.add(f.getOeuvre());
+        }
+        return oeuvres;
+    }
+
+    /**
+     * Exporte les favoris d'un utilisateur en PDF
+     */
+    public void exportFavoritesToPDF(int userId, String filePath) throws Exception {
+        List<Favoris> favoris = recupererParUser(userId);
+        
+        com.lowagie.text.Document document = new com.lowagie.text.Document(com.lowagie.text.PageSize.A4);
+        com.lowagie.text.pdf.PdfWriter.getInstance(document, new java.io.FileOutputStream(filePath));
+        document.open();
+
+        // Titre
+        com.lowagie.text.Font titleFont = com.lowagie.text.FontFactory.getFont(com.lowagie.text.FontFactory.HELVETICA_BOLD, 24, new java.awt.Color(36, 17, 151));
+        com.lowagie.text.Paragraph title = new com.lowagie.text.Paragraph("Œuvres favoris — Rouh el Fann", titleFont);
+        title.setAlignment(com.lowagie.text.Element.ALIGN_LEFT);
+        title.setSpacingAfter(10f);
+        document.add(title);
+
+        // Date
+        com.lowagie.text.Font metaFont = com.lowagie.text.FontFactory.getFont(com.lowagie.text.FontFactory.HELVETICA, 12, java.awt.Color.BLACK);
+        String dateStr = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        document.add(new com.lowagie.text.Paragraph("Liste exportée le " + dateStr, metaFont));
+        document.add(new com.lowagie.text.Paragraph(" ", metaFont)); // Spacer
+
+        // Tableau
+        com.lowagie.text.pdf.PdfPTable table = new com.lowagie.text.pdf.PdfPTable(4);
+        table.setWidthPercentage(100);
+        table.setWidths(new float[]{3f, 1.5f, 2f, 2.5f});
+
+        // En-têtes
+        com.lowagie.text.Font headFont = com.lowagie.text.FontFactory.getFont(com.lowagie.text.FontFactory.HELVETICA_BOLD, 12, java.awt.Color.BLACK);
+        java.awt.Color headBg = new java.awt.Color(240, 238, 245);
+        String[] headers = {"Titre", "Prix (DT)", "Catégorie", "Auteur"};
+        
+        for (String h : headers) {
+            com.lowagie.text.pdf.PdfPCell cell = new com.lowagie.text.pdf.PdfPCell(new com.lowagie.text.Phrase(h, headFont));
+            cell.setBackgroundColor(headBg);
+            cell.setPadding(8);
+            table.addCell(cell);
+        }
+
+        // Données
+        com.lowagie.text.Font bodyFont = com.lowagie.text.FontFactory.getFont(com.lowagie.text.FontFactory.HELVETICA, 11, java.awt.Color.BLACK);
+        for (Favoris f : favoris) {
+            Oeuvre o = f.getOeuvre();
+            table.addCell(new com.lowagie.text.pdf.PdfPCell(new com.lowagie.text.Phrase(o.getTitre(), bodyFont))).setPadding(5);
+            table.addCell(new com.lowagie.text.pdf.PdfPCell(new com.lowagie.text.Phrase(o.getPrix().toString(), bodyFont))).setPadding(5);
+            table.addCell(new com.lowagie.text.pdf.PdfPCell(new com.lowagie.text.Phrase(o.getCategorie() != null ? o.getCategorie().getNomCategorie() : "", bodyFont))).setPadding(5);
+            
+            String author = o.getUser() != null ? o.getUser().getNom() + " " + o.getUser().getPrenom() : "Inconnu";
+            table.addCell(new com.lowagie.text.pdf.PdfPCell(new com.lowagie.text.Phrase(author, bodyFont))).setPadding(5);
+        }
+
+        document.add(table);
+        document.close();
+    }
+
     public void toggle(int userId, int oeuvreId) throws SQLException {
         if (exists(userId, oeuvreId)) {
             supprimer(userId, oeuvreId);
@@ -118,6 +183,7 @@ public class FavorisService {
             ajouter(userId, oeuvreId);
         }
     }
+
     public void supprimerParUser(int userId) throws SQLException {
         String sql = "DELETE FROM favoris WHERE id_user = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);

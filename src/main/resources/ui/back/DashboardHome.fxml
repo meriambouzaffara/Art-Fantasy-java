@@ -32,12 +32,14 @@
             <Label text="📅" styleClass="dash-card-icon, color-events" />
             <Label text="Événements" styleClass="dash-card-title, color-events" />
             <Label text="Programmation &amp; gestion" styleClass="dash-card-subtitle" />
+            <Label fx:id="statEvenements" text="..." style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #e91e63; -fx-padding: 5 0 0 0;" />
         </VBox>
 
         <VBox styleClass="dash-card" prefWidth="280.0" onMouseClicked="#openSponsors" GridPane.columnIndex="0" GridPane.rowIndex="1">
             <Label text="🤝" styleClass="dash-card-icon, color-sponsors" />
             <Label text="Sponsors" styleClass="dash-card-title, color-sponsors" />
             <Label text="Partenaires officiels" styleClass="dash-card-subtitle" />
+            <Label fx:id="statSponsors" text="..." style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #4caf50; -fx-padding: 5 0 0 0;" />
         </VBox>
         <VBox styleClass="dash-card" prefWidth="280.0" onMouseClicked="#openCours" GridPane.columnIndex="1" GridPane.rowIndex="1">
             <Label text="🎨" styleClass="dash-card-icon, color-courses" />
@@ -64,6 +66,11 @@
             <Label text="📦" styleClass="dash-card-icon, color-articles" />
             <Label text="Articles" styleClass="dash-card-title, color-articles" />
             <Label text="Inventaire et produits" styleClass="dash-card-subtitle" />
+        </VBox>
+        <VBox styleClass="dash-card" prefWidth="280.0" onMouseClicked="#openOeuvreStatistiques" GridPane.columnIndex="2" GridPane.rowIndex="2">
+            <Label text="📊" styleClass="dash-card-icon" style="-fx-text-fill: #241197;" />
+            <Label text="Statistiques Œuvres" styleClass="dash-card-title" style="-fx-text-fill: #241197;" />
+            <Label text="Ventes et analyses" styleClass="dash-card-subtitle" />
         </VBox>
     </GridPane>
 </VBox>

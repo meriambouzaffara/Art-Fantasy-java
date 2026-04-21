@@ -110,4 +110,3 @@ public class CategorieService {
         return false;
     }
 }
-//test

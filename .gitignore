@@ -36,3 +36,10 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Local Config ###
+src/main/resources/config.properties
+
+
+.env
+src/main/resources/google-calendar-key.json

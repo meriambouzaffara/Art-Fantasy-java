@@ -13,10 +13,8 @@ public class Sponsor {
     private String adresse;
     private Date createdAt;
 
-    // Constructeur vide
     public Sponsor() {}
 
-    // Constructeur paramétré
     public Sponsor(String nom, String logo, String description, String email, String tel, String adresse, Date createdAt) {
         this.nom = nom;
         this.logo = logo;
@@ -27,7 +25,6 @@ public class Sponsor {
         this.createdAt = createdAt;
     }
 
-    // Getters & Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -52,7 +49,6 @@ public class Sponsor {
     public Date getCreatedAt() { return createdAt; }
     public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
 
-    // toString
     @Override
     public String toString() {
         return "Sponsor{" +

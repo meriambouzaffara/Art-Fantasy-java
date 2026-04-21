@@ -23,14 +23,19 @@
                     <Image url="@../logo.png" />
                 </ImageView>
             </HBox>
-            
+
             <Region HBox.hgrow="ALWAYS" />
 
             <HBox alignment="CENTER" spacing="10.0">
                 <Button text="Accueil" mnemonicParsing="false" styleClass="navbar-link" onAction="#goHome" />
                 <Button text="Événements" mnemonicParsing="false" styleClass="navbar-link" onAction="#goEvenements" />
                 <Button text="Sponsors" mnemonicParsing="false" styleClass="navbar-link" onAction="#goSponsors" />
-                <Button text="Cours" mnemonicParsing="false" styleClass="navbar-link" onAction="#goCours" />
+                <MenuButton text="Cours" mnemonicParsing="false" styleClass="navbar-link">
+                    <items>
+                        <MenuItem text="Nos Cours" onAction="#goCours" />
+                        <MenuItem text="Certificats" onAction="#goCertificats" />
+                    </items>
+                </MenuButton>
                 <Button text="Magasin" mnemonicParsing="false" styleClass="navbar-link" onAction="#goMagasin" />
                 <MenuButton text="Galerie" mnemonicParsing="false" styleClass="navbar-link">
                     <items>
@@ -63,10 +68,10 @@
             <VBox fx:id="heroSection" spacing="0.0" styleClass="hero-front" VBox.vgrow="ALWAYS">
                 <Label text="Rouh el Fann" styleClass="hero-front-title" />
                 <Label text="L'Âme de l'Art" styleClass="hero-front-subtitle" />
-                
-                <Label text="Découvrez une collection époustouflante d'œuvres d'art fantasy, de dragons majestueux aux royaumes enchantés. Art &amp; Fantaisie à chaque regard." 
+
+                <Label text="Découvrez une collection époustouflante d'œuvres d'art fantasy, de dragons majestueux aux royaumes enchantés. Art &amp; Fantaisie à chaque regard."
                        styleClass="hero-front-description" wrapText="true" />
-                
+
                 <HBox spacing="20.0" alignment="CENTER" style="-fx-padding: 40 0 0 0;">
                     <Button text="✨ Explorer la galerie" mnemonicParsing="false" styleClass="btn-front-primary" onAction="#goOeuvres" />
                     <Button text="📖 En savoir plus" mnemonicParsing="false" styleClass="btn-front-secondary" onAction="#goAbout" />

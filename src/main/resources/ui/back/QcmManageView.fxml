@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="20" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.rouhfan.ui.back.QcmManageController"
+      styleClass="app-shell" style="-fx-background-color: #f4f7f6;">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <VBox spacing="4">
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Button text="⬅" onAction="#handleRetour" styleClass="btn-secondary"/>
+            <Label fx:id="lblTitreCours" text="Gestion du QCM" styleClass="text-title"
+                   style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0f1c3f;"/>
+        </HBox>
+        <Label text="Configurez les questions et les critères de réussite." styleClass="text-subtitle" />
+    </VBox>
+
+    <HBox spacing="20" VBox.vgrow="ALWAYS">
+
+        <VBox spacing="10" HBox.hgrow="ALWAYS" styleClass="surface" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 10;">
+            <Label text="Questions actuelles" style="-fx-font-weight: bold; -fx-text-fill: #0f1c3f;"/>
+            <TableView fx:id="questionTable" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colQuestion" text="Question" prefWidth="400"/>
+                    <TableColumn fx:id="colAction" text="Action" prefWidth="100"/>
+                </columns>
+            </TableView>
+        </VBox>
+
+        <VBox spacing="15" prefWidth="400" styleClass="surface" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 10;">
+            <Label text="➕ Ajouter une Question" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0f1c3f;"/>
+
+            <TextArea fx:id="taQuestion" promptText="Texte de la question..." prefHeight="80" wrapText="true" style="-fx-border-color: #dfe6e9;"/>
+
+            <Label text="Réponses (Cochez la bonne)" style="-fx-font-size: 12px; -fx-text-fill: #997953;"/>
+
+            <VBox spacing="8">
+                <HBox spacing="5" alignment="CENTER_LEFT">
+                    <CheckBox fx:id="checkR1"/> <TextField fx:id="tfR1" promptText="Réponse 1" HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <HBox spacing="5" alignment="CENTER_LEFT">
+                    <CheckBox fx:id="checkR2"/> <TextField fx:id="tfR2" promptText="Réponse 2" HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <HBox spacing="5" alignment="CENTER_LEFT">
+                    <CheckBox fx:id="checkR3"/> <TextField fx:id="tfR3" promptText="Réponse 3" HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <HBox spacing="5" alignment="CENTER_LEFT">
+                    <CheckBox fx:id="checkR4"/> <TextField fx:id="tfR4" promptText="Réponse 4" HBox.hgrow="ALWAYS"/>
+                </HBox>
+            </VBox>
+
+            <Button text="Enregistrer la question" onAction="#handleSaveQuestion"
+                    maxWidth="Infinity" style="-fx-background-color: #0f1c3f; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10;"/>
+        </VBox>
+    </HBox>
+</VBox>

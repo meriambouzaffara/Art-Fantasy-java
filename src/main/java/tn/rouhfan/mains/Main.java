@@ -136,7 +136,7 @@ public class Main {
                     new BigDecimal("100.00"),
                     "disponible",
                     "uploads/oeuvres/test.png",
-                    null,
+                    new Date(),
                     dbUser,
                     c
             );
@@ -191,5 +191,3 @@ public class Main {
         }
     }
 }
-
-///

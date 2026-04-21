@@ -60,10 +60,10 @@ public class SessionManager {
         String roles = currentUser.getRoles().trim();
         // Enlever les crochets et guillemets: ["ROLE_ADMIN"] → ROLE_ADMIN
         roles = roles.replace("[", "")
-                     .replace("]", "")
-                     .replace("\"", "")
-                     .replace("'", "")
-                     .trim();
+                .replace("]", "")
+                .replace("\"", "")
+                .replace("'", "")
+                .trim();
 
         // S'il y a plusieurs rôles séparés par des virgules, prendre le premier
         if (roles.contains(",")) {

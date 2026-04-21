@@ -155,8 +155,7 @@ public class BackBaseController {
     private void openArticles(ActionEvent event) {
         setActive(navArticles);
         pageTitle.setText("Gestion articles");
-        // Je vais rediriger vers une page vide pour le moment car ArticleView n'est pas encore créé
-        Router.setContent(contentHost, "/ui/back/PlaceholderPage.fxml");
+        Router.setContent(contentHost, "/ui/back/ArticleView.fxml");
     }
 
     @FXML

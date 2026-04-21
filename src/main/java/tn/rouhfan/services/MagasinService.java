@@ -15,7 +15,7 @@ public class MagasinService implements IService<Magasin> {
         cnx = MyDatabase.getInstance().getConnection();
     }
 
-    // ✅ Ajouter
+    //  Ajouter
     @Override
     public void ajouter(Magasin m) throws SQLException {
         String sql = "INSERT INTO magasin (nom, adresse, tel, email, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?)";
@@ -29,10 +29,10 @@ public class MagasinService implements IService<Magasin> {
         ps.setDouble(6, m.getLongitude());
 
         ps.executeUpdate();
-        System.out.println("✅ Magasin ajouté");
+        System.out.println(" Magasin ajouté");
     }
 
-    // ✅ Supprimer
+    //  Supprimer
     @Override
     public void supprimer(int id) throws SQLException {
         String sql = "DELETE FROM magasin WHERE id = ?";
@@ -43,7 +43,7 @@ public class MagasinService implements IService<Magasin> {
         System.out.println("🗑️ Magasin supprimé");
     }
 
-    // ✅ Modifier
+    //  Modifier
     @Override
     public void modifier(Magasin m) throws SQLException {
         String sql = "UPDATE magasin SET nom=?, adresse=?, tel=?, email=?, latitude=?, longitude=? WHERE id=?";
@@ -61,7 +61,7 @@ public class MagasinService implements IService<Magasin> {
         System.out.println("✏️ Magasin modifié");
     }
 
-    // ✅ Récupérer tous
+    //  Récupérer tous
     @Override
     public List<Magasin> recuperer() throws SQLException {
         List<Magasin> magasins = new ArrayList<>();
@@ -87,7 +87,7 @@ public class MagasinService implements IService<Magasin> {
         return magasins;
     }
 
-    // ✅ Find by ID
+    //  Find by ID
     @Override
     public Magasin findById(int id) throws SQLException {
         String sql = "SELECT * FROM magasin WHERE id = ?";
