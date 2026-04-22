@@ -1,5 +1,7 @@
 package tn.rouhfan.ui.back;
 
+import javafx.application.Platform;
+import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -7,14 +9,22 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
+import netscape.javascript.JSObject;
 import tn.rouhfan.entities.Magasin;
 import tn.rouhfan.services.ArticleService;
 import tn.rouhfan.services.MagasinService;
+import tn.rouhfan.tools.OpenStreetMapHelper;
 
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -34,6 +44,8 @@ public class MagasinController implements Initializable {
     @FXML private TextField emailField;
     @FXML private TextField latField;
     @FXML private TextField lonField;
+    @FXML private WebView   locationMap;
+    @FXML private Label     selectedPositionLabel;
     @FXML private Label     errorLabel;
 
     // ── État ──────────────────────────────────────────────────────
@@ -42,12 +54,29 @@ public class MagasinController implements Initializable {
     private List<Magasin>  allMagasins;
     private boolean isEditMode      = false;
     private Magasin selectedForEdit = null;
+    private final MapBridge mapBridge = new MapBridge();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         magasinService = new MagasinService();
         articleService = new ArticleService();
+        setupMap();
         loadAndRender();
+    }
+
+    private void setupMap() {
+        if (locationMap == null) {
+            return;
+        }
+        locationMap.setContextMenuEnabled(false);
+        WebEngine engine = locationMap.getEngine();
+        engine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+            if (newState == Worker.State.SUCCEEDED) {
+                JSObject window = (JSObject) engine.executeScript("window");
+                window.setMember("javaConnector", mapBridge);
+            }
+        });
+        loadPickerMap(null, null);
     }
 
     // ── Chargement + rendu ────────────────────────────────────────
@@ -192,7 +221,7 @@ public class MagasinController implements Initializable {
     }
 
     @FXML private void refresh(ActionEvent e)    { searchField.clear(); hideForm(null); loadAndRender(); }
-    @FXML private void showAddForm(ActionEvent e){ isEditMode=false; selectedForEdit=null; formTitle.setText("➕ Nouveau Magasin"); clearForm(); setFormVisible(true); }
+    @FXML private void showAddForm(ActionEvent e){ isEditMode=false; selectedForEdit=null; formTitle.setText("➕ Nouveau Magasin"); clearForm(); setFormVisible(true); loadPickerMap(null, null); }
 
     private void startEdit(Magasin m) {
         isEditMode=true; selectedForEdit=m;
@@ -210,10 +239,18 @@ public class MagasinController implements Initializable {
             showFormError("Nom, Adresse, Téléphone et Email sont obligatoires."); return; }
         if (!email.contains("@"))  { showFormError("Email invalide."); return; }
         if (tel.length() < 8)      { showFormError("Téléphone : 8 chiffres minimum."); return; }
-        double lat=0, lon=0;
+        Double lat=null, lon=null;
         try {
-            if (!latTxt.isEmpty()) lat = Double.parseDouble(latTxt);
-            if (!lonTxt.isEmpty()) lon = Double.parseDouble(lonTxt);
+            if (!latTxt.isEmpty() || !lonTxt.isEmpty()) {
+                if (latTxt.isEmpty() || lonTxt.isEmpty()) {
+                    showFormError("Latitude et longitude doivent etre renseignees ensemble."); return;
+                }
+                lat = Double.parseDouble(latTxt);
+                lon = Double.parseDouble(lonTxt);
+                if (!OpenStreetMapHelper.isValidLatitude(lat) || !OpenStreetMapHelper.isValidLongitude(lon)) {
+                    showFormError("Latitude/Longitude hors limites."); return;
+                }
+            }
         } catch (NumberFormatException e) { showFormError("Latitude/Longitude invalides."); return; }
         try {
             if (isEditMode && selectedForEdit != null) {
@@ -229,6 +266,22 @@ public class MagasinController implements Initializable {
     }
 
     @FXML private void hideForm(ActionEvent e) { setFormVisible(false); clearForm(); hideError(); }
+
+    @FXML
+    private void centerMapOnFields(ActionEvent e) {
+        try {
+            Double lat = latField.getText().trim().isEmpty() ? null : Double.parseDouble(latField.getText().trim());
+            Double lon = lonField.getText().trim().isEmpty() ? null : Double.parseDouble(lonField.getText().trim());
+            if (lat != null && lon != null
+                    && (!OpenStreetMapHelper.isValidLatitude(lat) || !OpenStreetMapHelper.isValidLongitude(lon))) {
+                showFormError("Latitude/Longitude hors limites.");
+                return;
+            }
+            loadPickerMap(lat, lon);
+        } catch (NumberFormatException ex) {
+            showFormError("Coordonnees invalides.");
+        }
+    }
 
     private void deleteMagasin(Magasin m) {
         Alert c = new Alert(Alert.AlertType.CONFIRMATION);
@@ -247,13 +300,53 @@ public class MagasinController implements Initializable {
         telField.setText(orEmpty(m.getTel())); emailField.setText(orEmpty(m.getEmail()));
         latField.setText(m.getLatitude()  != null ? String.valueOf(m.getLatitude())  : "");
         lonField.setText(m.getLongitude() != null ? String.valueOf(m.getLongitude()) : "");
+        loadPickerMap(m.getLatitude(), m.getLongitude());
     }
-    private void clearForm()                     { nomField.clear();adresseField.clear();telField.clear();emailField.clear();latField.clear();lonField.clear(); }
-    private void setFormVisible(boolean v)       { formPanel.setVisible(v); formPanel.setManaged(v); }
+    private void clearForm()                     { nomField.clear();adresseField.clear();telField.clear();emailField.clear();latField.clear();lonField.clear(); updateSelectedPosition(null, null); }
+    private void setFormVisible(boolean v)       {
+        formPanel.setVisible(v); formPanel.setManaged(v);
+        if (v && locationMap != null) {
+            Platform.runLater(() -> locationMap.getEngine().executeScript("if(window.map){setTimeout(function(){map.invalidateSize();},80);}"));
+        }
+    }
     private void showFormError(String msg)       { errorLabel.setText("⚠️ "+msg); errorLabel.setVisible(true); errorLabel.setManaged(true); }
     private void hideError()                     { errorLabel.setVisible(false); errorLabel.setManaged(false); }
     private String orEmpty(String s)             { return s != null ? s : ""; }
     private void showAlert(Alert.AlertType t, String title, String msg) {
         Alert a=new Alert(t); a.setTitle(title); a.setHeaderText(null); a.setContentText(msg); a.showAndWait();
+    }
+
+    private void loadPickerMap(Double latitude, Double longitude) {
+        if (locationMap == null) {
+            return;
+        }
+        locationMap.getEngine().loadContent(OpenStreetMapHelper.buildPickerMap(latitude, longitude));
+        updateSelectedPosition(latitude, longitude);
+    }
+
+    private void updateSelectedPosition(Double latitude, Double longitude) {
+        if (selectedPositionLabel == null) {
+            return;
+        }
+        if (latitude == null || longitude == null) {
+            selectedPositionLabel.setText("Aucune position selectionnee");
+        } else {
+            selectedPositionLabel.setText("Position: " + formatCoordinate(latitude) + ", " + formatCoordinate(longitude));
+        }
+    }
+
+    private String formatCoordinate(double value) {
+        return String.format(Locale.US, "%.6f", value);
+    }
+
+    public class MapBridge {
+        public void positionSelected(double latitude, double longitude) {
+            Platform.runLater(() -> {
+                latField.setText(formatCoordinate(latitude));
+                lonField.setText(formatCoordinate(longitude));
+                updateSelectedPosition(latitude, longitude);
+                hideError();
+            });
+        }
     }
 }

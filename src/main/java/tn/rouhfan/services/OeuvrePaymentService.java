@@ -43,7 +43,7 @@ public class OeuvrePaymentService {
                         SessionCreateParams.LineItem.builder()
                                 .setPriceData(
                                         SessionCreateParams.LineItem.PriceData.builder()
-                                                .setCurrency("eur") 
+                                                .setCurrency("eur")
                                                 .setUnitAmount(unitAmount)
                                                 .setProductData(
                                                         SessionCreateParams.LineItem.PriceData.ProductData.builder()

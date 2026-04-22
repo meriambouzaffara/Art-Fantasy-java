@@ -10,6 +10,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane prefHeight="800.0" prefWidth="1280.0" stylesheets="@../theme.css" styleClass="app-shell" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.front.FrontBaseController">
@@ -64,21 +65,34 @@
     </top>
 
     <center>
-        <VBox spacing="0.0" fillWidth="true">
-            <VBox fx:id="heroSection" spacing="0.0" styleClass="hero-front" VBox.vgrow="ALWAYS">
-                <Label text="Rouh el Fann" styleClass="hero-front-title" />
-                <Label text="L'Âme de l'Art" styleClass="hero-front-subtitle" />
+        <StackPane>
+            <VBox spacing="0.0" fillWidth="true">
+                <VBox fx:id="heroSection" spacing="0.0" styleClass="hero-front" VBox.vgrow="ALWAYS">
+                    <Label text="Rouh el Fann" styleClass="hero-front-title" />
+                    <Label text="L'Âme de l'Art" styleClass="hero-front-subtitle" />
 
-                <Label text="Découvrez une collection époustouflante d'œuvres d'art fantasy, de dragons majestueux aux royaumes enchantés. Art &amp; Fantaisie à chaque regard."
-                       styleClass="hero-front-description" wrapText="true" />
+                    <Label text="Découvrez une collection époustouflante d'œuvres d'art fantasy..."
+                           styleClass="hero-front-description" wrapText="true" />
 
-                <HBox spacing="20.0" alignment="CENTER" style="-fx-padding: 40 0 0 0;">
-                    <Button text="✨ Explorer la galerie" mnemonicParsing="false" styleClass="btn-front-primary" onAction="#goOeuvres" />
-                    <Button text="📖 En savoir plus" mnemonicParsing="false" styleClass="btn-front-secondary" onAction="#goAbout" />
-                </HBox>
+                    <HBox spacing="20.0" alignment="CENTER" style="-fx-padding: 40 0 0 0;">
+                        <Button text="✨ Explorer la galerie" styleClass="btn-front-primary" onAction="#goOeuvres" />
+                        <Button text="📖 En savoir plus" styleClass="btn-front-secondary" onAction="#goAbout" />
+                    </HBox>
+                </VBox>
+
+                <!-- CONTENU MAGASIN / ARTICLES -->
+                <VBox fx:id="contentHost" spacing="20.0" styleClass="content" />
             </VBox>
 
-            <VBox fx:id="contentHost" spacing="20.0" styleClass="content" />
-        </VBox>
+            <!-- 🛒 BOUTON PANIER FLOTTANT -->
+            <Button fx:id="cartButton" text="Panier (0)" onAction="#openCart"
+                    StackPane.alignment="TOP_RIGHT"
+                    style="-fx-background-color: #c9a849; -fx-text-fill: white; -fx-font-weight: bold;
+                       -fx-background-radius: 22; -fx-padding: 11 18; -fx-cursor: hand;">
+                <StackPane.margin>
+                    <Insets top="22.0" right="26.0" />
+                </StackPane.margin>
+            </Button>
+        </StackPane>
     </center>
 </BorderPane>

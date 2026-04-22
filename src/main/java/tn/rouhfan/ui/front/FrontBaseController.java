@@ -13,6 +13,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.scene.control.Alert;
 import tn.rouhfan.entities.User;
+import tn.rouhfan.services.PanierService;
 import tn.rouhfan.tools.SessionManager;
 import tn.rouhfan.ui.Router;
 
@@ -28,13 +29,33 @@ public class FrontBaseController {
     @FXML private HBox userButtons;
     @FXML private Label welcomeLabel;
     @FXML private Button profileBtn;
+    // 🛒 PANIER
+    @FXML private Button cartButton;
+
+    private final PanierService panierService = PanierService.getInstance();
 
     @FXML
     public void initialize() {
         showHero(true);
         setupNavbarByRole();
+        setupCartButton();
+    }
+    private void setupCartButton() {
+        updateCartButton();
+        panierService.revisionProperty().addListener((obs, oldValue, newValue) -> updateCartButton());
     }
 
+    private void updateCartButton() {
+        if (cartButton != null) {
+            cartButton.setText("Panier (" + panierService.getItemCount() + ")");
+        }
+    }
+
+    @FXML
+    private void openCart(ActionEvent event) {
+        showHero(false);
+        Router.setContent(contentHost, "/ui/front/checkout.fxml");
+    }
     /**
      * Configure la navbar selon l'utilisateur connecté :
      * - Non connecté : Sign Up + Login
