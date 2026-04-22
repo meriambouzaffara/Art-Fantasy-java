@@ -125,7 +125,7 @@ public class FavorisService {
      */
     public void exportFavoritesToPDF(int userId, String filePath) throws Exception {
         List<Favoris> favoris = recupererParUser(userId);
-        
+
         com.lowagie.text.Document document = new com.lowagie.text.Document(com.lowagie.text.PageSize.A4);
         com.lowagie.text.pdf.PdfWriter.getInstance(document, new java.io.FileOutputStream(filePath));
         document.open();
@@ -152,7 +152,7 @@ public class FavorisService {
         com.lowagie.text.Font headFont = com.lowagie.text.FontFactory.getFont(com.lowagie.text.FontFactory.HELVETICA_BOLD, 12, java.awt.Color.BLACK);
         java.awt.Color headBg = new java.awt.Color(240, 238, 245);
         String[] headers = {"Titre", "Prix (DT)", "Catégorie", "Auteur"};
-        
+
         for (String h : headers) {
             com.lowagie.text.pdf.PdfPCell cell = new com.lowagie.text.pdf.PdfPCell(new com.lowagie.text.Phrase(h, headFont));
             cell.setBackgroundColor(headBg);
@@ -167,7 +167,7 @@ public class FavorisService {
             table.addCell(new com.lowagie.text.pdf.PdfPCell(new com.lowagie.text.Phrase(o.getTitre(), bodyFont))).setPadding(5);
             table.addCell(new com.lowagie.text.pdf.PdfPCell(new com.lowagie.text.Phrase(o.getPrix().toString(), bodyFont))).setPadding(5);
             table.addCell(new com.lowagie.text.pdf.PdfPCell(new com.lowagie.text.Phrase(o.getCategorie() != null ? o.getCategorie().getNomCategorie() : "", bodyFont))).setPadding(5);
-            
+
             String author = o.getUser() != null ? o.getUser().getNom() + " " + o.getUser().getPrenom() : "Inconnu";
             table.addCell(new com.lowagie.text.pdf.PdfPCell(new com.lowagie.text.Phrase(author, bodyFont))).setPadding(5);
         }

@@ -29,20 +29,10 @@ public class TwilioSmsService {
             System.err.println("Numéro de téléphone invalide pour l'envoi du SMS.");
             return;
         }
-        // Normalisation du numéro (format international requis par Twilio)
-        String normalizedTo = toPhoneNumber.trim().replaceAll("\\s+", "");
-        if (!normalizedTo.startsWith("+")) {
-            if (normalizedTo.startsWith("00")) {
-                normalizedTo = "+" + normalizedTo.substring(2);
-            } else {
-                // Par défaut on assume la Tunisie (+216) pour les numéros à 8 chiffres
-                normalizedTo = "+216" + normalizedTo;
-            }
-        }
-
+        
         try {
             Message message = Message.creator(
-                    new PhoneNumber(normalizedTo),
+                    new PhoneNumber(toPhoneNumber),
                     new PhoneNumber(FROM_NUMBER),
                     body
             ).create();

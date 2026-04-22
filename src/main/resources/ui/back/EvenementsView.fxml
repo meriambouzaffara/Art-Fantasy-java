@@ -6,8 +6,15 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.StackPane?>
 
 
 
@@ -60,17 +67,49 @@
         <Button text="✏️Modifier" onAction="#editEvenement" styleClass="btn-edit-reflet" />
         <Button text="🗑️Supprimer" onAction="#deleteEvenement" styleClass="btn-delete-reflet" />
     </HBox>
-    <!-- Table -->
-    <TableView fx:id="evenementTable" VBox.vgrow="ALWAYS" styleClass="table-art-fantasy">
-        <columns>
-            <TableColumn fx:id="colId" text="ID" prefWidth="50" />
-            <TableColumn fx:id="colTitre" text="Titre" prefWidth="180" />
-            <TableColumn fx:id="colDate" text="Date" prefWidth="120" />
-            <TableColumn fx:id="colLieu" text="Lieu" prefWidth="150" />
-            <TableColumn fx:id="colType" text="Type" prefWidth="100" />
-            <TableColumn fx:id="colCapacite" text="Capacité" prefWidth="80" />
-            <TableColumn fx:id="colStatut" text="Statut" prefWidth="100" />
-        </columns>
-    </TableView>
+    <!-- Tabs Container -->
+    <TabPane VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE" styleClass="tab-pane">
+        <tabs>
+            <Tab text="📋 Liste des Événements">
+                <VBox>
+                    <TableView fx:id="evenementTable" VBox.vgrow="ALWAYS" styleClass="table-art-fantasy">
+                        <columns>
+                            <TableColumn fx:id="colId" text="ID" prefWidth="50" />
+                            <TableColumn fx:id="colTitre" text="Titre" prefWidth="180" />
+                            <TableColumn fx:id="colDate" text="Date" prefWidth="120" />
+                            <TableColumn fx:id="colLieu" text="Lieu" prefWidth="150" />
+                            <TableColumn fx:id="colType" text="Type" prefWidth="100" />
+                            <TableColumn fx:id="colCapacite" text="Capacité" prefWidth="80" />
+                            <TableColumn fx:id="colStatut" text="Statut" prefWidth="100" />
+                        </columns>
+                    </TableView>
+                </VBox>
+            </Tab>
+            <Tab text="📊 Statistiques (Par Type)">
+                <VBox spacing="30.0" styleClass="surface" style="-fx-padding: 25;">
+                    <HBox spacing="30.0" VBox.vgrow="ALWAYS">
+                        <VBox spacing="15.0" HBox.hgrow="ALWAYS" alignment="CENTER">
+                            <Label text="Répartition par Type (Événements)" styleClass="text-title" style="-fx-font-size: 20;" />
+                            <StackPane>
+                                <PieChart fx:id="typePieChart" prefHeight="350.0" legendSide="RIGHT" />
+                                <javafx.scene.shape.Circle fill="WHITE" radius="70.0" />
+                            </StackPane>
+                        </VBox>
+                        <VBox spacing="15.0" HBox.hgrow="ALWAYS" alignment="CENTER">
+                            <Label text="Participants par Type" styleClass="text-title" style="-fx-font-size: 20;" />
+                            <BarChart fx:id="participantsBarChart" prefHeight="350.0" legendVisible="false">
+                                <xAxis>
+                                    <CategoryAxis side="BOTTOM" label="Type" />
+                                </xAxis>
+                                <yAxis>
+                                    <NumberAxis side="LEFT" label="Nb Participants" />
+                                </yAxis>
+                            </BarChart>
+                        </VBox>
+                    </HBox>
+                </VBox>
+            </Tab>
+        </tabs>
+    </TabPane>
 </VBox>
 

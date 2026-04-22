@@ -92,21 +92,21 @@ public class CategoriesController implements Initializable {
                 editBtn.getStyleClass().add("btn-edit-reflet");
                 deleteBtn.getStyleClass().add("btn-delete-reflet");
                 pane.setAlignment(javafx.geometry.Pos.CENTER);
-                
+
                 viewBtn.setMinWidth(Button.USE_PREF_SIZE);
                 editBtn.setMinWidth(Button.USE_PREF_SIZE);
                 deleteBtn.setMinWidth(Button.USE_PREF_SIZE);
-                
+
                 viewBtn.setOnAction(e -> {
                     Categorie c = getTableView().getItems().get(getIndex());
                     openCategorieDetails(c);
                 });
-                
+
                 editBtn.setOnAction(e -> {
                     Categorie c = getTableView().getItems().get(getIndex());
                     openCategorieDialog(c);
                 });
-                
+
                 deleteBtn.setOnAction(e -> {
                     Categorie c = getTableView().getItems().get(getIndex());
                     handleDelete(c);

@@ -36,7 +36,7 @@ public class OeuvreFormController implements Initializable {
     @FXML private TextField prixField;
     @FXML private ComboBox<String> statutCombo;
     @FXML private ComboBox<Categorie> categorieCombo;
-    
+
     @FXML private ImageView imagePreview;
     @FXML private Label placeholderLabel;
     @FXML private StackPane imageContainer;
@@ -50,7 +50,7 @@ public class OeuvreFormController implements Initializable {
 
     private OeuvreService oeuvreService;
     private CategorieService categorieService;
-    
+
     private Oeuvre currentOeuvre;
     private File selectedImageFile;
     private boolean saved = false;
@@ -60,7 +60,7 @@ public class OeuvreFormController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         oeuvreService = new OeuvreService();
         categorieService = new CategorieService();
-        
+
         setupCombos();
         loadData();
     }
@@ -74,7 +74,7 @@ public class OeuvreFormController implements Initializable {
             prixField.setEditable(false);
             statutCombo.setDisable(true);
             categorieCombo.setDisable(true);
-            
+
             if (saveBtn != null) {
                 saveBtn.setVisible(false);
                 saveBtn.setManaged(false);
@@ -91,7 +91,7 @@ public class OeuvreFormController implements Initializable {
             @Override public String toString(Categorie c) { return c == null ? "" : c.getNomCategorie(); }
             @Override public Categorie fromString(String string) { return null; }
         });
-        
+
         statutCombo.setValue("disponible");
     }
 
@@ -111,7 +111,7 @@ public class OeuvreFormController implements Initializable {
             descriptionField.setText(oeuvre.getDescription());
             prixField.setText(oeuvre.getPrix() != null ? oeuvre.getPrix().toString() : "");
             statutCombo.setValue(oeuvre.getStatut());
-            
+
             // Selectionner la bonne catégorie
             for (Categorie c : categorieCombo.getItems()) {
                 if (oeuvre.getCategorie() != null && c.getIdCategorie() == oeuvre.getCategorie().getIdCategorie()) {
@@ -134,17 +134,17 @@ public class OeuvreFormController implements Initializable {
     private void browseImage(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choisir une image");
-        
+
         // Ouvrir directement dans le dossier uploads/oeuvres
         File initialDir = new File(tn.rouhfan.tools.ImageUtils.UPLOADS_DIR + "/oeuvres");
         if (initialDir.exists()) {
             fileChooser.setInitialDirectory(initialDir);
         }
-        
+
         fileChooser.getExtensionFilters().addAll(
-            new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
+                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
         );
-        
+
         File file = fileChooser.showOpenDialog(titreField.getScene().getWindow());
         if (file != null) {
             selectedImageFile = file;
@@ -169,7 +169,7 @@ public class OeuvreFormController implements Initializable {
             currentOeuvre.setPrix(new BigDecimal(prixField.getText()));
             currentOeuvre.setStatut(statutCombo.getValue());
             currentOeuvre.setCategorie(categorieCombo.getValue());
-            
+
             // Utiliser l'utilisateur connecté automatiquement comme artiste
             User currentUser = SessionManager.getInstance().getCurrentUser();
             if (currentOeuvre.getUser() == null && currentUser != null) {
@@ -230,7 +230,7 @@ public class OeuvreFormController implements Initializable {
                 // Créer une oeuvre temporaire pour le test
                 Oeuvre tempOeuvre = new Oeuvre();
                 tempOeuvre.setTitre(titre);
-                
+
                 // Utiliser l'utilisateur courant pour le test
                 User currentUser = SessionManager.getInstance().getCurrentUser();
                 if (currentOeuvre != null && currentOeuvre.getUser() != null) {

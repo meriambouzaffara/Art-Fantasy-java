@@ -218,21 +218,21 @@ public class OeuvreStatistiquesController {
 
             // Styles
             CellStyle headerStyle = workbook.createCellStyle();
-            headerStyle.setFillForegroundColor(org.apache.poi.ss.usermodel.IndexedColors.INDIGO.getIndex());
-            headerStyle.setFillPattern(org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND);
+            headerStyle.setFillForegroundColor(IndexedColors.INDIGO.getIndex());
+            headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
             Font headerFont = workbook.createFont();
-            headerFont.setColor(org.apache.poi.ss.usermodel.IndexedColors.WHITE.getIndex());
+            headerFont.setColor(IndexedColors.WHITE.getIndex());
             headerFont.setBold(true);
             headerFont.setFontHeightInPoints((short) 12);
             headerStyle.setFont(headerFont);
-            headerStyle.setAlignment(org.apache.poi.ss.usermodel.HorizontalAlignment.CENTER);
+            headerStyle.setAlignment(HorizontalAlignment.CENTER);
 
             CellStyle titleStyle = workbook.createCellStyle();
             Font titleFont = workbook.createFont();
             titleFont.setBold(true);
             titleFont.setFontHeightInPoints((short) 16);
             titleStyle.setFont(titleFont);
-            titleStyle.setAlignment(org.apache.poi.ss.usermodel.HorizontalAlignment.CENTER);
+            titleStyle.setAlignment(HorizontalAlignment.CENTER);
 
             // Title Row
             Row titleRow = sheet.createRow(1);
@@ -267,7 +267,7 @@ public class OeuvreStatistiquesController {
                     dateStr = sdf.format(o.getDateVente());
                 } else {
                     // Fallback to today's date if empty in DB
-                    dateStr = sdf.format(new java.util.Date());
+                    dateStr = sdf.format(new Date());
                 }
                 row.createCell(6).setCellValue(dateStr);
             }

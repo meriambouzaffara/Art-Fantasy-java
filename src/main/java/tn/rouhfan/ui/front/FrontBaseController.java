@@ -28,6 +28,7 @@ public class FrontBaseController {
     @FXML private HBox userButtons;
     @FXML private Label welcomeLabel;
     @FXML private Button profileBtn;
+    @FXML private Button iaBtn;
 
     @FXML
     public void initialize() {
@@ -61,12 +62,18 @@ public class FrontBaseController {
 
             String role = session.getRole();
             String roleEmoji;
+            boolean isParticipant = false;
             if (role != null && role.toUpperCase().contains("ARTISTE")) {
                 roleEmoji = "🎨";
             } else {
                 roleEmoji = "🎭";
+                isParticipant = true;
             }
             welcomeLabel.setText(roleEmoji + " " + currentUser.getPrenom() + " " + currentUser.getNom());
+
+            // Afficher le bouton IA uniquement pour les participants
+            iaBtn.setVisible(isParticipant);
+            iaBtn.setManaged(isParticipant);
         }
     }
 
@@ -115,8 +122,8 @@ public class FrontBaseController {
         showHero(false);
         contentHost.getChildren().clear();
         try {
-            VBox view = Router.loadView("/ui/front/EvenementsFront.fxml");
-            contentHost.getChildren().add(view);
+            Parent root = FXMLLoader.load(getClass().getResource("/ui/front/EvenementsFront.fxml"));
+            contentHost.getChildren().add(root);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -156,6 +163,18 @@ public class FrontBaseController {
     private void goMagasin(ActionEvent event) {
         showHero(false);
         Router.setContent(contentHost, "/ui/front/front_magasins.fxml");
+    }
+
+    @FXML
+    private void goIA(ActionEvent event) {
+        showHero(false);
+        contentHost.getChildren().clear();
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/ui/front/IAOeuvresFront.fxml"));
+            contentHost.getChildren().add(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     @FXML
     private void goAvis(ActionEvent event) {

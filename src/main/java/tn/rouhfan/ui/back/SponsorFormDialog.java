@@ -50,7 +50,7 @@ public class SponsorFormDialog {
 
         // Form Content
         GridPane grid = createFormGrid();
-        
+
         // Buttons
         HBox buttonBox = new HBox(10);
         buttonBox.setPadding(new Insets(10));
@@ -93,14 +93,14 @@ public class SponsorFormDialog {
         Button browseBtn = new Button("📁 Parcourir");
         browseBtn.setStyle("-fx-font-size: 11; -fx-padding: 5 10;");
         browseBtn.setOnAction(e -> handleBrowseLogo());
-        
+
         Label logoPathLabel = new Label("Aucun logo sélectionné");
         logoPathLabel.setStyle("-fx-text-fill: #999; -fx-font-size: 10;");
-        
+
         logoBox.getChildren().addAll(browseBtn, logoPathLabel);
         grid.add(createLabel("Logo"), 0, 1);
         grid.add(logoBox, 1, 1);
-        
+
         // Logo Preview
         logoPreview = new ImageView();
         logoPreview.setFitWidth(150);
@@ -165,7 +165,7 @@ public class SponsorFormDialog {
 
     private void populateFields() {
         nomField.setText(sponsor.getNom() != null ? sponsor.getNom() : "");
-        
+
         // Load logo if exists
         if (sponsor.getLogo() != null && !sponsor.getLogo().isEmpty()) {
             selectedLogoPath = sponsor.getLogo();
@@ -177,7 +177,7 @@ public class SponsorFormDialog {
                 System.err.println("Erreur chargement logo: " + e.getMessage());
             }
         }
-        
+
         descriptionArea.setText(sponsor.getDescription() != null ? sponsor.getDescription() : "");
         emailField.setText(sponsor.getEmail() != null ? sponsor.getEmail() : "");
         telField.setText(sponsor.getTel() != null ? sponsor.getTel() : "");
@@ -222,29 +222,29 @@ public class SponsorFormDialog {
     private void handleBrowseLogo() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Sélectionner un logo");
-        
+
         // Add image file filters
         fileChooser.getExtensionFilters().addAll(
-            new FileChooser.ExtensionFilter("Images", "*.jpg", "*.jpeg", "*.png", "*.gif", "*.bmp"),
-            new FileChooser.ExtensionFilter("All Files", "*.*")
+                new FileChooser.ExtensionFilter("Images", "*.jpg", "*.jpeg", "*.png", "*.gif", "*.bmp"),
+                new FileChooser.ExtensionFilter("All Files", "*.*")
         );
-        
+
         File selectedFile = fileChooser.showOpenDialog(stage);
-        
+
         if (selectedFile != null) {
             if (ImageUtils.isValidImageFile(selectedFile)) {
                 try {
                     String relativePath = ImageUtils.saveUpload(selectedFile, "sponsors");
                     selectedLogoPath = relativePath;
-                    
+
                     // Update preview
                     String imageUrl = ImageUtils.getImageUrl(relativePath);
                     Image img = new Image(imageUrl);
                     logoPreview.setImage(img);
-                    
+
                     errorLabel.setText("✓ Logo chargé avec succès");
                     errorLabel.setStyle("-fx-text-fill: green; -fx-font-size: 11;");
-                    
+
                 } catch (Exception e) {
                     errorLabel.setText("❌ Erreur lors du chargement: " + e.getMessage());
                     errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 11;");

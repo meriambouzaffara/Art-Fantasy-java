@@ -13,6 +13,11 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ResourceBundle;
+import java.util.Map;
+import java.util.stream.Collectors;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.PieChart;
+import javafx.scene.chart.XYChart;
 import java.awt.Desktop;
 import java.net.URI;
 
@@ -34,6 +39,8 @@ public class EvenementsController implements Initializable {
     @FXML private Label statTotalEvents;
     @FXML private Label statTotalCapacity;
     @FXML private Label statTotalParticipants;
+    @FXML private PieChart typePieChart;
+    @FXML private BarChart<String, Number> participantsBarChart;
 
     private EvenementService evenementService;
     private ObservableList<Evenement> evenementsList;
@@ -90,7 +97,6 @@ public class EvenementsController implements Initializable {
         }
     }
 
-    // ✅ STATISTIQUES
     private void updateStats(ObservableList<Evenement> list) {
         if (statTotalEvents == null) return;
 
@@ -106,6 +112,31 @@ public class EvenementsController implements Initializable {
 
         statTotalCapacity.setText(String.valueOf(capacity));
         statTotalParticipants.setText(String.valueOf(participants));
+        
+        // Update Charts
+        if (typePieChart != null && participantsBarChart != null) {
+            typePieChart.getData().clear();
+            participantsBarChart.getData().clear();
+            
+            Map<String, Long> countByType = list.stream()
+                .filter(e -> e.getType() != null)
+                .collect(Collectors.groupingBy(Evenement::getType, Collectors.counting()));
+                
+            for (Map.Entry<String, Long> entry : countByType.entrySet()) {
+                typePieChart.getData().add(new PieChart.Data(entry.getKey() + " (" + entry.getValue() + ")", entry.getValue()));
+            }
+            
+            Map<String, Integer> participantsByType = list.stream()
+                .filter(e -> e.getType() != null)
+                .collect(Collectors.groupingBy(Evenement::getType, Collectors.summingInt(Evenement::getNbParticipants)));
+                
+            XYChart.Series<String, Number> series = new XYChart.Series<>();
+            series.setName("Participants");
+            for (Map.Entry<String, Integer> entry : participantsByType.entrySet()) {
+                series.getData().add(new XYChart.Data<>(entry.getKey(), entry.getValue()));
+            }
+            participantsBarChart.getData().add(series);
+        }
     }
 
     private void handleSearch() {

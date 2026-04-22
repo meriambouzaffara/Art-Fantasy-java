@@ -48,7 +48,7 @@ public class CategorieFormController implements Initializable {
         if (categorie != null) {
             formTitle.setText("✏️ Modifier la catégorie");
             nomField.setText(categorie.getNomCategorie());
-            
+
             if (categorie.getImageCategorie() != null && !categorie.getImageCategorie().isEmpty()) {
                 String fullPath = tn.rouhfan.tools.ImageUtils.getAbsolutePath(categorie.getImageCategorie());
                 if (fullPath != null) {
@@ -63,7 +63,7 @@ public class CategorieFormController implements Initializable {
     private void browseImage(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choisir une image de catégorie");
-        
+
         // Ouvrir directement dans le dossier uploads/categories
         File initialDir = new File(tn.rouhfan.tools.ImageUtils.UPLOADS_DIR + "/categories");
         if (initialDir.exists()) {
@@ -72,9 +72,9 @@ public class CategorieFormController implements Initializable {
 
         // Accepter n'importe quel type d'image
         fileChooser.getExtensionFilters().addAll(
-            new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
+                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
         );
-        
+
         File file = fileChooser.showOpenDialog(nomField.getScene().getWindow());
         if (file != null) {
             selectedImageFile = file;
@@ -93,7 +93,7 @@ public class CategorieFormController implements Initializable {
 
         try {
             if (currentCategorie == null) currentCategorie = new Categorie();
-            
+
             currentCategorie.setNomCategorie(nomField.getText());
 
             // Gérer l'upload d'image via ImageUtils
@@ -118,7 +118,7 @@ public class CategorieFormController implements Initializable {
 
     private boolean validateFields() {
         boolean isValid = true;
-        
+
         // Hide errors initially
         nomErrorLabel.setVisible(false);
         nomErrorLabel.setManaged(false);

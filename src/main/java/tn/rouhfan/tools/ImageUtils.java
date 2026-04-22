@@ -3,6 +3,8 @@ package tn.rouhfan.tools;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
@@ -16,7 +18,7 @@ public class ImageUtils {
         // Créer le répertoire de base s'il n'existe pas
         File uploadsDir = new File(UPLOADS_DIR);
         if (!uploadsDir.exists()) uploadsDir.mkdirs();
-        
+
         // Sous-répertoires par défaut
         String[] defaults = {"oeuvres", "categories", "evenements", "sponsors", "misc"};
         for (String sub : defaults) {
@@ -37,7 +39,7 @@ public class ImageUtils {
         // Nettoyer le chemin
         String normalizedPath = dbPath.replace("\\", "/");
         if (normalizedPath.startsWith("/")) normalizedPath = normalizedPath.substring(1);
-        
+
         // Liste des dossiers racines possibles
         String[] possibleRoots = {"src/main/resources", "target/classes", "."};
 
@@ -55,17 +57,17 @@ public class ImageUtils {
             File file = new File(root + File.separator + searchPath);
             if (file.exists()) return file.toURI().toString();
         }
-        
+
         // 2. Recherche par nom de fichier dans TOUS les sous-dossiers de uploads
         String fileName = searchPath.contains("/") ? searchPath.substring(searchPath.lastIndexOf("/") + 1) : searchPath;
-        
+
         for (String root : possibleRoots) {
             File uploadsDir = new File(root + File.separator + "uploads");
             if (uploadsDir.exists() && uploadsDir.isDirectory()) {
                 // Tenter à la racine de uploads
                 File directFile = new File(uploadsDir, fileName);
                 if (directFile.exists()) return directFile.toURI().toString();
-                
+
                 // Tenter dans tous les sous-dossiers
                 File[] subDirs = uploadsDir.listFiles(File::isDirectory);
                 if (subDirs != null) {
@@ -75,7 +77,7 @@ public class ImageUtils {
                     }
                 }
             }
-            
+
             // Tenter aussi dans l'ancien dossier images si présent
             File oldImagesDir = new File(root + File.separator + "images");
             if (oldImagesDir.exists()) {
@@ -104,10 +106,10 @@ public class ImageUtils {
     }
 
     /**
-     * Sauvegarde une image uploadée dans le dossier approprié dans resources.
+     * Sauvegarde une image uploadée dans le dossier approprié dans resources
      * @param sourceFile Le fichier source choisi par l'utilisateur
-     * @param subDir Nom du dossier cible (ex: "oeuvres", "categories", "evenements", "sponsors")
-     * @return Le chemin relatif à stocker en base de données (ex: uploads/evenements/name.png)
+     * @param subDir "oeuvres" ou "categories"
+     * @return Le chemin relatif à stocker en base de données (ex: uploads/oeuvres/name.png)
      */
     public static String saveUpload(File sourceFile, String subDir) throws IOException {
         if (sourceFile == null || !sourceFile.exists()) return null;
@@ -126,6 +128,11 @@ public class ImageUtils {
         return "uploads" + "/" + subDir + "/" + fileName;
     }
 
+    /**
+     * Pour compatibilité avec l'ancien code si nécessaire
+     * @deprecated Utiliser saveUpload pour les nouvelles oeuvres/categories
+     */
+    @Deprecated
     public static String copyImage(String sourcePath) {
         if (sourcePath == null || sourcePath.trim().isEmpty()) return "";
         try {
@@ -135,6 +142,13 @@ public class ImageUtils {
             System.err.println("❌ Erreur copie image: " + e.getMessage());
             return "";
         }
+    }
+
+    private static String getFileExtension(File file) {
+        String name = file.getName();
+        int lastIndexOf = name.lastIndexOf(".");
+        if (lastIndexOf == -1) return "png";
+        return name.substring(lastIndexOf + 1).toLowerCase();
     }
 
     public static void deleteImage(String dbPath) {
@@ -153,8 +167,8 @@ public class ImageUtils {
     public static boolean isValidImageFile(File file) {
         if (file == null || !file.exists()) return false;
         String name = file.getName().toLowerCase();
-        return name.endsWith(".jpg") || name.endsWith(".jpeg") || 
-               name.endsWith(".png") || name.endsWith(".gif") || 
-               name.endsWith(".bmp");
+        return name.endsWith(".jpg") || name.endsWith(".jpeg") ||
+                name.endsWith(".png") || name.endsWith(".gif") ||
+                name.endsWith(".bmp");
     }
 }

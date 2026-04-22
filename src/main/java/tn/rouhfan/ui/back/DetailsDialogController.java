@@ -33,7 +33,7 @@ public class DetailsDialogController {
         categoryLabel.setText(o.getCategorie() != null ? o.getCategorie().getNomCategorie() : "Non classé");
         artistLabel.setText(o.getUser() != null ? o.getUser().getNom() + " " + o.getUser().getPrenom() : "artiste artist");
         descriptionLabel.setText(o.getDescription());
-        
+
         loadImage(o.getImage());
     }
 
@@ -41,11 +41,11 @@ public class DetailsDialogController {
         titleLabel.setText("🏷️ Détails de la catégorie");
         subtitleLabel.setText("Organisation des œuvres");
         nameLabel.setText(c.getNomCategorie());
-        
+
         // Cacher les infos spécifiques aux œuvres
         extraInfoPane.setVisible(false);
         extraInfoPane.setManaged(false);
-        
+
         loadImage(c.getImageCategorie());
     }
 

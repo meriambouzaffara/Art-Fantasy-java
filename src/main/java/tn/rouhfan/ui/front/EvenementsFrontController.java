@@ -22,10 +22,12 @@ import tn.rouhfan.tools.ImageUtils;
 import tn.rouhfan.ui.back.EvenementFormDialog;
 
 import tn.rouhfan.entities.User;
+import javafx.application.Platform;
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ResourceBundle;
+import java.util.List;
 
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Element;
@@ -43,8 +45,11 @@ public class EvenementsFrontController implements Initializable {
     @FXML private TextField searchField;
     @FXML private ComboBox<String> sortCombo;
     @FXML private Button addButton;
-    @FXML private Button aiRecButton;
+    
+    @FXML private VBox recommendationsBox;
+    @FXML private FlowPane recommendationsPane;
 
+    private List<GroqAiService.AiRecommendationItem> currentAiItems;
     private EvenementService evenementService;
     private ObservableList<Evenement> evenementsList;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -77,16 +82,13 @@ public class EvenementsFrontController implements Initializable {
             addButton.setVisible(true);
             addButton.setManaged(true);
         }
-        if ("ROLE_PARTICIPANT".equals(userRole) && aiRecButton != null) {
-            aiRecButton.setVisible(true);
-            aiRecButton.setManaged(true);
-        }
     }
 
     private void loadEvenements() {
         try {
             evenementsList = FXCollections.observableArrayList(evenementService.recuperer());
             displayCards(evenementsList);
+            loadRecommendations();
         } catch (SQLException e) {
             showAlert("Erreur", "❌ Impossible de charger les événements: " + e.getMessage());
             e.printStackTrace();
@@ -286,59 +288,101 @@ public class EvenementsFrontController implements Initializable {
         }
     }
 
-    @FXML
-    private void showAiRecommendations(ActionEvent event) {
-        if (evenementsList == null || evenementsList.isEmpty()) {
-            showAlert("Info", "Aucun événement disponible pour demander des recommandations.");
+    private void loadRecommendations() {
+        String userRole = SessionManager.getInstance().getRole();
+        if (!"ROLE_PARTICIPANT".equals(userRole) || evenementsList == null || evenementsList.isEmpty()) {
+            if (recommendationsBox != null) {
+                recommendationsBox.setVisible(false);
+                recommendationsBox.setManaged(false);
+            }
             return;
         }
         
-        GroqAiService aiService = new GroqAiService();
-        GroqAiService.AiRecommendationResult result = aiService.getRecommendations(evenementsList, 3);
+        if (recommendationsBox != null) {
+            recommendationsBox.setVisible(true);
+            recommendationsBox.setManaged(true);
+            Label loadingLbl = new Label("⏳ Analyse de l'IA en cours...");
+            loadingLbl.setStyle("-fx-text-fill: #9b59b6; -fx-font-style: italic;");
+            recommendationsPane.getChildren().setAll(loadingLbl);
+        }
+        
+        new Thread(() -> {
+            java.util.List<Evenement> eventsForAi = new java.util.ArrayList<>(evenementsList);
+            try {
+                tn.rouhfan.entities.User currentUser = SessionManager.getInstance().getCurrentUser();
+                if (currentUser != null) {
+                    java.util.List<Evenement> myHistory = evenementService.getHistoriqueParticipations(currentUser.getId());
+                    java.util.List<Integer> historyIds = new java.util.ArrayList<>();
+                    for (Evenement e : myHistory) historyIds.add(e.getId());
+                    eventsForAi.removeIf(e -> historyIds.contains(e.getId()));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            GroqAiService aiService = new GroqAiService();
+            GroqAiService.AiRecommendationResult result = aiService.getRecommendations(eventsForAi, 3);
+            
+            Platform.runLater(() -> {
+                if (recommendationsPane == null) return;
+                recommendationsPane.getChildren().clear();
+                
+                if (result.getItems().isEmpty()) {
+                     Label emptyLbl = new Label("Désolé, aucune recommandation n'a pu être trouvée.");
+                     recommendationsPane.getChildren().add(emptyLbl);
+                     return;
+                }
+                
+                this.currentAiItems = result.getItems();
+                
+                for (GroqAiService.AiRecommendationItem item : result.getItems()) {
+                    Evenement evt = item.getEntity();
+                    VBox rootCard = createEventCard(evt);
+                    recommendationsPane.getChildren().add(rootCard);
+                }
+            });
+        }).start();
+    }
+    
+    @FXML
+    private void handleViewAnalysis(ActionEvent event) {
+        if (currentAiItems == null || currentAiItems.isEmpty()) return;
         
         Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle("✨ Recommandations IA - Rouh'El Fann");
-        dialog.setHeaderText(result.getAnalysis());
+        dialog.setTitle("✨ Pourquoi ces choix ?");
+        dialog.setHeaderText("Analyse de l'Intelligence Artificielle");
         
         DialogPane dialogPane = dialog.getDialogPane();
         dialogPane.getButtonTypes().add(ButtonType.CLOSE);
         
         VBox container = new VBox(15);
-        container.setPadding(new Insets(15));
+        container.setPadding(new javafx.geometry.Insets(15));
         
-        for (GroqAiService.AiRecommendationItem item : result.getItems()) {
+        for (GroqAiService.AiRecommendationItem item : currentAiItems) {
             Evenement evt = item.getEntity();
             
             VBox card = new VBox(5);
-            card.setStyle("-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-background-radius: 8; -fx-border-color: #e9ecef; -fx-border-radius: 8;");
+            card.setStyle("-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 8; -fx-border-color: #e9ecef; -fx-border-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 2);");
             
             Label titleLbl = new Label("🎯 " + evt.getTitre() + " (" + evt.getType() + ")");
             titleLbl.setStyle("-fx-font-weight: bold; -fx-font-size: 14; -fx-text-fill: #2c3e50;");
             
-            Label dateLbl = new Label("📅 " + (evt.getDateEvent() != null ? dateFormat.format(evt.getDateEvent()) : "N/A") + " | 📍 " + evt.getLieu());
-            dateLbl.setStyle("-fx-text-fill: #7f8c8d; -fx-font-size: 12;");
-            
-            Label aiVisionLbl = new Label("🤖 Vision IA: " + item.getAiVision());
+            Label aiVisionLbl = new Label("👁️ Vision de l'IA:\n" + item.getAiVision());
             aiVisionLbl.setWrapText(true);
-            aiVisionLbl.setStyle("-fx-text-fill: #8e44ad; -fx-font-style: italic;");
+            aiVisionLbl.setStyle("-fx-text-fill: #8e44ad; -fx-font-style: italic; -fx-font-size: 12;");
             
-            Label reasonLbl = new Label("💡 Pourquoi ? " + item.getReason());
+            Label reasonLbl = new Label("🤝 Pourquoi pour vous ?\n" + item.getReason());
             reasonLbl.setWrapText(true);
-            reasonLbl.setStyle("-fx-text-fill: #27ae60; -fx-font-weight: bold;");
+            reasonLbl.setStyle("-fx-text-fill: #27ae60; -fx-font-weight: bold; -fx-font-size: 12;");
             
-            card.getChildren().addAll(titleLbl, dateLbl, aiVisionLbl, reasonLbl);
+            card.getChildren().addAll(titleLbl, aiVisionLbl, reasonLbl);
             container.getChildren().add(card);
-        }
-        
-        if (result.getItems().isEmpty()) {
-             Label emptyLbl = new Label("Désolé, aucune recommandation spécifique n'a pu être trouvée.");
-             container.getChildren().add(emptyLbl);
         }
         
         ScrollPane scrollPane = new ScrollPane(container);
         scrollPane.setFitToWidth(true);
-        scrollPane.setPrefViewportHeight(200);
-        scrollPane.setPrefViewportWidth(90);
+        scrollPane.setPrefViewportHeight(400);
+        scrollPane.setPrefViewportWidth(450);
         scrollPane.setStyle("-fx-background-color: transparent;");
         
         dialogPane.setContent(scrollPane);
