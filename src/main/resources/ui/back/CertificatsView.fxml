@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="14.0" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.CertificatsController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+
+    <VBox spacing="4.0">
+        <Label text="📜 Gestion des Certificats" style="-fx-font-size: 24px; -fx-font-weight: bold;" />
+    </VBox>
+
+    <HBox spacing="10.0" alignment="CENTER_LEFT">
+        <TextField fx:id="searchField" promptText="🔍 Rechercher..." prefWidth="280" />
+        <Button text="🔄" onAction="#refresh" />
+        <HBox HBox.hgrow="ALWAYS" />
+        <Button text="➕ Ajouter" onAction="#addCertificat" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" />
+        <Button text="✏️ Modifier" onAction="#editCertificat" />
+        <Button text="🗑️ Supprimer" onAction="#deleteCertificat" style="-fx-background-color: #f44336; -fx-text-fill: white;" />
+    </HBox>
+
+    <TableView fx:id="certificatTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colId" text="ID" prefWidth="50" />
+            <TableColumn fx:id="colNom" text="Nom" prefWidth="180" />
+            <TableColumn fx:id="colNiveau" text="Niveau" prefWidth="100" />
+            <TableColumn fx:id="colScore" text="Score" prefWidth="80" />
+            <TableColumn fx:id="colDate" text="Date" prefWidth="120" />
+            <TableColumn fx:id="colParticipant" text="Participant" prefWidth="130" />
+            <TableColumn fx:id="colCours" text="Cours" prefWidth="130" />
+        </columns>
+    </TableView>
+
+    <VBox fx:id="formPane" spacing="10.0" style="-fx-background-color: #eeeeee; -fx-padding: 15; -fx-background-radius: 10;">
+        <GridPane hgap="10.0" vgap="10.0">
+            <children>
+                <Label text="Nom :" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+                <TextField fx:id="tfNom" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+
+                <Label text="Niveau :" GridPane.rowIndex="0" GridPane.columnIndex="2" />
+                <ComboBox fx:id="cbNiveau" prefWidth="200" GridPane.rowIndex="0" GridPane.columnIndex="3" />
+
+                <Label text="Score (%) :" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+                <TextField fx:id="tfScore" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+
+                <Label text="Date :" GridPane.rowIndex="1" GridPane.columnIndex="2" />
+                <DatePicker fx:id="dpDate" prefWidth="200" GridPane.rowIndex="1" GridPane.columnIndex="3" />
+
+                <Label text="Participant :" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+                <ComboBox fx:id="cbParticipant" prefWidth="200" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+
+                <Label text="Cours :" GridPane.rowIndex="2" GridPane.columnIndex="2" />
+                <ComboBox fx:id="cbCours" prefWidth="200" GridPane.rowIndex="2" GridPane.columnIndex="3" />
+            </children>
+        </GridPane>
+        <HBox spacing="10.0" alignment="CENTER_RIGHT">
+            <Button text="Annuler" onAction="#handleAnnuler" />
+            <Button text="Enregistrer" onAction="#handleSauvegarder" style="-fx-background-color: #2196F3; -fx-text-fill: white;" />
+        </HBox>
+    </VBox>
+</VBox>

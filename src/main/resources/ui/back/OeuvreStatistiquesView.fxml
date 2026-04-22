@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.ColumnConstraints?>
+
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.shape.Circle?>
+<ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" stylesheets="@../theme.css, @oeuvres_categories.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.OeuvreStatistiquesController">
+    <VBox spacing="30.0" styleClass="content">
+        <padding>
+            <Insets bottom="30.0" left="30.0" right="30.0" top="10.0" />
+        </padding>
+
+        <!-- Header & Filters -->
+        <VBox spacing="15.0" styleClass="surface" style="-fx-padding: 25;">
+            <HBox alignment="CENTER_LEFT" spacing="20.0">
+                <VBox spacing="5.0">
+                    <Label text="Statistiques — Œuvres vendues" styleClass="text-title" style="-fx-font-size: 32;" />
+                </VBox>
+                <Region HBox.hgrow="ALWAYS" />
+            </HBox>
+
+            <HBox alignment="BOTTOM_LEFT" spacing="20.0">
+                <VBox spacing="8.0">
+                    <Label text="Année" styleClass="filter-label" />
+                    <ComboBox fx:id="yearFilter" prefWidth="150.0" />
+                </VBox>
+                <VBox spacing="8.0">
+                    <Label text="Mois (détail catégories)" styleClass="filter-label" />
+                    <ComboBox fx:id="monthFilter" prefWidth="180.0" />
+                </VBox>
+                <Button onAction="#refreshStats" styleClass="btn-secondary" text="Actualiser" />
+                <Button fx:id="exportExcelBtn" onAction="#handleExportExcel" styleClass="btn-gold" style="-fx-background-color: #c9a849; -fx-text-fill: white; -fx-padding: 10 25;" text="📥 Export Excel — œuvres vendues" />
+            </HBox>
+        </VBox>
+
+        <!-- Summary Cards -->
+        <GridPane hgap="25.0" vgap="10.0">
+            <columnConstraints>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="33.3" />
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="33.3" />
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="33.3" />
+            </columnConstraints>
+            
+            <VBox spacing="10.0" styleClass="surface" style="-fx-padding: 25; -fx-border-color: #6c2a90; -fx-border-width: 0 0 0 5;" GridPane.columnIndex="0">
+                <Label fx:id="totalArtworksLabel" text="0" style="-fx-font-size: 42; -fx-font-weight: 800; -fx-text-fill: #241197;" />
+                <Label text="Œuvres au total" styleClass="text-subtitle" style="-fx-font-weight: bold;" />
+            </VBox>
+            
+            <VBox spacing="10.0" styleClass="surface" style="-fx-padding: 25; -fx-border-color: #167e4e; -fx-border-width: 0 0 0 5;" GridPane.columnIndex="1">
+                <Label fx:id="totalSoldLabel" text="0" style="-fx-font-size: 42; -fx-font-weight: 800; -fx-text-fill: #167e4e;" />
+                <Label text="Œuvres vendues (toutes périodes)" styleClass="text-subtitle" style="-fx-font-weight: bold;" />
+            </VBox>
+            
+            <VBox spacing="10.0" styleClass="surface" style="-fx-padding: 25; -fx-border-color: #c9a849; -fx-border-width: 0 0 0 5;" GridPane.columnIndex="2">
+                <Label fx:id="monthSoldLabel" text="0" style="-fx-font-size: 42; -fx-font-weight: 800; -fx-text-fill: #c9a849;" />
+                <Label fx:id="monthSoldTitle" text="Vendues ce mois" styleClass="text-subtitle" style="-fx-font-weight: bold;" />
+            </VBox>
+        </GridPane>
+
+        <!-- Charts Row 1 -->
+        <HBox spacing="30.0">
+            <VBox spacing="15.0" styleClass="surface" style="-fx-padding: 25;" HBox.hgrow="ALWAYS">
+                <Label fx:id="pieChartTitle" text="Ventes par catégorie — Avril 2026" styleClass="text-title" style="-fx-font-size: 20;" />
+                <StackPane>
+                    <PieChart fx:id="categoryPieChart" prefHeight="350.0" legendSide="RIGHT" />
+                    <!-- The circle that creates the doughnut effect -->
+                    <javafx.scene.shape.Circle fill="WHITE" radius="70.0" />
+                </StackPane>
+            </VBox>
+            <VBox spacing="15.0" styleClass="surface" style="-fx-padding: 25;" HBox.hgrow="ALWAYS">
+                <Label text="Ventes par catégorie (barres)" styleClass="text-title" style="-fx-font-size: 20;" />
+                <BarChart fx:id="categoryBarChart" prefHeight="350.0" legendVisible="false">
+                    <xAxis>
+                        <NumberAxis side="BOTTOM" tickUnit="1" minorTickVisible="false" />
+                    </xAxis>
+                    <yAxis>
+                        <CategoryAxis side="LEFT" />
+                    </yAxis>
+                </BarChart>
+            </VBox>
+        </HBox>
+
+        <!-- Charts Row 2 -->
+        <VBox spacing="15.0" styleClass="surface" style="-fx-padding: 25;">
+            <Label fx:id="lineChartTitle" text="Courbe des ventes — 2026" styleClass="text-title" style="-fx-font-size: 20;" />
+            <LineChart fx:id="salesTrendChart" prefHeight="400.0">
+                <xAxis>
+                    <CategoryAxis side="BOTTOM" label="Mois" />
+                </xAxis>
+                <yAxis>
+                    <NumberAxis side="LEFT" label="Nombre de ventes" />
+                </yAxis>
+            </LineChart>
+        </VBox>
+
+        <!-- Data Table -->
+        <VBox spacing="15.0">
+            <Label fx:id="tableTitle" text="Détail par catégorie — Avril 2026" styleClass="text-title" style="-fx-font-size: 22;" />
+            <TableView fx:id="categoryTable" styleClass="table-art-fantasy" prefHeight="300.0">
+                <columns>
+                    <TableColumn fx:id="catNameCol" prefWidth="400.0" text="Catégorie" />
+                    <TableColumn fx:id="catCountCol" prefWidth="250.0" text="Nombre vendues" />
+                </columns>
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                </columnResizePolicy>
+            </TableView>
+        </VBox>
+    </VBox>
+</ScrollPane>

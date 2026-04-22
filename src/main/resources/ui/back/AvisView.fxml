@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<?import javafx.scene.layout.Pane?>
+<VBox spacing="14.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.AvisController">
+    <VBox spacing="4.0">
+        <Label text="💬 Avis &amp; Réclamations" styleClass="text-title" />
+        <Label text="Modérez les avis et répondez aux réclamations." styleClass="text-subtitle" />
+    </VBox>
+
+
+    <HBox spacing="10.0" alignment="CENTER_LEFT">
+        <TextField fx:id="searchField" promptText="🔍 Rechercher..." prefWidth="200" />
+        <ComboBox fx:id="typeFilter" prefWidth="120" />
+        <ComboBox fx:id="statutFilter" prefWidth="120" />
+        <Button text="🔄 Rafraîchir" styleClass="btn-add" onAction="#refresh" />
+        <Button text="👁 Voir réponses" styleClass="btn-primary"  onAction="#voirReponses" />
+        <Pane HBox.hgrow="ALWAYS" />
+        <Button text="✏️ Répondre" styleClass="btn-primary"  onAction="#repondre" />
+        <Button text="🗑️ Supprimer" styleClass="btn-primary"  onAction="#deleteAvis" />
+    </HBox>
+
+    <TableView fx:id="avisTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colId" text="ID" prefWidth="50" />
+            <TableColumn fx:id="colType" text="Type" prefWidth="100" />
+            <TableColumn fx:id="colSujet" text="Sujet" prefWidth="200" />
+            <TableColumn fx:id="colMessage" text="Message" prefWidth="300" />
+            <TableColumn fx:id="colUtilisateur" text="Utilisateur" prefWidth="150" />
+            <TableColumn fx:id="colDate" text="Date" prefWidth="120" />
+            <TableColumn fx:id="colStatut" text="Statut" prefWidth="100" />
+            <TableColumn fx:id="colCategorie" text="Categorie" />
+        </columns>
+    </TableView>
+
+</VBox>

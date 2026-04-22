@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="20.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.front.FrontArticleController" stylesheets="@../theme.css">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+    <HBox alignment="CENTER_LEFT" spacing="20">
+        <Button text="← Retour aux magasins" styleClass="btn-front-secondary" onAction="#goBackToMagasins"/>
+        <Label fx:id="magasinTitle" styleClass="hero-front-title" />
+    </HBox>
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
+        <GridPane fx:id="articlesGrid" hgap="20" vgap="20" alignment="CENTER"/>
+    </ScrollPane>
+</VBox>
