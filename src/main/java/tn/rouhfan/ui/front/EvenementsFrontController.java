@@ -38,6 +38,8 @@ import com.itextpdf.text.pdf.PdfWriter;
 import java.io.FileOutputStream;
 import java.io.File;
 import java.awt.Desktop;
+import tn.rouhfan.services.TicketPdfGenerator;
+import tn.rouhfan.services.TicketEmailService;
 
 public class EvenementsFrontController implements Initializable {
 
@@ -205,6 +207,15 @@ public class EvenementsFrontController implements Initializable {
                 deleteBtn.setOnAction(e -> handleDelete(event));
 
                 buttonBox.getChildren().addAll(editBtn, deleteBtn);
+            }
+            
+            if (isCreator) {
+                Button shareBtn = new Button("🔵 Partager");
+                shareBtn.setStyle("-fx-background-color: #1877F2; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;");
+                shareBtn.setMaxWidth(Double.MAX_VALUE);
+                HBox.setHgrow(shareBtn, Priority.ALWAYS);
+                shareBtn.setOnAction(e -> handleShareFacebook(event));
+                buttonBox.getChildren().add(shareBtn);
             }
         }
 
@@ -410,10 +421,10 @@ public class EvenementsFrontController implements Initializable {
     private void handleParticipate(Evenement event) {
         try {
             evenementService.participer(event.getId());
-            showAlert("Participation confirmée", "✅ Vous participez maintenant à l'événement: " + event.getTitre() + "\nVotre ticket PDF va être généré !");
+            showAlert("Participation confirmée", "✅ Vous participez maintenant à l'événement: " + event.getTitre() + "\nVotre ticket PDF va être généré et envoyé par email !");
 
-            // Generate PDF Ticket
-            generatePdfTicket(event);
+            // Generate PDF Ticket and send email
+            generatePdfTicketAndEmail(event);
 
             loadEvenements(); // Refresh to show updated participant count
         } catch (SQLException e) {
@@ -422,60 +433,15 @@ public class EvenementsFrontController implements Initializable {
         }
     }
 
-    private void generatePdfTicket(Evenement event) {
+    private void generatePdfTicketAndEmail(Evenement event) {
         try {
             String currentUser = SessionManager.getInstance().isLoggedIn() ?
                     SessionManager.getInstance().getFullName() : "Participant";
+            String userEmail = SessionManager.getInstance().isLoggedIn() ?
+                    SessionManager.getInstance().getCurrentUser().getEmail() : null;
 
-            String fileName = "Ticket_Evenement_" + event.getId() + ".pdf";
-            File pdfFile = new File(fileName);
-            Document document = new Document();
-            PdfWriter.getInstance(document, new FileOutputStream(pdfFile));
-            document.open();
-
-            // Options de style
-            Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 22, com.itextpdf.text.BaseColor.BLACK);
-            Font fontSubTitle = FontFactory.getFont(FontFactory.HELVETICA, 16, com.itextpdf.text.BaseColor.DARK_GRAY);
-            Font fontText = FontFactory.getFont(FontFactory.HELVETICA, 12, com.itextpdf.text.BaseColor.BLACK);
-
-            // Ajout du Logo (si présent dans les ressources)
-            try {
-                URL logoUrl = getClass().getResource("/ui/logo.png");
-                if (logoUrl != null) {
-                    com.itextpdf.text.Image logo = com.itextpdf.text.Image.getInstance(logoUrl);
-                    logo.scaleToFit(150, 150);
-                    logo.setAlignment(Element.ALIGN_CENTER);
-                    document.add(logo);
-                }
-            } catch (Exception ex) {
-                System.out.println("Logo non trouvé pour le PDF");
-            }
-
-            // Titre du Document
-            Paragraph title = new Paragraph("TICKET DE PARTICIPATION", fontTitle);
-            title.setAlignment(Element.ALIGN_CENTER);
-            title.setSpacingAfter(20f);
-            document.add(title);
-
-            // Infos Événement
-            document.add(new Paragraph("Événement : " + event.getTitre(), fontSubTitle));
-            document.add(new Paragraph("---------------------------------------------------------"));
-            document.add(new Paragraph("Lieu : " + event.getLieu(), fontText));
-            String dateFormatted = event.getDateEvent() != null ? dateFormat.format(event.getDateEvent()) : "Non définie";
-            document.add(new Paragraph("Date : " + dateFormatted, fontText));
-            document.add(new Paragraph("Type : " + event.getType(), fontText));
-
-            document.add(new Paragraph(" ", fontText)); // Espace
-            document.add(new Paragraph("Détails du Participant :", fontSubTitle));
-            document.add(new Paragraph("---------------------------------------------------------"));
-            document.add(new Paragraph("Nom du Participant : " + currentUser, fontText));
-
-            document.add(new Paragraph(" ", fontText));
-            Paragraph footer = new Paragraph("Merci de votre participation ! Ce ticket est strictement personnel.", FontFactory.getFont(FontFactory.HELVETICA_OBLIQUE, 10));
-            footer.setAlignment(Element.ALIGN_CENTER);
-            document.add(footer);
-
-            document.close();
+            TicketPdfGenerator pdfGenerator = new TicketPdfGenerator();
+            File pdfFile = pdfGenerator.generateTicket(event, currentUser);
 
             // Ouvrir le PDF généré
             if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
@@ -484,8 +450,33 @@ public class EvenementsFrontController implements Initializable {
                 System.out.println("⚠️ Impossible d'ouvrir le fichier automatiquement. Le fichier est enregistré sous : " + pdfFile.getAbsolutePath());
             }
 
+            // Envoyer l'email
+            if (userEmail != null && !userEmail.isEmpty()) {
+                TicketEmailService emailService = new TicketEmailService();
+                emailService.sendTicket(userEmail, event.getTitre(), pdfFile);
+                System.out.println("✅ Email envoyé à " + userEmail);
+            }
+
         } catch (Exception e) {
-            System.err.println("❌ Erreur de génération du PDF : " + e.getMessage());
+            System.err.println("❌ Erreur lors de la génération ou l'envoi du ticket : " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void handleShareFacebook(Evenement event) {
+        try {
+            // URL fictive de l'événement basée sur l'ID (à adapter selon le vrai domaine si existant)
+            String eventUrl = "http://rouhelfann.tn/evenements/" + event.getId();
+            // Facebook sharer URL
+            String facebookShareUrl = "https://www.facebook.com/sharer/sharer.php?u=" + java.net.URLEncoder.encode(eventUrl, "UTF-8");
+            
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                Desktop.getDesktop().browse(new java.net.URI(facebookShareUrl));
+            } else {
+                System.out.println("⚠️ Impossible d'ouvrir le navigateur web.");
+            }
+        } catch (Exception e) {
+            showAlert("Erreur", "❌ Impossible d'ouvrir la page de partage Facebook: " + e.getMessage());
             e.printStackTrace();
         }
     }

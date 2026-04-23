@@ -16,9 +16,12 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import tn.rouhfan.entities.Sponsor;
+import tn.rouhfan.entities.Evenement;
 import tn.rouhfan.services.SponsorService;
+import tn.rouhfan.services.EvenementService;
 import tn.rouhfan.tools.ImageUtils;
 import tn.rouhfan.ui.back.SponsorFormDialog;
+import java.util.List;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -137,13 +140,24 @@ public class SponsorsFrontController implements Initializable {
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        // Button Contact
+        // Boutons HBox
+        HBox buttonBox = new HBox(10);
+        
         Button contactBtn = new Button("✉️ Contacter");
         contactBtn.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(contactBtn, Priority.ALWAYS);
         contactBtn.setStyle("-fx-background-color: linear-gradient(to right, #6c2a90, #9c4dcc); -fx-text-fill: white; -fx-font-weight: 800; -fx-background-radius: 8; -fx-padding: 10 15; -fx-font-size: 13; -fx-cursor: hand;");
         contactBtn.setOnAction(e -> handleContact(sponsor));
 
-        contentBox.getChildren().addAll(nameLabel, emailLabel, detailsBox, footerBox, spacer, contactBtn);
+        Button viewEventsBtn = new Button("📅 Événements");
+        viewEventsBtn.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(viewEventsBtn, Priority.ALWAYS);
+        viewEventsBtn.setStyle("-fx-background-color: #00b894; -fx-text-fill: white; -fx-font-weight: 800; -fx-background-radius: 8; -fx-padding: 10 15; -fx-font-size: 13; -fx-cursor: hand;");
+        viewEventsBtn.setOnAction(e -> handleViewEvents(sponsor));
+        
+        buttonBox.getChildren().addAll(contactBtn, viewEventsBtn);
+
+        contentBox.getChildren().addAll(nameLabel, emailLabel, detailsBox, footerBox, spacer, buttonBox);
         card.getChildren().addAll(imageContainer, contentBox);
         return card;
     }
@@ -227,6 +241,44 @@ public class SponsorsFrontController implements Initializable {
         info.setHeaderText("Sponsor: " + sponsor.getNom());
         info.setContentText("Email: " + sponsor.getEmail() + "\nTéléphone: " + sponsor.getTel());
         info.showAndWait();
+    }
+
+    private void handleViewEvents(Sponsor sponsor) {
+        try {
+            EvenementService evenementService = new EvenementService();
+            List<Evenement> events = evenementService.getEvenementsBySponsor(sponsor.getId());
+
+            Dialog<Void> dialog = new Dialog<>();
+            dialog.setTitle("Événements sponsorisés par " + sponsor.getNom());
+            dialog.setHeaderText("Liste des événements");
+            DialogPane dialogPane = dialog.getDialogPane();
+            dialogPane.getButtonTypes().add(ButtonType.CLOSE);
+
+            if (events.isEmpty()) {
+                dialogPane.setContent(new Label("Aucun événement sponsorisé pour le moment."));
+            } else {
+                VBox container = new VBox(10);
+                container.setPadding(new Insets(10));
+                for (Evenement event : events) {
+                    VBox card = new VBox(5);
+                    card.setStyle("-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-border-color: #ddd; -fx-border-radius: 5;");
+                    Label title = new Label("🎯 " + event.getTitre());
+                    title.setStyle("-fx-font-weight: bold; -fx-font-size: 14;");
+                    Label details = new Label("📍 " + event.getLieu() + " | 📅 " + (event.getDateEvent() != null ? dateFormat.format(event.getDateEvent()) : "N/A"));
+                    details.setStyle("-fx-text-fill: #666;");
+                    card.getChildren().addAll(title, details);
+                    container.getChildren().add(card);
+                }
+                ScrollPane scrollPane = new ScrollPane(container);
+                scrollPane.setFitToWidth(true);
+                scrollPane.setPrefViewportHeight(300);
+                scrollPane.setPrefViewportWidth(400);
+                dialogPane.setContent(scrollPane);
+            }
+            dialog.showAndWait();
+        } catch (SQLException ex) {
+            showAlert("Erreur", "Impossible de charger les événements: " + ex.getMessage());
+        }
     }
 
     private void showAlert(String title, String message) {

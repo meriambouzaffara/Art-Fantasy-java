@@ -45,8 +45,8 @@ public class SponsorsController implements Initializable {
     }
 
     private void setupColumns() {
-        colId.setCellValueFactory(cellData ->
-                new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getId()).asObject());
+        //colId.setCellValueFactory(cellData ->
+          //      new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getId()).asObject());
 
         colNom.setCellValueFactory(cellData ->
                 new javafx.beans.property.SimpleStringProperty(cellData.getValue().getNom()));
