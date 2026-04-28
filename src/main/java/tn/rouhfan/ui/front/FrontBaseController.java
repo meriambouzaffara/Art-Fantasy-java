@@ -13,6 +13,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.scene.control.Alert;
 import tn.rouhfan.entities.User;
+import tn.rouhfan.services.NotificationService;
 import tn.rouhfan.tools.SessionManager;
 import tn.rouhfan.ui.Router;
 
@@ -29,6 +30,9 @@ public class FrontBaseController {
     @FXML private Label welcomeLabel;
     @FXML private Button profileBtn;
     @FXML private Button iaBtn;
+    @FXML private Button notifBtn;
+    
+    private NotificationService notificationService = new NotificationService();
 
     @FXML
     public void initialize() {
@@ -74,6 +78,16 @@ public class FrontBaseController {
             // Afficher le bouton IA uniquement pour les participants
             iaBtn.setVisible(isParticipant);
             iaBtn.setManaged(isParticipant);
+            
+            // Notifications
+            int unread = notificationService.countUnread(currentUser.getId());
+            if (unread > 0) {
+                notifBtn.setText("\uD83D\uDD14 (" + unread + ")");
+                notifBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #fac62d; -fx-font-weight: bold; -fx-font-size: 16; -fx-cursor: hand; -fx-border-color: #fac62d; -fx-border-radius: 15; -fx-border-width: 1;");
+            } else {
+                notifBtn.setText("\uD83D\uDD14");
+                notifBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #fac62d; -fx-font-weight: bold; -fx-font-size: 16; -fx-cursor: hand;");
+            }
         }
     }
 
@@ -249,6 +263,23 @@ public class FrontBaseController {
             contentHost.getChildren().add(root);
         } catch (IOException e) {
             System.err.println("[FrontBase] Erreur chargement Profil: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    @FXML
+    private void openNotifications(ActionEvent event) {
+        showHero(false);
+        contentHost.getChildren().clear();
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/ui/front/NotificationsFront.fxml"));
+            contentHost.getChildren().add(root);
+            
+            // Mettre à jour le compteur (réinitialiser)
+            notifBtn.setText("\uD83D\uDD14");
+            notifBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #fac62d; -fx-font-weight: bold; -fx-font-size: 16; -fx-cursor: hand;");
+        } catch (IOException e) {
+            System.err.println("[FrontBase] Erreur chargement Notifications: " + e.getMessage());
             e.printStackTrace();
         }
     }

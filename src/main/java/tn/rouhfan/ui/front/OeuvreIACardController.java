@@ -18,6 +18,7 @@ public class OeuvreIACardController {
     @FXML private ImageView oeuvreImage;
     @FXML private Label titreLabel;
     @FXML private Label categorieLabel;
+    @FXML private Label descriptionLabel;
     @FXML private Label dateLabel;
 
     private OeuvreIA oeuvre;
@@ -30,6 +31,7 @@ public class OeuvreIACardController {
 
         titreLabel.setText(o.getTitre());
         categorieLabel.setText(o.getCategorie() != null ? "📁 " + o.getCategorie().getNomCategorie() : "Non catégorisé");
+        descriptionLabel.setText(o.getDescription());
         
         if (o.getDateCreation() != null) {
             dateLabel.setText("Créé le " + new SimpleDateFormat("dd/MM/yyyy HH:mm").format(o.getDateCreation()));
@@ -41,6 +43,38 @@ public class OeuvreIACardController {
             if (fullPath != null) {
                 oeuvreImage.setImage(new Image(fullPath));
             }
+        }
+    }
+
+    @FXML
+    private void handleView() {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/ui/front/IAOeuvreDetailsDialog.fxml"));
+            javafx.scene.Parent root = loader.load();
+            
+            IAOeuvreDetailsController controller = loader.getController();
+            controller.setOeuvre(oeuvre);
+            
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setScene(new javafx.scene.Scene(root));
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.initStyle(javafx.stage.StageStyle.UNDECORATED); // Pour un look premium sans bordures Windows
+            
+            // Permettre le déplacement de la fenêtre car UNDECORATED
+            final double[] xOffset = new double[1];
+            final double[] yOffset = new double[1];
+            root.setOnMousePressed(event -> {
+                xOffset[0] = event.getSceneX();
+                yOffset[0] = event.getSceneY();
+            });
+            root.setOnMouseDragged(event -> {
+                stage.setX(event.getScreenX() - xOffset[0]);
+                stage.setY(event.getScreenY() - yOffset[0]);
+            });
+
+            stage.show();
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
         }
     }
 

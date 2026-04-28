@@ -48,6 +48,6 @@
         <Button fx:id="buyBtn" text="🛒 Acheter" onAction="#handleBuy" maxWidth="Infinity" visible="false" managed="false"
                 style="-fx-background-color: linear-gradient(to right, #00b894, #00cec9); -fx-text-fill: white; -fx-font-weight: 800; -fx-background-radius: 12; -fx-padding: 12 20; -fx-font-size: 14; -fx-cursor: hand;" />
         
-        <Button fx:id="viewBtn" text="👁️ Voir Détails" onAction="#handleView" styleClass="btn-front-secondary" maxWidth="Infinity" style="-fx-padding: 12 20;" />
+        <Button fx:id="viewBtn" text="Voir Détails" onAction="#handleView" styleClass="btn-front-secondary" maxWidth="Infinity" style="-fx-padding: 12 20;" />
     </VBox>
 </VBox>

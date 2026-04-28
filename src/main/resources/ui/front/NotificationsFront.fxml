@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+
+<ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.front.NotificationsFrontController">
+    <VBox spacing="20.0" styleClass="content" style="-fx-padding: 40;">
+        <HBox alignment="CENTER_LEFT">
+            <Label text="🔔 Mes Notifications" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #241197;" />
+        </HBox>
+        
+        <VBox fx:id="notificationsBox" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 0);">
+            <!-- Notifications injected here -->
+        </VBox>
+        
+        <VBox fx:id="emptyState" alignment="CENTER" spacing="10" visible="false" managed="false" style="-fx-padding: 40 0;">
+            <Label text="📭" style="-fx-font-size: 40;" />
+            <Label text="Vous n'avez aucune notification pour le moment." style="-fx-text-fill: #64748b; -fx-font-size: 16;" />
+        </VBox>
+    </VBox>
+</ScrollPane>

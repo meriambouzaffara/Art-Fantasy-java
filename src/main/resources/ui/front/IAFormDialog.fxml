@@ -65,6 +65,10 @@
                     <Label text="Donnez un titre à votre œuvre" styleClass="filter-label" />
                     <TextField fx:id="titleField" promptText="Ex: L'Éveil du Dragon" styleClass="text-field" />
                 </VBox>
+                <VBox spacing="8">
+                    <Label text="Description de l'œuvre" styleClass="filter-label" />
+                    <TextArea fx:id="descriptionField" promptText="Décrivez votre œuvre en quelques mots..." styleClass="text-area" prefHeight="80" wrapText="true" />
+                </VBox>
             </VBox>
         </VBox>
 

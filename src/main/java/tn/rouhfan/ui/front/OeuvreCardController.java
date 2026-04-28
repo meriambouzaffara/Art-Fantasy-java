@@ -153,86 +153,41 @@ public class OeuvreCardController {
             scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
             stage.setScene(scene);
             stage.show();
-        } catch (IOException e) {
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erreur de chargement");
+            alert.setHeaderText("Impossible d'ouvrir les détails");
+            alert.setContentText("Erreur : " + e.getMessage() + "\nVérifiez la console pour plus de détails.");
+            alert.showAndWait();
             e.printStackTrace();
         }
     }
 
     @FXML
     private void handleBuy() {
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Acheter l'œuvre");
-        confirm.setHeaderText("🛒 Confirmer l'achat avec Stripe");
-        confirm.setContentText("Vous allez être redirigé vers une page de paiement sécurisée pour acheter \"" + 
-            oeuvre.getTitre() + "\" au prix de " + (oeuvre.getPrix() != null ? oeuvre.getPrix().toString() : "0") + " DT.");
-        
-        confirm.showAndWait().ifPresent(res -> {
-            if (res == ButtonType.OK) {
-                try {
-                    // 1. Créer la session de paiement complexe
-                    com.stripe.model.checkout.Session session = paymentService.createSession(oeuvre);
-                    String checkoutUrl = session.getUrl();
-                    String sessionId = session.getId();
-                    
-                    // 2. Ouvrir le navigateur
-                    if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                        Desktop.getDesktop().browse(new URI(checkoutUrl));
-                        
-                        // 3. Informer l'utilisateur (Non-bloquant si possible)
-                        Alert info = new Alert(Alert.AlertType.INFORMATION);
-                        info.setTitle("Paiement en cours");
-                        info.setHeaderText("🔄 Synchronisation automatique");
-                        info.setContentText("Veuillez finaliser le paiement dans votre navigateur.\nL'application détectera automatiquement le succès du paiement.");
-                        info.getButtonTypes().setAll(ButtonType.CANCEL);
-                        
-                        // Démarrer le polling en arrière-plan
-                        javafx.concurrent.Task<Boolean> pollTask = new javafx.concurrent.Task<Boolean>() {
-                            @Override
-                            protected Boolean call() throws Exception {
-                                int attempts = 0;
-                                while (attempts < 60) { // Timeout après 3 minutes (60 * 3s)
-                                    if (isCancelled()) return false;
-                                    if (paymentService.isPaymentSuccessful(sessionId)) return true;
-                                    Thread.sleep(3000);
-                                    attempts++;
-                                }
-                                return false;
-                            }
-                        };
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/front/OeuvreStripePaymentDialog.fxml"));
+            Parent root = loader.load();
+            OeuvreStripePaymentDialogController controller = loader.getController();
+            controller.setOeuvre(oeuvre);
 
-                        pollTask.setOnSucceeded(e -> {
-                            if (pollTask.getValue()) {
-                                try {
-                                    finaliserAchat();
-                                    info.close();
-                                    
-                                    Alert success = new Alert(Alert.AlertType.INFORMATION);
-                                    success.setTitle("Succès");
-                                    success.setHeaderText("✅ Paiement confirmé");
-                                    success.setContentText("Merci ! L'œuvre est maintenant marquée comme vendue.");
-                                    success.show();
-                                } catch (Exception ex) {
-                                    ex.printStackTrace();
-                                }
-                            }
-                        });
+            Stage paymentStage = new Stage();
+            paymentStage.initModality(Modality.APPLICATION_MODAL);
+            paymentStage.setTitle("Paiement Sécurisé");
+            paymentStage.setScene(new Scene(root));
+            paymentStage.showAndWait();
 
-                        new Thread(pollTask).start();
-                        info.show();
-
-                    } else {
-                        throw new IOException("Navigateur non supporté sur ce système.");
-                    }
-                } catch (Exception e) {
-                    Alert error = new Alert(Alert.AlertType.ERROR);
-                    error.setTitle("Erreur de paiement");
-                    error.setHeaderText("Désolé, une erreur est survenue");
-                    error.setContentText(e.getMessage());
-                    error.showAndWait();
-                    e.printStackTrace();
-                }
+            if (controller.isSuccess()) {
+                if (refreshCallback != null) refreshCallback.run();
             }
-        });
+        } catch (IOException e) {
+            Alert error = new Alert(Alert.AlertType.ERROR);
+            error.setTitle("Erreur");
+            error.setHeaderText("Impossible d'ouvrir le paiement");
+            error.setContentText(e.getMessage());
+            error.showAndWait();
+            e.printStackTrace();
+        }
     }
 
     private void finaliserAchat() throws SQLException {

@@ -17,8 +17,12 @@
                 <Label text="✨ Mes Créations IA" styleClass="text-title" style="-fx-font-size: 32; -fx-text-fill: #241197;" />
                 <Label text="Laissez libre cours à votre imagination et transformez vos idées en art numérique." styleClass="text-subtitle" />
             </VBox>
-            <Button text="🚀 Créer une œuvre avec IA" onAction="#handleCreateWithIA" 
-                    style="-fx-background-color: linear-gradient(to right, #6c2a90, #241197); -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 12 30; -fx-background-radius: 30; -fx-font-size: 16; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 5);" />
+            <HBox spacing="15">
+                <Button text="🎵 Créer depuis Musique" onAction="#handleCreateWithMusic" 
+                        style="-fx-background-color: linear-gradient(to right, #c084fc, #f472b6); -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 12 25; -fx-background-radius: 30; -fx-font-size: 16; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 10, 0, 0, 5);" />
+                <Button text="🚀 Créer une œuvre IA" onAction="#handleCreateWithIA" 
+                        style="-fx-background-color: linear-gradient(to right, #6c2a90, #241197); -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 12 30; -fx-background-radius: 30; -fx-font-size: 16; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 5);" />
+            </HBox>
         </HBox>
 
         <VBox spacing="20.0" style="-fx-background-color: white; -fx-background-radius: 20; -fx-padding: 30; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 15, 0, 0, 0);">

@@ -78,4 +78,25 @@ public class IAOeuvresFrontController implements Initializable {
             e.printStackTrace();
         }
     }
+    @FXML
+    private void handleCreateWithMusic() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/front/MusicArtWizardDialog.fxml"));
+            Parent root = loader.load();
+            MusicArtWizardController ctrl = loader.getController();
+            ctrl.setRefreshCallback(this::loadData);
+            
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("🎵 Musique vers Art");
+            
+            Scene scene = new Scene(root);
+            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+            stage.initStyle(javafx.stage.StageStyle.TRANSPARENT);
+            stage.setScene(scene);
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

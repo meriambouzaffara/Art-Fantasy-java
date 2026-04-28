@@ -43,6 +43,7 @@ public class IAFormDialogController {
     
     @FXML private TextField elementsField;
     @FXML private TextField titleField;
+    @FXML private TextArea descriptionField;
     @FXML private ComboBox<Categorie> categoryCombo;
 
     private int currentStep = 1;
@@ -189,8 +190,13 @@ public class IAFormDialogController {
             if (!Files.exists(uploadDir)) Files.createDirectories(uploadDir);
             
             Files.copy(lastGeneratedStream, uploadDir.resolve(fileName));
+            
+            String description = descriptionField.getText();
+            if (description == null || description.trim().isEmpty()) {
+                description = "Générée par IA. Prompt: " + lastPrompt;
+            }
 
-            OeuvreIA oeuvre = new OeuvreIA(title, "Prompt: " + lastPrompt, "uploads/misc/" + fileName, user, cat);
+            OeuvreIA oeuvre = new OeuvreIA(title, description, "uploads/misc/" + fileName, user, cat);
             oeuvreIAService.ajouter(oeuvre);
 
             generated = true;
@@ -201,8 +207,8 @@ public class IAFormDialogController {
     }
 
     private boolean validateFinalStep() {
-        if (titleField.getText().trim().isEmpty() || categoryCombo.getValue() == null) {
-            showError("Champs requis", "Veuillez donner un titre et choisir une catégorie.");
+        if (titleField.getText().trim().isEmpty() || categoryCombo.getValue() == null || descriptionField.getText().trim().isEmpty()) {
+            showError("Champs requis", "Veuillez donner un titre, choisir une catégorie et ajouter une description.");
             return false;
         }
         return true;

@@ -129,9 +129,11 @@ public class OeuvreRecommendationService {
 
         try {
             List<Favoris> userFavoris = favorisService.recupererParUser(user.getId());
-            String preferences = userFavoris.stream()
-                    .map(f -> f.getOeuvre().getCategorie().getNomCategorie() + " (" + f.getOeuvre().getTitre() + ")")
-                    .collect(Collectors.joining(", "));
+            String preferences = userFavoris.isEmpty() 
+                    ? "l'art en général (l'utilisateur découvre la galerie)"
+                    : userFavoris.stream()
+                        .map(f -> f.getOeuvre().getCategorie().getNomCategorie() + " (" + f.getOeuvre().getTitre() + ")")
+                        .collect(Collectors.joining(", "));
 
             JSONObject requestBody = new JSONObject();
             requestBody.put("model", "llama-3.3-70b-versatile");
@@ -142,8 +144,9 @@ public class OeuvreRecommendationService {
             JSONObject systemMsg = new JSONObject();
             systemMsg.put("role", "system");
             systemMsg.put("content", "Tu es un expert en art. Tu dois analyser un profil utilisateur et une sélection d'oeuvres. " +
-                    "Retourne un JSON avec 'profil_analysis' (String) et 'oeuvres' (Array d'objets avec 'id', 'vision', 'pourquoi'). " +
-                    "Sois inspirant et précis. Langue: Français.");
+                    "Tu DOIS renvoyer un objet JSON ayant EXACTEMENT cette structure : " +
+                    "{ \"profil_analysis\": \"ton analyse globale...\", \"oeuvres\": [ { \"id\": 123, \"vision\": \"...\", \"pourquoi\": \"...\" } ] } " +
+                    "Même si le profil est nouveau, donne une analyse inspirante. Langue: Français.");
             messages.put(systemMsg);
 
             // Message Utilisateur Textuel (Sans Image)
