@@ -129,3 +129,4 @@ public class NotificationsFrontController implements Initializable {
         }
     }
 }
+//////////:
