@@ -174,6 +174,30 @@ public class OeuvreService implements IService<Oeuvre> {
         return oeuvres;
     }
 
+    public List<Oeuvre> recupererParUser(int userId) throws SQLException {
+        List<Oeuvre> oeuvres = new ArrayList<>();
+        String sql = "SELECT o.*, c.nom_categorie FROM oeuvre o " +
+                "LEFT JOIN categorie c ON o.categorie_id = c.id_categorie " +
+                "WHERE o.user_id = ?";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setInt(1, userId);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            Oeuvre o = new Oeuvre();
+            o.setId(rs.getInt("id"));
+            o.setTitre(rs.getString("titre"));
+            o.setImage(rs.getString("image"));
+            o.setStatut(rs.getString("statut"));
+            
+            Categorie c = new Categorie();
+            c.setIdCategorie(rs.getInt("categorie_id"));
+            c.setNomCategorie(rs.getString("nom_categorie"));
+            o.setCategorie(c);
+            oeuvres.add(o);
+        }
+        return oeuvres;
+    }
+
     @Override
     public Oeuvre findById(int id) throws SQLException {
         String sql = "SELECT o.*, " +

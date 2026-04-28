@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.geometry.Insets?>
+
+<ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.front.IAOeuvresFrontController" vbarPolicy="AS_NEEDED" hbarPolicy="NEVER">
+    <VBox spacing="30.0" styleClass="content" stylesheets="@../back/oeuvres_categories.css" style="-fx-padding: 40;">
+        
+        <HBox alignment="CENTER_LEFT" spacing="20">
+            <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                <Label text="✨ Mes Créations IA" styleClass="text-title" style="-fx-font-size: 32; -fx-text-fill: #241197;" />
+                <Label text="Laissez libre cours à votre imagination et transformez vos idées en art numérique." styleClass="text-subtitle" />
+            </VBox>
+            <HBox spacing="15">
+                <Button text="🎵 Créer depuis Musique" onAction="#handleCreateWithMusic" 
+                        style="-fx-background-color: linear-gradient(to right, #c084fc, #f472b6); -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 12 25; -fx-background-radius: 30; -fx-font-size: 16; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 10, 0, 0, 5);" />
+                <Button text="🚀 Créer une œuvre IA" onAction="#handleCreateWithIA" 
+                        style="-fx-background-color: linear-gradient(to right, #6c2a90, #241197); -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 12 30; -fx-background-radius: 30; -fx-font-size: 16; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 5);" />
+            </HBox>
+        </HBox>
+
+        <VBox spacing="20.0" style="-fx-background-color: white; -fx-background-radius: 20; -fx-padding: 30; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 15, 0, 0, 0);">
+            <Label text="🖼️ Ma Collection Privée" style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+            <FlowPane fx:id="cardsPane" hgap="30.0" vgap="30.0" prefWrapLength="1100.0" alignment="TOP_LEFT" />
+            
+            <VBox fx:id="emptyState" alignment="CENTER" spacing="15" visible="false" managed="false" style="-fx-padding: 50 0;">
+                <Label text="✨" style="-fx-font-size: 60;" />
+                <Label text="Vous n'avez pas encore créé d'œuvre avec l'IA." style="-fx-font-size: 18; -fx-text-fill: #64748b;" />
+                <Button text="Commencer maintenant" onAction="#handleCreateWithIA" styleClass="btn-front-secondary" />
+            </VBox>
+        </VBox>
+
+    </VBox>
+</ScrollPane>

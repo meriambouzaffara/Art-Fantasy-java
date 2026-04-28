@@ -13,6 +13,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.scene.control.Alert;
 import tn.rouhfan.entities.User;
+import tn.rouhfan.services.NotificationService;
 import tn.rouhfan.services.PanierService;
 import tn.rouhfan.tools.SessionManager;
 import tn.rouhfan.ui.Router;
@@ -29,33 +30,31 @@ public class FrontBaseController {
     @FXML private HBox userButtons;
     @FXML private Label welcomeLabel;
     @FXML private Button profileBtn;
-    // 🛒 PANIER
+    @FXML private Button iaBtn;
+    @FXML private Button notifBtn;
+
+    // Bouton panier flottant (Magasin)
     @FXML private Button cartButton;
 
+    private final NotificationService notificationService = new NotificationService();
     private final PanierService panierService = PanierService.getInstance();
 
     @FXML
     public void initialize() {
         showHero(true);
         setupNavbarByRole();
-        setupCartButton();
-    }
-    private void setupCartButton() {
+        // Mettre à jour le compteur du panier en temps réel
         updateCartButton();
-        panierService.revisionProperty().addListener((obs, oldValue, newValue) -> updateCartButton());
+        panierService.revisionProperty().addListener((obs, o, n) -> updateCartButton());
     }
 
     private void updateCartButton() {
         if (cartButton != null) {
-            cartButton.setText("Panier (" + panierService.getItemCount() + ")");
+            int count = panierService.getItemCount();
+            cartButton.setText("🛒 Panier (" + count + ")");
         }
     }
 
-    @FXML
-    private void openCart(ActionEvent event) {
-        showHero(false);
-        Router.setContent(contentHost, "/ui/front/checkout.fxml");
-    }
     /**
      * Configure la navbar selon l'utilisateur connecté :
      * - Non connecté : Sign Up + Login
@@ -82,12 +81,28 @@ public class FrontBaseController {
 
             String role = session.getRole();
             String roleEmoji;
+            boolean isParticipant = false;
             if (role != null && role.toUpperCase().contains("ARTISTE")) {
                 roleEmoji = "🎨";
             } else {
                 roleEmoji = "🎭";
+                isParticipant = true;
             }
             welcomeLabel.setText(roleEmoji + " " + currentUser.getPrenom() + " " + currentUser.getNom());
+
+            // Afficher le bouton IA uniquement pour les participants
+            iaBtn.setVisible(isParticipant);
+            iaBtn.setManaged(isParticipant);
+
+            // Notifications
+            int unread = notificationService.countUnread(currentUser.getId());
+            if (unread > 0) {
+                notifBtn.setText("\uD83D\uDD14 (" + unread + ")");
+                notifBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #fac62d; -fx-font-weight: bold; -fx-font-size: 16; -fx-cursor: hand; -fx-border-color: #fac62d; -fx-border-radius: 15; -fx-border-width: 1;");
+            } else {
+                notifBtn.setText("\uD83D\uDD14");
+                notifBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #fac62d; -fx-font-weight: bold; -fx-font-size: 16; -fx-cursor: hand;");
+            }
         }
     }
 
@@ -178,6 +193,18 @@ public class FrontBaseController {
         showHero(false);
         Router.setContent(contentHost, "/ui/front/front_magasins.fxml");
     }
+
+    @FXML
+    private void goIA(ActionEvent event) {
+        showHero(false);
+        contentHost.getChildren().clear();
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/ui/front/IAOeuvresFront.fxml"));
+            contentHost.getChildren().add(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     @FXML
     private void goAvis(ActionEvent event) {
         showHero(false);
@@ -256,6 +283,23 @@ public class FrontBaseController {
     }
 
     @FXML
+    private void openNotifications(ActionEvent event) {
+        showHero(false);
+        contentHost.getChildren().clear();
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/ui/front/NotificationsFront.fxml"));
+            contentHost.getChildren().add(root);
+
+            // Mettre à jour le compteur (réinitialiser)
+            notifBtn.setText("\uD83D\uDD14");
+            notifBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #fac62d; -fx-font-weight: bold; -fx-font-size: 16; -fx-cursor: hand;");
+        } catch (IOException e) {
+            System.err.println("[FrontBase] Erreur chargement Notifications: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     private void logout(ActionEvent event) {
         SessionManager.getInstance().logout();
         System.out.println("[FrontBase] Déconnexion effectuée");
@@ -270,6 +314,19 @@ public class FrontBaseController {
 
     @FXML
     private void contact(ActionEvent event) {
+    }
+
+    @FXML
+    private void openCart(ActionEvent event) {
+        showHero(false);
+        contentHost.getChildren().clear();
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/ui/front/checkout.fxml"));
+            contentHost.getChildren().add(root);
+        } catch (IOException e) {
+            System.err.println("[FrontBase] Erreur chargement Checkout: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     // ==================== Helpers ====================

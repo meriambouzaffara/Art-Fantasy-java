@@ -55,7 +55,20 @@ public class Evenement {
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
 
-    public String getStatut() { return statut; }
+    public String getStatut() {
+        if (dateEvent == null) return "PLANIFIÉ";
+        
+        java.time.LocalDate today = java.time.LocalDate.now();
+        java.time.LocalDate eventDate = dateEvent.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+        
+        if (eventDate.isAfter(today)) {
+            return "PLANIFIÉ";
+        } else if (eventDate.isEqual(today)) {
+            return "EN COURS";
+        } else {
+            return "TERMINÉ";
+        }
+    }
     public void setStatut(String statut) { this.statut = statut; }
 
     public Date getDateEvent() { return dateEvent; }

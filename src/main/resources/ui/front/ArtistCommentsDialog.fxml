@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.shape.Circle?>
+
+<VBox prefWidth="900.0" prefHeight="650.0" spacing="0" style="-fx-background-color: #f0f2f5; -fx-background-radius: 20; -fx-overflow: hidden;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.front.ArtistCommentsController">
+    
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: white; -fx-padding: 20; -fx-border-color: #dddfe2; -fx-border-width: 0 0 1 0;">
+        <Label text="💬 Gestion des Commentaires" style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #241197;" />
+        <Region HBox.hgrow="ALWAYS" />
+        <Button text="✕" onAction="#handleClose" style="-fx-background-color: transparent; -fx-font-size: 20; -fx-cursor: hand;" />
+    </HBox>
+
+    <HBox VBox.vgrow="ALWAYS" spacing="0">
+        <!-- Sidebar: List of Artworks -->
+        <VBox prefWidth="280.0" style="-fx-background-color: white; -fx-border-color: #dddfe2; -fx-border-width: 0 1 0 0;">
+            <Label text="VOS ŒUVRES" style="-fx-padding: 15; -fx-text-fill: #65676b; -fx-font-weight: bold; -fx-font-size: 12;" />
+            <ListView fx:id="oeuvreListView" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-width: 0;" />
+        </VBox>
+
+        <!-- Main Area: Comments Feed -->
+        <VBox HBox.hgrow="ALWAYS" spacing="0">
+            <ScrollPane fx:id="commentsScrollPane" VBox.vgrow="ALWAYS" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: #f0f2f5; -fx-padding: 20;">
+                <VBox fx:id="commentsContainer" spacing="20" />
+            </ScrollPane>
+
+            <!-- Quick Reply Area -->
+            <VBox fx:id="replyArea" visible="false" managed="false" style="-fx-background-color: white; -fx-padding: 20; -fx-border-color: #dddfe2; -fx-border-width: 1 0 0 0;">
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label fx:id="replyingToLabel" text="Répondre à..." style="-fx-text-fill: #65676b; -fx-font-size: 13;" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button text="Annuler" onAction="#handleCancelReply" style="-fx-background-color: transparent; -fx-text-fill: #241197; -fx-font-size: 12; -fx-cursor: hand;" />
+                </HBox>
+                <VBox spacing="10" style="-fx-padding: 10 0 0 0;">
+                    <TextArea fx:id="replyInput" promptText="Écrivez votre réponse..." prefHeight="70" wrapText="true" style="-fx-background-radius: 15; -fx-border-radius: 15;" />
+                    <HBox spacing="10" alignment="CENTER_RIGHT">
+                        <Button text="Envoyer 🚀" onAction="#handlePostReply" style="-fx-background-color: #241197; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 25; -fx-background-radius: 10; -fx-cursor: hand;" />
+                    </HBox>
+                </VBox>
+            </VBox>
+
+            <!-- Placeholder when no oeuvre selected -->
+            <VBox fx:id="placeholderBox" alignment="CENTER" spacing="15" VBox.vgrow="ALWAYS">
+                <Label text="📥" style="-fx-font-size: 60;" />
+                <Label text="Sélectionnez une œuvre pour voir les commentaires" style="-fx-text-fill: #65676b; -fx-font-size: 16;" />
+            </VBox>
+        </VBox>
+    </HBox>
+</VBox>
