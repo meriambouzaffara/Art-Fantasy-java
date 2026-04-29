@@ -7,6 +7,10 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import javafx.stage.Modality;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import tn.rouhfan.entities.*;
@@ -25,7 +29,6 @@ import tn.rouhfan.tools.MyDatabase;
 public class CoursController implements Initializable {
 
     @FXML private TableView<Cours> coursTable;
-    @FXML private TableColumn<Cours, Integer> colId;
     @FXML private TableColumn<Cours, String> colNom, colNiveau, colDuree, colStatut, colArtiste;
     @FXML private TextField searchField;
     @FXML private VBox formPane, questionsContainer;
@@ -45,6 +48,7 @@ public class CoursController implements Initializable {
     private final UserService userService = new UserService();
     private final QcmService qcmService = new QcmService();
     private final QcmQuestionService questionService = new QcmQuestionService();
+    private final Coursreviewservice reviewService = new Coursreviewservice();
     private Connection cnx;
 
     private final ObservableList<Cours> coursList = FXCollections.observableArrayList();
@@ -102,6 +106,162 @@ public class CoursController implements Initializable {
             }
         });
     }
+
+    private void setupColumns() {
+        colNom.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("nom"));
+        colNiveau.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("niveau"));
+        colDuree.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("duree"));
+        colStatut.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("statut"));
+        colArtiste.setCellValueFactory(cd -> {
+            Cours c = cd.getValue();
+            if (c != null && c.getArtiste() != null) {
+                return new javafx.beans.property.SimpleStringProperty(
+                        c.getArtiste().getPrenom() + " " + c.getArtiste().getNom());
+            }
+            return new javafx.beans.property.SimpleStringProperty("");
+        });
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // POPUP "VOIR LES NOTES" — NOUVEAU
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @FXML
+    private void handleVoirNotes() {
+        Cours selected = coursTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showError("Veuillez sélectionner un cours pour voir ses notes.");
+            return;
+        }
+        ouvrirPopupNotes(selected);
+    }
+
+    private void ouvrirPopupNotes(Cours cours) {
+        try {
+            double moyenne  = reviewService.getMoyenne(cours.getId());
+            int    total    = reviewService.getNombreNotes(cours.getId());
+            int[]  distrib  = reviewService.getDistributionNotes(cours.getId());
+
+            // ── Fenêtre popup ─────────────────────────────────────────────────
+            Stage popup = new Stage();
+            popup.initModality(Modality.APPLICATION_MODAL);
+            popup.setTitle("★ Notes — " + cours.getNom());
+            popup.setResizable(false);
+
+            VBox root = new VBox(20);
+            root.setPadding(new Insets(28));
+            root.setStyle("-fx-background-color: #f4f7f6;");
+            root.setPrefWidth(420);
+
+            // ── En-tête ───────────────────────────────────────────────────────
+            VBox header = new VBox(6);
+            header.setStyle(
+                    "-fx-background-color: linear-gradient(to right, #0f1c3f, #1a3a6e);" +
+                            "-fx-background-radius: 14; -fx-padding: 20 24;"
+            );
+            Label lblTitre = new Label("★  Notes du cours");
+            lblTitre.setStyle("-fx-font-size: 17; -fx-font-weight: bold; -fx-text-fill: white;");
+            Label lblCoursNom = new Label(cours.getNom());
+            lblCoursNom.setStyle("-fx-font-size: 13; -fx-text-fill: rgba(255,255,255,0.70);");
+            header.getChildren().addAll(lblTitre, lblCoursNom);
+
+            // ── Score global ──────────────────────────────────────────────────
+            HBox scoreBox = new HBox(20);
+            scoreBox.setAlignment(Pos.CENTER);
+            scoreBox.setStyle(
+                    "-fx-background-color: white; -fx-background-radius: 14;" +
+                            "-fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 10, 0, 0, 3);"
+            );
+
+            // Chiffre moyen
+            VBox moyenneBox = new VBox(4);
+            moyenneBox.setAlignment(Pos.CENTER);
+            Label lblMoyChiffre = new Label(total > 0 ? String.format("%.1f", moyenne) : "—");
+            lblMoyChiffre.setStyle("-fx-font-size: 42; -fx-font-weight: bold; -fx-text-fill: #0f1c3f;");
+
+            // Étoiles de la moyenne
+            HBox etoilesMoy = new HBox(3);
+            etoilesMoy.setAlignment(Pos.CENTER);
+            int arrondi = (int) Math.round(moyenne);
+            for (int i = 1; i <= 5; i++) {
+                Label e = new Label(i <= arrondi ? "★" : "☆");
+                e.setStyle("-fx-font-size: 20; -fx-text-fill: #FFD700;");
+                etoilesMoy.getChildren().add(e);
+            }
+
+            Label lblTotal = new Label(total + " note" + (total > 1 ? "s" : ""));
+            lblTotal.setStyle("-fx-font-size: 12; -fx-text-fill: #a0aec0;");
+            moyenneBox.getChildren().addAll(lblMoyChiffre, etoilesMoy, lblTotal);
+
+            // ── Distribution des notes ────────────────────────────────────────
+            VBox distribBox = new VBox(6);
+            distribBox.setAlignment(Pos.CENTER_LEFT);
+            HBox.setHgrow(distribBox, Priority.ALWAYS);
+
+            for (int i = 5; i >= 1; i--) {
+                int nb = distrib[i - 1];
+                double pct = total > 0 ? (double) nb / total : 0;
+
+                HBox row = new HBox(8);
+                row.setAlignment(Pos.CENTER_LEFT);
+
+                Label lblNote = new Label(i + " ★");
+                lblNote.setStyle("-fx-font-size: 12; -fx-text-fill: #4a5568; -fx-min-width: 40;");
+
+                // Barre de progression
+                StackPane barBg = new StackPane();
+                barBg.setPrefSize(130, 10);
+                barBg.setStyle("-fx-background-color: #e2e8f0; -fx-background-radius: 5;");
+
+                Region barFill = new Region();
+                barFill.setPrefHeight(10);
+                barFill.setPrefWidth(130 * pct);
+                barFill.setStyle("-fx-background-color: #f6d365; -fx-background-radius: 5;");
+                StackPane.setAlignment(barFill, Pos.CENTER_LEFT);
+                barBg.getChildren().add(barFill);
+
+                Label lblNb = new Label(nb + "");
+                lblNb.setStyle("-fx-font-size: 11; -fx-text-fill: #718096; -fx-min-width: 20;");
+
+                row.getChildren().addAll(lblNote, barBg, lblNb);
+                distribBox.getChildren().add(row);
+            }
+
+            scoreBox.getChildren().addAll(moyenneBox, new Separator(javafx.geometry.Orientation.VERTICAL), distribBox);
+
+            // ── Message si aucune note ────────────────────────────────────────
+            if (total == 0) {
+                Label lblVide = new Label("Aucune note pour ce cours pour l'instant.");
+                lblVide.setStyle("-fx-text-fill: #a0aec0; -fx-font-size: 13; -fx-font-style: italic;");
+                lblVide.setAlignment(Pos.CENTER);
+                lblVide.setMaxWidth(Double.MAX_VALUE);
+                root.getChildren().addAll(header, scoreBox, lblVide);
+            } else {
+                root.getChildren().addAll(header, scoreBox);
+            }
+
+            // ── Bouton fermer ─────────────────────────────────────────────────
+            Button btnFermer = new Button("Fermer");
+            btnFermer.setMaxWidth(Double.MAX_VALUE);
+            btnFermer.setStyle(
+                    "-fx-background-color: #0f1c3f; -fx-text-fill: white;" +
+                            "-fx-font-weight: bold; -fx-padding: 10; -fx-background-radius: 8; -fx-cursor: hand;"
+            );
+            btnFermer.setOnAction(e -> popup.close());
+            root.getChildren().add(btnFermer);
+
+            popup.setScene(new Scene(root));
+            popup.show();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("Erreur lors du chargement des notes : " + e.getMessage());
+        }
+    }
+
+
+
+
 
     private void handlePrepareEdit(QcmQuestion q) {
         if (q == null) return;
@@ -448,21 +608,7 @@ public class CoursController implements Initializable {
         cbArtiste.setValue(c.getArtiste());
     }
 
-    private void setupColumns() {
-        colId.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("id"));
-        colNom.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("nom"));
-        colNiveau.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("niveau"));
-        colDuree.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("duree"));
-        colStatut.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("statut"));
-        colArtiste.setCellValueFactory(cellData -> {
-            Cours cours = cellData.getValue();
-            if (cours != null && cours.getArtiste() != null) {
-                String artisteNom = cours.getArtiste().getPrenom() + " " + cours.getArtiste().getNom();
-                return new javafx.beans.property.SimpleStringProperty(artisteNom);
-            }
-            return new javafx.beans.property.SimpleStringProperty("");
-        });
-    }
+
 
     private void setupSearch() {
         filteredList = new FilteredList<>(coursList, p -> true);
@@ -489,6 +635,18 @@ public class CoursController implements Initializable {
     private void chargerUtilisateurs() {
         try {
             cbArtiste.setItems(FXCollections.observableArrayList(userService.recuperer()));
+            cbArtiste.setConverter(new javafx.util.StringConverter<User>() {
+                @Override
+                public String toString(User user) {
+                    if (user == null) return "";
+                    return user.getPrenom() + " " + user.getNom();
+                }
+
+                @Override
+                public User fromString(String string) {
+                    return null; // Non nécessaire car le ComboBox n'est pas éditable
+                }
+            });
         } catch (SQLException e) {
             showError("Erreur chargement artistes: " + e.getMessage());
         }
@@ -497,6 +655,34 @@ public class CoursController implements Initializable {
     private void afficherFormulaire(boolean v) {
         formPane.setVisible(v);
         formPane.setManaged(v);
+    }
+
+    @FXML
+    private void handleGererQcm() {
+        Cours selected = coursTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showError("Veuillez sélectionner un cours pour gérer son QCM !");
+            return;
+        }
+
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/ui/back/QcmManageView.fxml")
+            );
+            javafx.scene.Parent root = loader.load();
+
+            QcmManageController ctrl = loader.getController();
+            ctrl.setCours(selected);
+
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setTitle("Gestion QCM – " + selected.getNom());
+            stage.setScene(new javafx.scene.Scene(root, 1000, 680));
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.show();
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+            showError("Impossible d'ouvrir la gestion QCM : " + e.getMessage());
+        }
     }
 
     @FXML

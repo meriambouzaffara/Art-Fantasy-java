@@ -3,49 +3,124 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox spacing="20" style="-fx-background-color: #F0EADF;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.front.Cours2Controller">
+<VBox spacing="20" style="-fx-background-color: #F0EADF;"
+      xmlns="http://javafx.com/javafx/8"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.rouhfan.ui.front.Cours2Controller">
     <children>
-        <Label text="🎨 Nos Formations Artistiques" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #23627C; -fx-padding: 20 0 0 20;" />
+
+        <Label text="🎨 Nos Formations Artistiques"
+               style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #23627C; -fx-padding: 20 0 0 20;" />
 
         <HBox spacing="15" alignment="CENTER_LEFT" style="-fx-padding: 10 20 5 20;">
             <TextField fx:id="searchField" promptText="🔍 Rechercher un cours..."
-                       style="-fx-background-color: white; -fx-border-color: #23BBB7; -fx-border-radius: 20; -fx-background-radius: 20; -fx-padding: 8 15; -fx-pref-width: 300; -fx-text-fill: #23627C; -fx-font-weight: bold;" />
-
-            <Region HBox.hgrow="ALWAYS" /> <Label text="Trier par :" style="-fx-font-weight: bold; -fx-text-fill: #23627C; -fx-font-size: 14;" />
-
+                       style="-fx-background-color: white; -fx-border-color: #23BBB7;
+                              -fx-border-radius: 20; -fx-background-radius: 20;
+                              -fx-padding: 8 15; -fx-pref-width: 300;
+                              -fx-text-fill: #23627C; -fx-font-weight: bold;" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label text="Trier par :" style="-fx-font-weight: bold; -fx-text-fill: #23627C; -fx-font-size: 14;" />
             <MenuButton text="📊 Niveau" style="-fx-background-color: #23BBB7; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;">
                 <items>
                     <MenuItem text="⬆️ Débutant → Avancé" onAction="#trierParNiveauCroissant" />
                     <MenuItem text="⬇️ Avancé → Débutant" onAction="#trierParNiveauDecroissant" />
                 </items>
             </MenuButton>
-
             <MenuButton text="📝 Nom" style="-fx-background-color: #744D83; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;">
                 <items>
                     <MenuItem text="⬆️ A → Z" onAction="#trierParNomCroissant" />
                     <MenuItem text="⬇️ Z → A" onAction="#trierParNomDecroissant" />
                 </items>
             </MenuButton>
-
-            <Button text="🔄" onAction="#resetTri" style="-fx-background-color: #D3EDEF; -fx-text-fill: #23627C; -fx-font-weight: bold; -fx-background-radius: 8; -fx-border-color: #23BBB7; -fx-border-radius: 8; -fx-cursor: hand;" />
+            <Button text="🔄" onAction="#resetTri"
+                    style="-fx-background-color: #D3EDEF; -fx-text-fill: #23627C; -fx-font-weight: bold;
+                           -fx-background-radius: 8; -fx-border-color: #23BBB7; -fx-border-radius: 8; -fx-cursor: hand;" />
         </HBox>
 
-        <ScrollPane fx:id="mainScroll" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
+        <ScrollPane fx:id="mainScroll" fitToWidth="true"
+                    style="-fx-background-color: transparent; -fx-background: transparent;"
+                    VBox.vgrow="ALWAYS">
             <content>
                 <FlowPane fx:id="coursesGrid" hgap="25" vgap="25">
-                    <padding>
-                        <Insets bottom="30" left="30" right="30" top="10" />
-                    </padding>
+                    <padding><Insets bottom="30" left="30" right="30" top="10" /></padding>
                 </FlowPane>
             </content>
         </ScrollPane>
 
-        <VBox fx:id="detailView" visible="false" managed="false" spacing="15" style="-fx-padding: 30; -fx-background-color: #E3DBE6; -fx-background-radius: 20;">
-            <Button text="← Retour aux cours" onAction="#retourListe" style="-fx-background-color: #744D83; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 8;" />
-            <Label fx:id="lblNom" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #23627C;" />
+        <VBox fx:id="detailView" visible="false" managed="false" spacing="15"
+              style="-fx-padding: 30; -fx-background-color: #E3DBE6; -fx-background-radius: 20;"
+              VBox.vgrow="ALWAYS">
+
+            <Button text="← Retour aux cours" onAction="#retourListe"
+                    style="-fx-background-color: #744D83; -fx-text-fill: white;
+                           -fx-cursor: hand; -fx-background-radius: 8; -fx-padding: 8 16; -fx-font-weight: bold;" />
+
+            <HBox alignment="CENTER_LEFT" spacing="16">
+                <Label fx:id="lblNom"
+                       style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #23627C;"
+                       HBox.hgrow="ALWAYS" maxWidth="Infinity" wrapText="true" />
+                <Button fx:id="btnTranslate" text="🌐 Traduire" onAction="#handleTranslate"
+                        style="-fx-background-color: white; -fx-text-fill: #23BBB7;
+                               -fx-border-color: #23BBB7; -fx-border-width: 2;
+                               -fx-border-radius: 20; -fx-background-radius: 20;
+                               -fx-font-weight: bold; -fx-padding: 8 18; -fx-cursor: hand;" />
+            </HBox>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Langue :" style="-fx-font-size: 12; -fx-text-fill: #744D83; -fx-font-weight: bold;" />
+                <ComboBox fx:id="cbLangue" prefWidth="170"
+                          style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-font-size: 13;" />
+                <ProgressIndicator fx:id="translateLoader" prefWidth="22" prefHeight="22" visible="false" managed="false" />
+                <Label fx:id="lblTranslateStatus"
+                       style="-fx-font-size: 12; -fx-text-fill: #23627C; -fx-font-style: italic;" />
+            </HBox>
+
             <Label fx:id="lblNiveau" style="-fx-text-fill: #23627C; -fx-font-weight: bold;" />
-            <TextArea fx:id="taContenu" editable="false" wrapText="true" prefHeight="400" style="-fx-control-inner-background: #F0EADF; -fx-background-radius: 10;" />
-            <Button text="📝 Passer le QCM" onAction="#goPasserQcm" style="-fx-background-color: #23BBB7; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 10;" />
+
+            <TextArea fx:id="taContenu" editable="false" wrapText="true" prefHeight="260"
+                      style="-fx-control-inner-background: #F0EADF; -fx-background-radius: 10;
+                             -fx-font-size: 14; -fx-text-fill: #23627C;" VBox.vgrow="ALWAYS" />
+
+            <!-- ══ SECTION ÉTOILES ══════════════════════════════════════════ -->
+            <VBox spacing="10"
+                  style="-fx-background-color: white; -fx-background-radius: 14;
+                         -fx-padding: 16 20; -fx-border-color: #D3EDEF;
+                         -fx-border-width: 1; -fx-border-radius: 14;">
+
+                <HBox alignment="CENTER_LEFT" spacing="24">
+
+                    <!-- Moyenne -->
+                    <VBox alignment="CENTER" spacing="3" minWidth="80">
+                        <Label fx:id="lblMoyenne"
+                               style="-fx-font-size: 30; -fx-font-weight: bold; -fx-text-fill: #23627C;" />
+                        <HBox fx:id="starsDisplay" spacing="2" alignment="CENTER" />
+                        <Label fx:id="lblNbNotes"
+                               style="-fx-font-size: 11; -fx-text-fill: #a0aec0;" />
+                    </VBox>
+
+                    <Separator orientation="VERTICAL" />
+
+                    <!-- Étoiles cliquables -->
+                    <VBox spacing="8" HBox.hgrow="ALWAYS">
+                        <Label text="Notez ce cours :"
+                               style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #744D83;" />
+                        <HBox fx:id="starsInput" spacing="4" alignment="CENTER_LEFT" />
+                        <Label fx:id="lblMonNote"
+                               style="-fx-font-size: 12; -fx-text-fill: #23BBB7; -fx-font-style: italic;" />
+                        <Button fx:id="btnNoter" text="✔  Enregistrer ma note"
+                                onAction="#handleNoter"
+                                style="-fx-background-color: #23BBB7; -fx-text-fill: white;
+                                       -fx-font-weight: bold; -fx-font-size: 12;
+                                       -fx-padding: 8 20; -fx-background-radius: 8; -fx-cursor: hand;" />
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <Button text="📝 Passer le QCM" onAction="#goPasserQcm" maxWidth="Infinity"
+                    style="-fx-background-color: #23BBB7; -fx-text-fill: white;
+                           -fx-font-weight: bold; -fx-padding: 12 20;
+                           -fx-background-radius: 10; -fx-cursor: hand; -fx-font-size: 14;" />
         </VBox>
+
     </children>
 </VBox>

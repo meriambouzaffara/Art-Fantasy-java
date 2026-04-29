@@ -9,31 +9,37 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="14.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.AvisController">
+<?import javafx.scene.layout.Pane?>
+<VBox spacing="14.0" stylesheets="@../theme.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.AvisController">
     <VBox spacing="4.0">
         <Label text="💬 Avis &amp; Réclamations" styleClass="text-title" />
         <Label text="Modérez les avis et répondez aux réclamations." styleClass="text-subtitle" />
     </VBox>
 
-    <HBox spacing="10.0" alignment="CENTER_LEFT">
+
+    <HBox spacing="15.0" alignment="CENTER_LEFT">
         <TextField fx:id="searchField" promptText="🔍 Rechercher..." prefWidth="200" />
-        <ComboBox fx:id="typeFilter" promptText="Type" prefWidth="120" />
-        <ComboBox fx:id="statutFilter" promptText="Statut" prefWidth="120" />
-        <Button text="🔄 Rafraîchir" onAction="#refresh" styleClass="btn-secondary" />
-        <HBox HBox.hgrow="ALWAYS" />
-        <Button text="✏️ Répondre" onAction="#repondre" styleClass="btn-primary" />
-        <Button text="🗑️ Supprimer" onAction="#deleteAvis" styleClass="btn-secondary" />
+        <ComboBox fx:id="typeFilter" prefWidth="120" />
+        <ComboBox fx:id="statutFilter" prefWidth="120" />
+        <Button text="🔄 Rafraîchir" prefWidth="150" styleClass="btn-add" onAction="#refresh" />
+        <Button text="📊 Historique" prefWidth="150" styleClass="btn-primary" onAction="#openDashboard" />
+        <Button text="👁 Voir réponses" prefWidth="150" styleClass="btn-primary"  onAction="#voirReponses" />
+        <Button text="✏️ Répondre" prefWidth="150" styleClass="btn-primary"  onAction="#repondre" />
+        <Button text="🗑️ Supprimer" prefWidth="150" styleClass="btn-danger"  onAction="#deleteAvis" />
     </HBox>
 
-    <TableView fx:id="avisTable" VBox.vgrow="ALWAYS" styleClass="surface">
+    <TableView fx:id="avisTable" VBox.vgrow="ALWAYS">
         <columns>
-            <TableColumn fx:id="colId" text="ID" prefWidth="50" />
+            <TableColumn fx:id="colId" text="ID" prefWidth="50" visible="false" />
             <TableColumn fx:id="colType" text="Type" prefWidth="100" />
             <TableColumn fx:id="colSujet" text="Sujet" prefWidth="200" />
             <TableColumn fx:id="colMessage" text="Message" prefWidth="300" />
             <TableColumn fx:id="colUtilisateur" text="Utilisateur" prefWidth="150" />
             <TableColumn fx:id="colDate" text="Date" prefWidth="120" />
             <TableColumn fx:id="colStatut" text="Statut" prefWidth="100" />
+            <TableColumn fx:id="colCategorie" text="Categorie" />
+            <TableColumn fx:id="colActionImg" text="Images" prefWidth="120" />
         </columns>
     </TableView>
+
 </VBox>
