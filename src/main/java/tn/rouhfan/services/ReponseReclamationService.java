@@ -35,6 +35,23 @@ public class ReponseReclamationService implements IService<ReponseReclamation> {
         }
 
         System.out.println("✅ Réponse ajoutée en BD");
+
+        // =========================
+        // 📩 EMAIL + SMS (CORRIGÉ)
+        // =========================
+        ReclamationEmailService reclamationEmailService = new ReclamationEmailService();
+        ReclamationSMSService reclamationSmsService = new ReclamationSMSService();
+
+        reclamationEmailService.sendEmail(
+                "maissanfissi@gmail.com",
+                "Nouvelle réponse",
+                "Votre réclamation a reçu une réponse"
+        );
+
+        reclamationSmsService.sendSMS(
+                "(21694734820)",
+                "Votre réclamation a reçu une réponse."
+        );
     }
 
     // =========================

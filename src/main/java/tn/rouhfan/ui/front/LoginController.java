@@ -1,5 +1,6 @@
 package tn.rouhfan.ui.front;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -11,26 +12,27 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import tn.rouhfan.entities.User;
+import tn.rouhfan.services.GoogleOAuthService;
+import tn.rouhfan.services.LoginLogService;
 import tn.rouhfan.services.UserService;
-import tn.rouhfan.tools.PasswordUtils;
+import tn.rouhfan.tools.AppLogger;
 import tn.rouhfan.tools.SessionManager;
+
+import java.io.IOException;
 
 public class LoginController {
 
-    @FXML
-    private TextField emailField;
-
-    @FXML
-    private PasswordField passwordField;
-
-    @FXML
-    private Label errorLabel;
+    @FXML private TextField emailField;
+    @FXML private PasswordField passwordField;
+    @FXML private Label errorLabel;
 
     private final UserService userService = new UserService();
+    private final LoginLogService loginLogService = new LoginLogService();
+    private final GoogleOAuthService googleOAuthService = new GoogleOAuthService();
 
     @FXML
     public void initialize() {
-        errorLabel.setText("");
+        // Initialisation si nécessaire
     }
 
     @FXML
@@ -43,42 +45,92 @@ public class LoginController {
             return;
         }
 
+        // Vérifier si l'utilisateur est bloqué (Brute Force Protection : 5 échecs en 15 min)
+        if (loginLogService.countRecentFailures(email, 15) >= 5) {
+            errorLabel.setText("Compte temporairement bloqué (trop de tentatives). Réessayez dans 15 minutes.");
+            return;
+        }
+
         try {
-            User user = userService.findByEmail(email);
+            User user = userService.authenticate(email, password);
 
-            if (user == null) {
-                errorLabel.setText("Aucun compte trouvé avec cet e-mail.");
-                return;
-            }
+            if (user != null) {
+                if (!user.isVerified()) {
+                    errorLabel.setText("Veuillez vérifier votre email avant de vous connecter.");
+                    return;
+                }
 
-            if (!PasswordUtils.checkPassword(password, user.getPassword())) {
-                errorLabel.setText("Mot de passe incorrect.");
-                return;
-            }
+                SessionManager.getInstance().login(user);
+                loginLogService.logSuccess(user.getId(), email);
+                userService.updateLastLogin(user.getId());
 
-            // Login réussi
-            SessionManager.getInstance().login(user);
-            String role = SessionManager.getInstance().getRole();
-            System.out.println("Login réussi pour: " + user.getNom() + " " + user.getPrenom() + " | Rôle: " + role);
-
-            // Redirection selon le rôle
-            if (role != null && role.toUpperCase().contains("ADMIN")) {
-                // ADMIN → Dashboard directement
-                navigateTo(event, "/ui/back/BackBase.fxml");
+                // Redirection selon le rôle
+                String role = SessionManager.getInstance().getRole();
+                if (role != null && role.toUpperCase().contains("ADMIN")) {
+                    navigateTo(event, "/ui/back/BackBase.fxml");
+                } else {
+                    navigateTo(event, "/ui/front/FrontBase.fxml");
+                }
             } else {
-                // ARTISTE ou PARTICIPANT → FrontOffice
-                navigateTo(event, "/ui/front/FrontBase.fxml");
+                loginLogService.logFailure(email, "Email ou mot de passe incorrect");
+                errorLabel.setText("Email ou mot de passe incorrect.");
             }
-
         } catch (Exception e) {
             errorLabel.setText("Erreur de connexion: " + e.getMessage());
-            e.printStackTrace();
+            AppLogger.error("[LoginController] Erreur authenticate", e);
         }
     }
 
     @FXML
-    private void goSignUp(ActionEvent event) {
-        navigateTo(event, "/ui/front/SignUp.fxml");
+    private void handleGoogleLogin(ActionEvent event) {
+        errorLabel.setText("Ouverture de la fenêtre Google...");
+        
+        googleOAuthService.openLoginPopup(new GoogleOAuthService.OAuthCallback() {
+            @Override
+            public void onSuccess(User user) {
+                Platform.runLater(() -> {
+                    errorLabel.setText("Connecté avec succès !");
+                    loginLogService.logSuccess(user.getId(), user.getEmail());
+                    
+                    String role = SessionManager.getInstance().getRole();
+                    if (role != null && role.toUpperCase().contains("ADMIN")) {
+                        navigateTo(event, "/ui/back/BackBase.fxml");
+                    } else {
+                        navigateTo(event, "/ui/front/FrontBase.fxml");
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                Platform.runLater(() -> errorLabel.setText("Erreur Google : " + error));
+            }
+
+            @Override
+            public void onCancel() {
+                Platform.runLater(() -> errorLabel.setText("Authentification Google annulée."));
+            }
+        });
+    }
+
+    @FXML
+    private void handleFacebookLogin(ActionEvent event) {
+        errorLabel.setText("Facebook login non implémenté.");
+    }
+
+    @FXML
+    private void handleGithubLogin(ActionEvent event) {
+        errorLabel.setText("GitHub login non implémenté.");
+    }
+
+    @FXML
+    private void handleFaceLogin(ActionEvent event) {
+        navigateTo(event, "/ui/front/FaceLogin.fxml");
+    }
+
+    @FXML
+    private void openChatbot(ActionEvent event) {
+        navigateTo(event, "/ui/front/Chatbot.fxml");
     }
 
     @FXML
@@ -86,13 +138,30 @@ public class LoginController {
         navigateTo(event, "/ui/front/FrontBase.fxml");
     }
 
+    @FXML
+    private void goForgotPassword(ActionEvent event) {
+        navigateTo(event, "/ui/front/ForgotPassword.fxml");
+    }
+
+    @FXML
+    private void goSignUp(ActionEvent event) {
+        navigateTo(event, "/ui/front/SignUp.fxml");
+    }
+
     private void navigateTo(ActionEvent event, String fxmlPath) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            java.net.URL resource = getClass().getResource(fxmlPath);
+            if (resource == null) {
+                errorLabel.setText("Page introuvable: " + fxmlPath);
+                AppLogger.error("FXML introuvable: " + fxmlPath, null);
+                return;
+            }
+            Parent root = FXMLLoader.load(resource);
             stage.getScene().setRoot(root);
         } catch (Exception e) {
-            System.err.println("Navigation error: " + fxmlPath);
+            AppLogger.error("Erreur de navigation vers " + fxmlPath, e);
+            errorLabel.setText("Erreur: " + e.getMessage());
             e.printStackTrace();
         }
     }

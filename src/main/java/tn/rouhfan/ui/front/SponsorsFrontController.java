@@ -257,22 +257,49 @@ public class SponsorsFrontController implements Initializable {
             if (events.isEmpty()) {
                 dialogPane.setContent(new Label("Aucun événement sponsorisé pour le moment."));
             } else {
-                VBox container = new VBox(10);
-                container.setPadding(new Insets(10));
+                VBox container = new VBox(15);
+                container.setPadding(new Insets(15));
+                container.setStyle("-fx-background-color: #f0f2f5;");
                 for (Evenement event : events) {
-                    VBox card = new VBox(5);
-                    card.setStyle("-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-border-color: #ddd; -fx-border-radius: 5;");
+                    HBox card = new HBox(15);
+                    card.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                    card.setStyle("-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 4);");
+                    
+                    ImageView imgView = new ImageView();
+                    imgView.setFitWidth(80);
+                    imgView.setFitHeight(80);
+                    imgView.setPreserveRatio(true);
+                    if (event.getImage() != null && !event.getImage().isEmpty()) {
+                        try {
+                            String imageUrl = tn.rouhfan.tools.ImageUtils.getImageUrl(event.getImage());
+                            imgView.setImage(new Image(imageUrl));
+                        } catch (Exception e) {}
+                    } else {
+                        // Fallback image styling or placeholder could go here
+                        imgView.setStyle("-fx-background-color: #e2e8f0;");
+                    }
+                    
+                    VBox content = new VBox(5);
+                    HBox.setHgrow(content, Priority.ALWAYS);
+                    
                     Label title = new Label("🎯 " + event.getTitre());
-                    title.setStyle("-fx-font-weight: bold; -fx-font-size: 14;");
+                    title.setStyle("-fx-font-weight: bold; -fx-font-size: 16; -fx-text-fill: #2c3e50;");
+                    title.setWrapText(true);
+                    
+                    Label type = new Label(event.getType() != null ? event.getType() : "Événement");
+                    type.setStyle("-fx-font-size: 11; -fx-text-fill: white; -fx-background-color: #e67e22; -fx-padding: 2 8; -fx-background-radius: 10;");
+                    
                     Label details = new Label("📍 " + event.getLieu() + " | 📅 " + (event.getDateEvent() != null ? dateFormat.format(event.getDateEvent()) : "N/A"));
-                    details.setStyle("-fx-text-fill: #666;");
-                    card.getChildren().addAll(title, details);
+                    details.setStyle("-fx-text-fill: #7f8c8d; -fx-font-size: 12;");
+                    
+                    content.getChildren().addAll(type, title, details);
+                    card.getChildren().addAll(imgView, content);
                     container.getChildren().add(card);
                 }
                 ScrollPane scrollPane = new ScrollPane(container);
                 scrollPane.setFitToWidth(true);
-                scrollPane.setPrefViewportHeight(300);
-                scrollPane.setPrefViewportWidth(400);
+                scrollPane.setPrefViewportHeight(400);
+                scrollPane.setPrefViewportWidth(450);
                 dialogPane.setContent(scrollPane);
             }
             dialog.showAndWait();

@@ -20,6 +20,7 @@ import tn.rouhfan.services.MagasinService;
 import tn.rouhfan.services.PanierService;
 import tn.rouhfan.tools.ImageUtils;
 import tn.rouhfan.tools.OpenStreetMapHelper;
+import tn.rouhfan.tools.SessionManager;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -219,7 +220,7 @@ public class FrontMagasinController implements Initializable {
                         + "-fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 9 0; -fx-cursor: hand;"));
         btn.setOnAction(e -> showArticleDetail(article));
 
-        Button buyBtn = new Button("Acheter");
+        Button buyBtn = new Button("🛒 Acheter");
         buyBtn.setMaxWidth(Double.MAX_VALUE);
         buyBtn.setDisable(article.getStock() != null && article.getStock() <= 0);
         buyBtn.setStyle("-fx-background-color: #c9a849; -fx-text-fill: white; "
@@ -227,7 +228,19 @@ public class FrontMagasinController implements Initializable {
                 + "-fx-cursor: hand; -fx-font-size: 12;");
         buyBtn.setOnAction(e -> addToCart(article));
 
-        HBox actions = new HBox(8, btn, buyBtn);
+        // Bouton itinéraire sur la carte (petit, icône seule)
+        Button mapBtn = new Button("🗺️");
+        mapBtn.setPrefWidth(40);
+        mapBtn.setStyle("-fx-background-color: #f0eef5; -fx-text-fill: #241197; "
+                + "-fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 9 4; "
+                + "-fx-cursor: hand; -fx-font-size: 14;");
+        boolean cardHasCoords = article.getMagasin() != null
+                && OpenStreetMapHelper.hasCoordinates(article.getMagasin());
+        mapBtn.setDisable(!cardHasCoords);
+        mapBtn.setTooltip(new Tooltip(cardHasCoords ? "Calculer l'itinéraire" : "Position GPS non renseignée"));
+        mapBtn.setOnAction(e -> showItineraire(article.getMagasin()));
+
+        HBox actions = new HBox(8, btn, buyBtn, mapBtn);
         HBox.setHgrow(btn, Priority.ALWAYS);
         HBox.setHgrow(buyBtn, Priority.ALWAYS);
 
@@ -246,6 +259,32 @@ public class FrontMagasinController implements Initializable {
                         + "-fx-cursor: hand;"));
 
         return card;
+    }
+
+    // ── Navigation retour ─────────────────────────────────────────
+
+    @FXML
+    private void goBackToMagasins() {
+        VBox contentHost = (VBox) articlesFlow.getScene().lookup("#contentHost");
+        if (contentHost != null) {
+            tn.rouhfan.ui.Router.setContent(contentHost, "/ui/front/front_liste_magasins.fxml");
+        }
+    }
+
+    /**
+     * Pré-sélectionne un magasin dans le ComboBox et filtre les articles en conséquence.
+     * Appelé depuis FrontListeMagasinsController après le chargement de la vue.
+     */
+    public void setSelectedMagasin(Magasin magasin) {
+        if (magasin == null) return;
+        for (Magasin m : magasinFilter.getItems()) {
+            if (m.getId() != null && m.getId().equals(magasin.getId())) {
+                magasinFilter.getSelectionModel().select(m);
+                break;
+            }
+        }
+        updateMagasinMap(magasinFilter.getSelectionModel().getSelectedItem());
+        applyFilters();
     }
 
     // ── Actions filtres ───────────────────────────────────────────
@@ -322,14 +361,59 @@ public class FrontMagasinController implements Initializable {
     // ── Détail article ────────────────────────────────────────────
 
     private void addToCart(Article article) {
+        // ── Vérification : l'utilisateur doit être connecté ──────
+        if (SessionManager.getInstance().getCurrentUser() == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Connexion requise");
+            alert.setHeaderText("Vous devez être connecté pour ajouter un article au panier.");
+            alert.setContentText("Connectez-vous ou créez un compte pour continuer vos achats.");
+            alert.showAndWait();
+            return;
+        }
+        // ────────────────────────────────────────────────────────
         boolean added = panierService.addArticle(article);
         Alert alert = new Alert(added ? Alert.AlertType.INFORMATION : Alert.AlertType.WARNING);
         alert.setTitle(added ? "Panier" : "Stock indisponible");
         alert.setHeaderText(null);
         alert.setContentText(added
-                ? "Article ajoute au panier."
-                : "Impossible d'ajouter cet article: stock indisponible ou quantite maximale atteinte.");
+                ? "✅ Article ajouté au panier."
+                : "Impossible d'ajouter cet article : stock indisponible ou quantité maximale atteinte.");
         alert.showAndWait();
+    }
+
+    /** Ouvre un dialog avec la carte d'itinéraire vers le magasin. */
+    private void showItineraire(Magasin magasin) {
+        if (magasin == null || !OpenStreetMapHelper.hasCoordinates(magasin)) {
+            Alert a = new Alert(Alert.AlertType.WARNING);
+            a.setTitle("Position indisponible");
+            a.setHeaderText(null);
+            a.setContentText("La position GPS de ce magasin n'est pas renseignée.");
+            a.showAndWait();
+            return;
+        }
+
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("🗺️ Itinéraire — " + magasin.getNom());
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+        dialog.getDialogPane().setPrefSize(720, 520);
+
+        WebView routeMap = new WebView();
+        routeMap.setContextMenuEnabled(false);
+        routeMap.setPrefSize(700, 470);
+        routeMap.getEngine().loadContent(
+                OpenStreetMapHelper.buildRouteMap(
+                        magasin.getLatitude(), magasin.getLongitude(), magasin.getNom()));
+
+        VBox content = new VBox(8);
+        Label hint = new Label("📍 Entrez votre adresse de départ dans la carte pour calculer l'itinéraire.");
+        hint.setStyle("-fx-font-size: 12; -fx-text-fill: #5a4a72;");
+        content.getChildren().addAll(hint, routeMap);
+        dialog.getDialogPane().setContent(content);
+
+        dialog.setOnShown(ev -> javafx.application.Platform.runLater(() ->
+                routeMap.getEngine().executeScript(
+                        "if(window.map){map.invalidateSize();setTimeout(function(){map.invalidateSize();},200);}")));
+        dialog.showAndWait();
     }
 
     private void updateMagasinMap(Magasin selected) {
@@ -401,14 +485,27 @@ public class FrontMagasinController implements Initializable {
                 ? article.getDescription() : "Aucune description");
         description.setWrapText(true);
 
-        Button buyButton = new Button("Acheter");
+        Button buyButton = new Button("🛒 Acheter");
         buyButton.setMaxWidth(Double.MAX_VALUE);
         buyButton.setDisable(article.getStock() != null && article.getStock() <= 0);
         buyButton.setStyle("-fx-background-color: #c9a849; -fx-text-fill: white; -fx-font-weight: bold; "
                 + "-fx-background-radius: 10; -fx-padding: 9 0; -fx-cursor: hand;");
         buyButton.setOnAction(event -> addToCart(article));
 
-        details.getChildren().addAll(price, stock, store, description, buyButton);
+        // Bouton itinéraire (actif seulement si le magasin a des coordonnées)
+        Button itinBtn = new Button("🗺️ Itinéraire");
+        itinBtn.setMaxWidth(Double.MAX_VALUE);
+        boolean hasCoords = article.getMagasin() != null
+                && OpenStreetMapHelper.hasCoordinates(article.getMagasin());
+        itinBtn.setDisable(!hasCoords);
+        itinBtn.setStyle("-fx-background-color: #241197; -fx-text-fill: white; -fx-font-weight: bold; "
+                + "-fx-background-radius: 10; -fx-padding: 9 0; -fx-cursor: hand;");
+        if (!hasCoords) {
+            itinBtn.setTooltip(new Tooltip("Position GPS non renseignée pour ce magasin"));
+        }
+        itinBtn.setOnAction(event -> showItineraire(article.getMagasin()));
+
+        details.getChildren().addAll(price, stock, store, description, buyButton, itinBtn);
 
         VBox mapBox = new VBox(8);
         mapBox.setPrefWidth(340);

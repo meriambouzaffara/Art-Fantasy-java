@@ -7,6 +7,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import tn.rouhfan.entities.Certificat;
 import tn.rouhfan.entities.Cours;
 import tn.rouhfan.entities.User;
@@ -23,7 +25,6 @@ import java.util.ResourceBundle;
 public class CertificatsController implements Initializable {
 
     @FXML private TableView<Certificat> certificatTable;
-    @FXML private TableColumn<Certificat, Integer> colId;
     @FXML private TableColumn<Certificat, String> colNom, colNiveau, colScore, colDate, colParticipant, colCours;
 
     @FXML private TextField tfNom, tfScore, searchField;
@@ -40,12 +41,15 @@ public class CertificatsController implements Initializable {
 
     private Certificat selectedCertificat = null;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+    
+    private final ObservableList<Certificat> masterData = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupColumns();
         setupComboBoxes();
         loadData();
+        setupSearch();
 
         if (formPane != null) {
             formPane.setVisible(false);
@@ -54,7 +58,6 @@ public class CertificatsController implements Initializable {
     }
 
     private void setupColumns() {
-        colId.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("id"));
         colNom.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("nom"));
         colNiveau.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("niveau"));
         colScore.setCellValueFactory(cd -> new javafx.beans.property.SimpleStringProperty(
@@ -143,10 +146,44 @@ public class CertificatsController implements Initializable {
 
     private void loadData() {
         try {
-            certificatTable.setItems(FXCollections.observableArrayList(certService.recuperer()));
+            masterData.setAll(certService.recuperer());
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private void setupSearch() {
+        FilteredList<Certificat> filteredData = new FilteredList<>(masterData, b -> true);
+
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            filteredData.setPredicate(certificat -> {
+                if (newValue == null || newValue.trim().isEmpty()) {
+                    return true;
+                }
+
+                String lowerCaseFilter = newValue.toLowerCase();
+
+                if (certificat.getNom() != null && certificat.getNom().toLowerCase().contains(lowerCaseFilter)) {
+                    return true;
+                } else if (certificat.getNiveau() != null && certificat.getNiveau().toLowerCase().contains(lowerCaseFilter)) {
+                    return true;
+                } else if (certificat.getParticipant() != null && 
+                           ((certificat.getParticipant().getNom() != null && certificat.getParticipant().getNom().toLowerCase().contains(lowerCaseFilter)) || 
+                            (certificat.getParticipant().getPrenom() != null && certificat.getParticipant().getPrenom().toLowerCase().contains(lowerCaseFilter)))) {
+                    return true;
+                } else if (certificat.getCours() != null && certificat.getCours().getNom() != null && certificat.getCours().getNom().toLowerCase().contains(lowerCaseFilter)) {
+                    return true;
+                } else if (certificat.getScore() != null && certificat.getScore().toString().contains(lowerCaseFilter)) {
+                    return true;
+                }
+                
+                return false;
+            });
+        });
+
+        SortedList<Certificat> sortedData = new SortedList<>(filteredData);
+        sortedData.comparatorProperty().bind(certificatTable.comparatorProperty());
+        certificatTable.setItems(sortedData);
     }
 
     @FXML
@@ -184,18 +221,30 @@ public class CertificatsController implements Initializable {
     @FXML
     private void editCertificat() {
         selectedCertificat = certificatTable.getSelectionModel().getSelectedItem();
-        if (selectedCertificat != null) {
-            tfNom.setText(selectedCertificat.getNom());
-            tfScore.setText(selectedCertificat.getScore().toString());
-            cbNiveau.setValue(selectedCertificat.getNiveau());
-            cbCours.setValue(selectedCertificat.getCours());
-            cbParticipant.setValue(selectedCertificat.getParticipant());
-            if (selectedCertificat.getDateObtention() != null) {
-                dpDate.setValue(new java.sql.Date(selectedCertificat.getDateObtention().getTime()).toLocalDate());
-            }
-            formPane.setVisible(true);
-            formPane.setManaged(true);
+        if (selectedCertificat == null) return;
+
+        tfNom.setText(selectedCertificat.getNom());
+        tfScore.setText(selectedCertificat.getScore().toString());
+        cbNiveau.setValue(selectedCertificat.getNiveau());
+
+        if (selectedCertificat.getDateObtention() != null) {
+            dpDate.setValue(new java.sql.Date(
+                    selectedCertificat.getDateObtention().getTime()).toLocalDate());
         }
+
+        // ✅ Chercher par ID dans la liste de la ComboBox
+        cbParticipant.getItems().stream()
+                .filter(u -> u.getId() == selectedCertificat.getParticipant().getId())
+                .findFirst()
+                .ifPresent(cbParticipant::setValue);
+
+        cbCours.getItems().stream()
+                .filter(co -> co.getId() == selectedCertificat.getCours().getId())
+                .findFirst()
+                .ifPresent(cbCours::setValue);
+
+        formPane.setVisible(true);
+        formPane.setManaged(true);
     }
 
     @FXML

@@ -408,66 +408,36 @@ public class UtilisateursController implements Initializable {
         });
     }
 
-//    // ════════════════════════════════════════
-//    //  EXPORT CSV
-//    // ════════════════════════════════════════
-//
-//    @FXML
-//    private void exportCSV(ActionEvent event) {
-//        if (usersList == null || usersList.isEmpty()) {
-//            showWarning("Export impossible", "Aucun utilisateur à exporter.");
-//            return;
-//        }
-//
-//        FileChooser fileChooser = new FileChooser();
-//        fileChooser.setTitle("Exporter les utilisateurs en CSV");
-//        fileChooser.setInitialFileName("utilisateurs_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".csv");
-//        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Fichier CSV", "*.csv"));
-//
-//        Stage stage = (Stage) userTable.getScene().getWindow();
-//        File file = fileChooser.showSaveDialog(stage);
-//
-//        if (file != null) {
-//            try {
-//                PrintWriter writer = new PrintWriter(new FileWriter(file));
-//                writer.println("ID;Nom;Prénom;Email;Rôle;Statut;Type;Date de création");
-//
-//                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-//                for (User u : filteredUsers) {
-//                    String role = u.getRoles() != null
-//                            ? u.getRoles().replace("[\"", "").replace("\"]", "")
-//                            : "";
-//                    String dateStr = u.getCreatedAt() != null ? sdf.format(u.getCreatedAt()) : "";
-//
-//                    writer.println(
-//                            u.getId() + ";" +
-//                            escapeCsv(u.getNom()) + ";" +
-//                            escapeCsv(u.getPrenom()) + ";" +
-//                            escapeCsv(u.getEmail()) + ";" +
-//                            role + ";" +
-//                            escapeCsv(u.getStatut()) + ";" +
-//                            escapeCsv(u.getType()) + ";" +
-//                            dateStr
-//                    );
-//                }
-//                writer.close();
-//
-//                showSuccess("Export réussi",
-//                        filteredUsers.size() + " utilisateur(s) exporté(s) vers :\n" + file.getAbsolutePath());
-//                setStatus("Export CSV : " + filteredUsers.size() + " utilisateurs");
-//            } catch (Exception e) {
-//                showError("Erreur d'export", "Impossible d'exporter :\n" + e.getMessage());
-//            }
-//        }
-//    }
-//
-//    private String escapeCsv(String value) {
-//        if (value == null) return "";
-//        if (value.contains(";") || value.contains("\"") || value.contains("\n")) {
-//            return "\"" + value.replace("\"", "\"\"") + "\"";
-//        }
-//        return value;
-//    }
+    // ════════════════════════════════════════
+    //  EXPORT CSV
+    // ════════════════════════════════════════
+
+    @FXML
+    private void exportCSV(ActionEvent event) {
+        if (usersList == null || usersList.isEmpty()) {
+            showWarning("Export impossible", "Aucun utilisateur à exporter.");
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Exporter les utilisateurs en CSV");
+        fileChooser.setInitialFileName("utilisateurs_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".csv");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Fichier CSV", "*.csv"));
+
+        Stage stage = (Stage) userTable.getScene().getWindow();
+        File file = fileChooser.showSaveDialog(stage);
+
+        if (file != null) {
+            try {
+                tn.rouhfan.services.UserExportService exportService = new tn.rouhfan.services.UserExportService();
+                int count = exportService.exportToCSV(new java.util.ArrayList<>(filteredUsers), file);
+                showSuccess("Export réussi", count + " utilisateur(s) exporté(s) vers :\n" + file.getAbsolutePath());
+                setStatus("📤 Export CSV : " + count + " utilisateurs");
+            } catch (Exception e) {
+                showError("Erreur d'export", "Impossible d'exporter :\n" + e.getMessage());
+            }
+        }
+    }
 
     // ════════════════════════════════════════
     //  ALERTES & STATUT

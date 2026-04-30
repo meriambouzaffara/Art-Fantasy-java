@@ -40,6 +40,7 @@ public class ArticleController implements Initializable {
     @FXML private VBox              formPanel;
     @FXML private Label             formTitle;
     @FXML private TextField         titreField;
+    @FXML private TextField         referenceField;
     @FXML private TextField         prixField;
     @FXML private TextField         stockField;
     @FXML private TextArea          descriptionField;
@@ -284,18 +285,23 @@ public class ArticleController implements Initializable {
         catch(NumberFormatException e) { showFormError("Prix invalide."); return; }
         try { stock=Integer.parseInt(stTx); if(stock<0) throw new NumberFormatException(); }
         catch(NumberFormatException e) { showFormError("Stock invalide."); return; }
+        String reference = referenceField.getText().trim();
         try {
             if (isEditMode && selectedForEdit != null) {
-                selectedForEdit.setTitre(titre); selectedForEdit.setPrix(prix);
+                selectedForEdit.setTitre(titre);
+                selectedForEdit.setReference(reference.isEmpty() ? null : reference);
+                selectedForEdit.setPrix(prix);
                 selectedForEdit.setStock(stock);
                 selectedForEdit.setDescription(descriptionField.getText().trim());
                 selectedForEdit.setImage(imageField.getText().trim());
                 selectedForEdit.setMagasin(mag);
                 articleService.modifier(selectedForEdit);
             } else {
-                articleService.ajouter(new Article(titre, prix, stock,
+                Article newArticle = new Article(titre, prix, stock,
                         descriptionField.getText().trim(), null,
-                        imageField.getText().trim(), mag));
+                        imageField.getText().trim(), mag);
+                newArticle.setReference(reference.isEmpty() ? null : reference);
+                articleService.ajouter(newArticle);
             }
             loadAndRender(); setFormVisible(false); clearForm();
         } catch (SQLException e) { showFormError("Erreur DB : " + e.getMessage()); }
@@ -392,6 +398,7 @@ public class ArticleController implements Initializable {
     // ── Utilitaires formulaire ────────────────────────────────────
     private void populateForm(Article a) {
         titreField.setText(a.getTitre()!=null?a.getTitre():"");
+        referenceField.setText(a.getReference()!=null?a.getReference():"");
         prixField.setText(String.valueOf(a.getPrix()));
         stockField.setText(String.valueOf(a.getStock()!=null?a.getStock():0));
         descriptionField.setText(a.getDescription()!=null?a.getDescription():"");
@@ -400,7 +407,7 @@ public class ArticleController implements Initializable {
             allMagasins.stream().filter(m->m.getId()!=null&&m.getId().equals(a.getMagasin().getId()))
                     .findFirst().ifPresent(m->magasinCombo.getSelectionModel().select(m));
     }
-    private void clearForm()               { titreField.clear();prixField.clear();stockField.clear();descriptionField.clear();imageField.clear();magasinCombo.getSelectionModel().clearSelection(); }
+    private void clearForm()               { titreField.clear();referenceField.clear();prixField.clear();stockField.clear();descriptionField.clear();imageField.clear();magasinCombo.getSelectionModel().clearSelection(); }
     private void setFormVisible(boolean v) { formPanel.setVisible(v); formPanel.setManaged(v); }
     private void showFormError(String msg) { errorLabel.setText("⚠️ "+msg); errorLabel.setVisible(true); errorLabel.setManaged(true); }
     private void hideError()               { errorLabel.setVisible(false); errorLabel.setManaged(false); }

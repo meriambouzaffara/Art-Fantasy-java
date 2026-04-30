@@ -8,6 +8,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.stage.Modality;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import java.io.IOException;
 import tn.rouhfan.tools.SessionManager;
 import tn.rouhfan.ui.Router;
 
@@ -57,6 +61,9 @@ public class BackBaseController {
 
     @FXML
     private Button navOeuvreStatistiques;
+
+    @FXML
+    private Button navAIUsage;
 
     @FXML
     public void initialize() {
@@ -173,10 +180,42 @@ public class BackBaseController {
     }
 
     @FXML
+    private void openAIUsage(ActionEvent event) {
+        setActive(navAIUsage);
+        pageTitle.setText("AI Usage & Logs");
+        Router.setContent(contentHost, "/ui/back/AIUsageDashboard.fxml");
+    }
+
+    @FXML
     private void openProfile(ActionEvent event) {
         clearActive();
         pageTitle.setText("Mon Profil");
         Router.setContent(contentHost, "/ui/back/ProfileView.fxml");
+    }
+
+    @FXML
+    private void openChatbot(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/front/Chatbot.fxml"));
+            Parent root = loader.load();
+            
+            Stage stage = new Stage();
+            stage.initStyle(javafx.stage.StageStyle.UNDECORATED);
+            stage.setTitle("Assistant Admin - Rouh el Fann");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.NONE);
+            stage.setResizable(false);
+            
+            stage.setOnShown(e -> {
+                Stage mainStage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+                stage.setX(mainStage.getX() + mainStage.getWidth() - stage.getWidth() - 20);
+                stage.setY(mainStage.getY() + mainStage.getHeight() - stage.getHeight() - 40);
+            });
+            
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -225,5 +264,6 @@ public class BackBaseController {
         navArticles.getStyleClass().remove("active");
         navAvis.getStyleClass().remove("active");
         if (navOeuvreStatistiques != null) navOeuvreStatistiques.getStyleClass().remove("active");
+        if (navAIUsage != null) navAIUsage.getStyleClass().remove("active");
     }
 }

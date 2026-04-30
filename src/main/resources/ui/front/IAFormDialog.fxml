@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.shape.Circle?>
+
+<VBox spacing="0.0" prefWidth="600.0" prefHeight="700.0" style="-fx-background-color: white; -fx-background-radius: 20; -fx-overflow: hidden;" stylesheets="@../back/oeuvres_categories.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.front.IAFormDialogController">
+    
+    <!-- HEADER / PROGRESS BAR -->
+    <VBox spacing="15.0" style="-fx-background-color: #f8fafc; -fx-padding: 25; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;">
+        <HBox alignment="CENTER_LEFT" spacing="15">
+            <Label fx:id="wizardIcon" text="✨" style="-fx-font-size: 28;" />
+            <VBox>
+                <Label text="Assistant de Création IA" style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #241197;" />
+                <Label fx:id="stepLabel" text="Étape 1 sur 5" style="-fx-text-fill: #64748b;" />
+            </VBox>
+            <Region HBox.hgrow="ALWAYS" />
+            <Button text="✕" onAction="#handleCancel" style="-fx-background-color: transparent; -fx-font-size: 18; -fx-cursor: hand;" />
+        </HBox>
+        <ProgressBar fx:id="progressBar" progress="0.2" prefWidth="Infinity" style="-fx-accent: #241197; -fx-pref-height: 8;" />
+    </VBox>
+
+    <!-- CONTENT AREA (STEPS) -->
+    <StackPane VBox.vgrow="ALWAYS" style="-fx-padding: 30;">
+        
+        <!-- STEP 1: TYPE -->
+        <VBox fx:id="step1" spacing="20" visible="true">
+            <Label text="Quel type d'œuvre souhaitez-vous créer ?" style="-fx-font-size: 18; -fx-font-weight: bold;" />
+            <VBox spacing="10" fx:id="typeContainer" />
+        </VBox>
+
+        <!-- STEP 2: STYLE -->
+        <VBox fx:id="step2" spacing="20" visible="false">
+            <Label text="Choisissez un style artistique" style="-fx-font-size: 18; -fx-font-weight: bold;" />
+            <VBox spacing="10" fx:id="styleContainer" />
+        </VBox>
+
+        <!-- STEP 3: COLOR -->
+        <VBox fx:id="step3" spacing="20" visible="false">
+            <Label text="Sélectionnez une palette de couleurs" style="-fx-font-size: 18; -fx-font-weight: bold;" />
+            <VBox spacing="10" fx:id="colorContainer" />
+        </VBox>
+
+        <!-- STEP 4: MOOD -->
+        <VBox fx:id="step4" spacing="20" visible="false">
+            <Label text="Quelle ambiance doit dégager l'œuvre ?" style="-fx-font-size: 18; -fx-font-weight: bold;" />
+            <VBox spacing="10" fx:id="moodContainer" />
+        </VBox>
+
+        <!-- STEP 5: FINAL DETAILS -->
+        <VBox fx:id="step5" spacing="20" visible="false">
+            <Label text="Dernières touches" style="-fx-font-size: 18; -fx-font-weight: bold;" />
+            <VBox spacing="15">
+                <VBox spacing="8">
+                    <Label text="Éléments supplémentaires (optionnel)" styleClass="filter-label" />
+                    <TextField fx:id="elementsField" promptText="Ex: forêt mystique, océan déchaîné..." styleClass="text-field" />
+                </VBox>
+                <VBox spacing="8">
+                    <Label text="Associer à une catégorie" styleClass="filter-label" />
+                    <ComboBox fx:id="categoryCombo" prefWidth="Infinity" promptText="Choisir une catégorie..." styleClass="combo-box" />
+                </VBox>
+                <VBox spacing="8">
+                    <Label text="Donnez un titre à votre œuvre" styleClass="filter-label" />
+                    <TextField fx:id="titleField" promptText="Ex: L'Éveil du Dragon" styleClass="text-field" />
+                </VBox>
+                <VBox spacing="8">
+                    <Label text="Description de l'œuvre" styleClass="filter-label" />
+                    <TextArea fx:id="descriptionField" promptText="Décrivez votre œuvre en quelques mots..." styleClass="text-area" prefHeight="80" wrapText="true" />
+                </VBox>
+            </VBox>
+        </VBox>
+
+        <!-- PREVIEW STEP -->
+        <VBox fx:id="previewStep" spacing="20" visible="false" alignment="CENTER">
+            <Label text="Votre Chef-d'œuvre est prêt !" style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #15803d;" />
+            <StackPane style="-fx-background-color: #f1f5f9; -fx-background-radius: 15; -fx-padding: 10;">
+                <ImageView fx:id="previewImage" fitHeight="350" fitWidth="350" preserveRatio="true" />
+                <StackPane fx:id="loadingOverlay" visible="false" style="-fx-background-color: rgba(255,255,255,0.7); -fx-background-radius: 10;">
+                    <VBox alignment="CENTER" spacing="10">
+                        <ProgressIndicator prefWidth="50" />
+                        <Label text="L'IA travaille..." style="-fx-font-weight: bold; -fx-text-fill: #241197;" />
+                    </VBox>
+                </StackPane>
+            </StackPane>
+            <HBox spacing="15" alignment="CENTER">
+                <Button text="🔄 Régénérer" onAction="#handleGenerate" styleClass="btn-secondary" style="-fx-padding: 10 20;" />
+                <Button text="💾 Enregistrer" onAction="#handleSave" style="-fx-background-color: #15803d; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 25; -fx-background-radius: 10; -fx-cursor: hand;" />
+                <Separator orientation="VERTICAL" prefHeight="20" />
+                <Button onAction="#shareFacebook" style="-fx-background-color: #1877F2; -fx-text-fill: white; -fx-background-radius: 10; -fx-font-weight: bold; -fx-padding: 10 15; -fx-cursor: hand;" text="f Partager" />
+                <Button onAction="#shareTwitter" style="-fx-background-color: #000000; -fx-text-fill: white; -fx-background-radius: 10; -fx-font-weight: bold; -fx-padding: 10 15; -fx-cursor: hand;" text="𝕏 Tweet" />
+            </HBox>
+        </VBox>
+    </StackPane>
+
+    <!-- FOOTER NAVIGATION -->
+    <HBox fx:id="navigationBar" spacing="15.0" alignment="CENTER_RIGHT" style="-fx-padding: 20; -fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-width: 1 0 0 0;">
+        <Button fx:id="backBtn" text="← Précédent" onAction="#handleBack" visible="false" styleClass="btn-secondary" style="-fx-padding: 10 20;" />
+        <Button fx:id="nextBtn" text="Suivant →" onAction="#handleNext" 
+                style="-fx-background-color: #241197; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 30; -fx-background-radius: 10; -fx-cursor: hand;" />
+    </HBox>
+
+</VBox>

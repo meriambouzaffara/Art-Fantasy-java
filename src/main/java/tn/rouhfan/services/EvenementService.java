@@ -437,6 +437,10 @@ public class EvenementService implements IService<Evenement> {
             throw new SQLException("Événement complet");
         }
 
+        if ("TERMINÉ".equals(event.getStatut())) {
+            throw new SQLException("L'événement est terminé, vous ne pouvez plus y participer.");
+        }
+
         String sql = "UPDATE evenement SET nb_participants = nb_participants + 1 WHERE id = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, eventId);

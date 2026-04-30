@@ -11,6 +11,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 
 <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.ProfileController">
 <VBox spacing="20.0">
@@ -18,29 +20,39 @@
         <Insets top="10" right="10" bottom="10" left="10" />
     </padding>
 
-    <!-- Header -->
-    <VBox spacing="4.0">
-        <Label text="👤 Mon Profil" styleClass="text-title" />
-        <Label text="Gérez vos informations personnelles et votre mot de passe." styleClass="text-subtitle" />
-    </VBox>
+    <!-- Header avec Photo de Profil et Badge -->
+    <HBox spacing="30.0" alignment="CENTER_LEFT" styleClass="surface" style="-fx-padding: 30; -fx-background-radius: 24;">
+        <VBox alignment="CENTER" spacing="10">
+            <VBox alignment="CENTER" style="-fx-background-color: #f0f2f9; -fx-background-radius: 100; -fx-min-width: 130; -fx-min-height: 130; -fx-max-width: 130; -fx-max-height: 130; -fx-border-color: #241197; -fx-border-radius: 100; -fx-border-width: 2;">
+                <ImageView fx:id="profileImageView" fitHeight="120.0" fitWidth="120.0" preserveRatio="true">
+                    <Image url="@../placeholder-user.png" />
+                </ImageView>
+            </VBox>
+            <Button text="Modifier la photo" onAction="#handleUploadPhoto" style="-fx-background-color: transparent; -fx-text-fill: #241197; -fx-font-size: 12; -fx-font-weight: bold; -fx-cursor: hand;" />
+        </VBox>
 
-    <!-- Informations en lecture seule -->
-    <HBox spacing="20.0" alignment="CENTER_LEFT">
-        <VBox spacing="4" style="-fx-background-color: #f0eef5; -fx-background-radius: 16; -fx-padding: 14 24;">
-            <Label text="Rôle" style="-fx-font-size: 11; -fx-text-fill: #5a4a72; -fx-font-weight: 600;" />
-            <Label fx:id="roleLabel" text="—" style="-fx-font-size: 15; -fx-text-fill: #241197; -fx-font-weight: 800;" />
-        </VBox>
-        <VBox spacing="4" style="-fx-background-color: #f0eef5; -fx-background-radius: 16; -fx-padding: 14 24;">
-            <Label text="Statut" style="-fx-font-size: 11; -fx-text-fill: #5a4a72; -fx-font-weight: 600;" />
-            <Label fx:id="statutLabel" text="—" style="-fx-font-size: 15; -fx-text-fill: #241197; -fx-font-weight: 800;" />
-        </VBox>
-        <VBox spacing="4" style="-fx-background-color: #f0eef5; -fx-background-radius: 16; -fx-padding: 14 24;">
-            <Label text="Type" style="-fx-font-size: 11; -fx-text-fill: #5a4a72; -fx-font-weight: 600;" />
-            <Label fx:id="typeLabel" text="—" style="-fx-font-size: 15; -fx-text-fill: #241197; -fx-font-weight: 800;" />
-        </VBox>
-        <VBox spacing="4" style="-fx-background-color: #f0eef5; -fx-background-radius: 16; -fx-padding: 14 24;">
-            <Label text="Membre depuis" style="-fx-font-size: 11; -fx-text-fill: #5a4a72; -fx-font-weight: 600;" />
-            <Label fx:id="dateCreationLabel" text="—" style="-fx-font-size: 15; -fx-text-fill: #241197; -fx-font-weight: 800;" />
+        <VBox spacing="10" HBox.hgrow="ALWAYS">
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label fx:id="userNameTitle" text="Nom Prénom" style="-fx-font-size: 28; -fx-font-weight: 800; -fx-text-fill: #241197;" />
+                <Label fx:id="verifiedBadge" text="✔ Vérifié" visible="false"
+                       style="-fx-background-color: #0984e3; -fx-text-fill: white; -fx-padding: 4 10; -fx-background-radius: 20; -fx-font-size: 11; -fx-font-weight: bold;" />
+            </HBox>
+            <Label text="Gérez vos informations personnelles et sécurisez votre compte." styleClass="text-subtitle" />
+            
+            <HBox spacing="15" style="-fx-padding: 10 0 0 0;">
+                <VBox spacing="4" style="-fx-background-color: #f0f2f9; -fx-background-radius: 12; -fx-padding: 8 16; -fx-min-width: 100;">
+                    <Label text="RÔLE" style="-fx-font-size: 9; -fx-text-fill: #5a4a72; -fx-font-weight: 900;" />
+                    <Label fx:id="roleLabel" text="—" style="-fx-font-size: 13; -fx-text-fill: #241197; -fx-font-weight: 800;" />
+                </VBox>
+                <VBox spacing="4" style="-fx-background-color: #f0f2f9; -fx-background-radius: 12; -fx-padding: 8 16; -fx-min-width: 100;">
+                    <Label text="STATUT" style="-fx-font-size: 9; -fx-text-fill: #5a4a72; -fx-font-weight: 900;" />
+                    <Label fx:id="statutLabel" text="—" style="-fx-font-size: 13; -fx-text-fill: #241197; -fx-font-weight: 800;" />
+                </VBox>
+                <VBox spacing="4" style="-fx-background-color: #f0f2f9; -fx-background-radius: 12; -fx-padding: 8 16; -fx-min-width: 140;">
+                    <Label text="MEMBRE DEPUIS" style="-fx-font-size: 9; -fx-text-fill: #5a4a72; -fx-font-weight: 900;" />
+                    <Label fx:id="dateCreationLabel" text="—" style="-fx-font-size: 13; -fx-text-fill: #241197; -fx-font-weight: 800;" />
+                </VBox>
+            </HBox>
         </VBox>
     </HBox>
 
@@ -124,5 +136,32 @@
                     style="-fx-background-color: linear-gradient(to right, #009688, #4db6ac); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 700; -fx-background-radius: 12; -fx-padding: 12 28; -fx-cursor: hand;" />
         </HBox>
     </VBox>
+
+    <!-- Section : Reconnaissance Faciale -->
+    <VBox spacing="16" styleClass="surface" style="-fx-padding: 30; -fx-background-radius: 20;">
+        <Label text="👤 Reconnaissance Faciale"
+               style="-fx-font-size: 18; -fx-font-weight: 700; -fx-text-fill: #241197;" />
+        <Label fx:id="faceStatusLabel" text="Chargement du statut..." wrapText="true"
+               style="-fx-text-fill: #5a4a72;" />
+
+        <!-- Camera Preview (hidden by default) -->
+        <VBox fx:id="faceCameraBox" visible="false" managed="false" alignment="CENTER" spacing="10"
+              style="-fx-background-color: #1a1a2e; -fx-background-radius: 16; -fx-padding: 8;">
+            <ImageView fx:id="facePreview" fitWidth="320" fitHeight="240" preserveRatio="true" />
+            <Label fx:id="faceDetectionLabel" text="" style="-fx-text-fill: white; -fx-font-weight: bold;" />
+        </VBox>
+
+        <HBox alignment="CENTER_LEFT" spacing="12">
+            <Button fx:id="enrollFaceBtn" text="📷 Enregistrer mon visage" onAction="#handleEnrollFace"
+                    style="-fx-background-color: linear-gradient(to right, #00b894, #00cec9); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 700; -fx-background-radius: 12; -fx-padding: 12 28; -fx-cursor: hand;" />
+            <Button fx:id="disableFaceBtn" text="🚫 Désactiver" onAction="#handleDisableFace" visible="false" managed="false"
+                    style="-fx-background-color: #fee2e2; -fx-text-fill: #d63031; -fx-font-size: 14px; -fx-font-weight: 700; -fx-background-radius: 12; -fx-padding: 12 28; -fx-cursor: hand;" />
+            <Button fx:id="captureFaceBtn" text="✅ Capturer" onAction="#handleCaptureFace" visible="false" managed="false"
+                    style="-fx-background-color: linear-gradient(to right, #241197, #6c2a90); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 700; -fx-background-radius: 12; -fx-padding: 12 28; -fx-cursor: hand;" />
+            <Button fx:id="cancelFaceBtn" text="Annuler" onAction="#handleCancelFace" visible="false" managed="false"
+                    style="-fx-background-color: #f0eef5; -fx-text-fill: #5a4a72; -fx-font-weight: 700; -fx-background-radius: 12; -fx-padding: 12 28; -fx-cursor: hand;" />
+        </HBox>
+    </VBox>
+
 </VBox>
 </ScrollPane>

@@ -6,6 +6,7 @@ public class Article {
 
     private Long idArticle;
     private String titre;
+    private String reference;
     private double prix;
     private Integer stock;
     private String description;
@@ -54,6 +55,14 @@ public class Article {
 
     public void setTitre(String titre) {
         this.titre = titre != null ? titre.trim() : null;
+    }
+
+    public String getReference() {
+        return reference;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference != null && !reference.isBlank() ? reference.trim() : null;
     }
 
     public double getPrix() {
