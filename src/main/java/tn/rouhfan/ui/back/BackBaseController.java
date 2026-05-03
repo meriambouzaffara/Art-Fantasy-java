@@ -166,6 +166,13 @@ public class BackBaseController {
     }
 
     @FXML
+    private void openOeuvreStatistiques(ActionEvent event) {
+        setActive(navOeuvreStatistiques);
+        pageTitle.setText("Statistiques Œuvres");
+        Router.setContent(contentHost, "/ui/back/OeuvreStatistiquesView.fxml");
+    }
+
+    @FXML
     private void openProfile(ActionEvent event) {
         clearActive();
         pageTitle.setText("Mon Profil");

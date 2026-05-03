@@ -369,32 +369,67 @@ public class EvenementService implements IService<Evenement> {
         return events;
     }
 
-    // ✅ PARTICIPER À UN ÉVÉNEMENT (incrémente nb_participants)
     public void participer(int eventId) throws SQLException {
+        int userId = 0;
+        if (SessionManager.getInstance().isLoggedIn()) {
+            userId = SessionManager.getInstance().getCurrentUser().getId();
+        } else {
+            throw new SQLException("Vous devez être connecté pour participer.");
+        }
+
+        // Vérifier si l'utilisateur participe déjà
+        PreparedStatement checkPs = cnx.prepareStatement("SELECT * FROM participation WHERE user_id = ? AND evenement_id = ?");
+        checkPs.setInt(1, userId);
+        checkPs.setInt(2, eventId);
+        if (checkPs.executeQuery().next()) {
+            throw new SQLException("Vous participez déjà à cet événement.");
+        }
+
         // First check if event exists and has capacity
         Evenement event = findById(eventId);
         if (event == null) {
             throw new SQLException("Événement non trouvé");
         }
-        
+
         // Check if event is full
         if (event.getCapacite() != null && event.getNbParticipants() >= event.getCapacite()) {
             throw new SQLException("Événement complet");
         }
-        
+
         String sql = "UPDATE evenement SET nb_participants = nb_participants + 1 WHERE id = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, eventId);
         int rows = ps.executeUpdate();
-        
+
         if (rows > 0) {
             System.out.println("✅ Participation enregistrée pour l'événement ID: " + eventId);
+            PreparedStatement insertPs = cnx.prepareStatement("INSERT INTO participation (user_id, evenement_id) VALUES (?, ?)");
+            insertPs.setInt(1, userId);
+            insertPs.setInt(2, eventId);
+            insertPs.executeUpdate();
         } else {
             throw new SQLException("Erreur lors de la mise à jour");
         }
     }
 
-    // ✅ HELPER - mapper ResultSet en Evenement
+    public List<Evenement> getHistoriqueParticipations(int userId) throws SQLException {
+        String sql = "SELECT e.*, s.id AS s_id, s.nom AS s_nom, u.nom AS u_nom, u.prenom AS u_prenom " +
+                     "FROM evenement e " +
+                     "JOIN participation p ON e.id = p.evenement_id " +
+                     "LEFT JOIN sponsor s ON e.sponsor_id = s.id " +
+                     "LEFT JOIN `user` u ON e.createur_id = u.id " +
+                     "WHERE p.user_id = ? ORDER BY p.date_participation DESC";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setInt(1, userId);
+        ResultSet rs = ps.executeQuery();
+        
+        List<Evenement> events = new ArrayList<>();
+        while (rs.next()) {
+            events.add(mapResultSetToEvenement(rs));
+        }
+        return events;
+    }
+
     private Evenement mapResultSetToEvenement(ResultSet rs) throws SQLException {
         Evenement e = new Evenement();
 
@@ -430,5 +465,5 @@ public class EvenementService implements IService<Evenement> {
         }
 
         return e;
-        }
     }
+}

@@ -23,7 +23,6 @@ import java.util.ResourceBundle;
 public class GalerieController implements Initializable {
 
     @FXML private TableView<Oeuvre> oeuvreTable;
-    @FXML private TableColumn<Oeuvre, Integer> colId;
     @FXML private TableColumn<Oeuvre, String> colImage;
     @FXML private TableColumn<Oeuvre, String> colTitre;
     @FXML private TableColumn<Oeuvre, String> colArtiste;
@@ -31,7 +30,7 @@ public class GalerieController implements Initializable {
     @FXML private TableColumn<Oeuvre, String> colPrix;
     @FXML private TableColumn<Oeuvre, String> colStatus;
     @FXML private TableColumn<Oeuvre, Void> colActions;
-    
+
     @FXML private TextField searchField;
     @FXML private ComboBox<String> statusFilter;
     @FXML private ComboBox<String> sortCombo;
@@ -49,8 +48,6 @@ public class GalerieController implements Initializable {
     }
 
     private void setupColumns() {
-        colId.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getId()).asObject());
-
         // Image Column
         colImage.setCellFactory(param -> new TableCell<Oeuvre, String>() {
             private final ImageView imageView = new ImageView();
@@ -69,9 +66,9 @@ public class GalerieController implements Initializable {
                     Oeuvre o = getTableRow().getItem();
                     String imagePath = o.getImage();
                     if (imagePath != null && !imagePath.isEmpty()) {
-                        File file = new File(imagePath);
-                        if (file.exists()) {
-                            Image img = new Image(file.toURI().toString(), true);
+                        String fullPath = tn.rouhfan.tools.ImageUtils.getAbsolutePath(imagePath);
+                        if (fullPath != null) {
+                            Image img = new Image(fullPath, true);
                             imageView.setImage(img);
                             setGraphic(imageView);
                         } else {
@@ -85,22 +82,23 @@ public class GalerieController implements Initializable {
         });
 
         colTitre.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getTitre()));
-        
+        colTitre.setStyle("-fx-alignment: CENTER;");
+
         colArtiste.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
-            cellData.getValue().getUser() != null ? 
-            cellData.getValue().getUser().getNom() + " " + cellData.getValue().getUser().getPrenom() : "artiste artist"
+                cellData.getValue().getUser() != null ?
+                        cellData.getValue().getUser().getNom() + " " + cellData.getValue().getUser().getPrenom() : "artiste artist"
         ));
-        
+
         colCategorie.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
-            cellData.getValue().getCategorie() != null ? cellData.getValue().getCategorie().getNomCategorie() : "Non classé"
+                cellData.getValue().getCategorie() != null ? cellData.getValue().getCategorie().getNomCategorie() : "Non classé"
         ));
-        
+
         colPrix.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
-            cellData.getValue().getPrix() != null ? cellData.getValue().getPrix().toString() + " DT" : "0.00 DT"
+                cellData.getValue().getPrix() != null ? cellData.getValue().getPrix().toString() + " DT" : "0.00 DT"
         ));
-        
+
         colStatus.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getStatut()));
-        
+
         // Custom Cell for Status
         colStatus.setCellFactory(column -> new TableCell<Oeuvre, String>() {
             @Override
@@ -130,11 +128,11 @@ public class GalerieController implements Initializable {
                 editBtn.getStyleClass().add("btn-edit-reflet");
                 deleteBtn.getStyleClass().add("btn-delete-reflet");
                 pane.setAlignment(javafx.geometry.Pos.CENTER);
-                
+
                 viewBtn.setMinWidth(Button.USE_PREF_SIZE);
                 editBtn.setMinWidth(Button.USE_PREF_SIZE);
                 deleteBtn.setMinWidth(Button.USE_PREF_SIZE);
-                
+
                 viewBtn.setOnAction(e -> {
                     Oeuvre o = getTableView().getItems().get(getIndex());
                     openOeuvreDetails(o);
@@ -144,7 +142,7 @@ public class GalerieController implements Initializable {
                     Oeuvre o = getTableView().getItems().get(getIndex());
                     openOeuvreDialog(o);
                 });
-                
+
                 deleteBtn.setOnAction(e -> {
                     Oeuvre o = getTableView().getItems().get(getIndex());
                     handleDelete(o);
@@ -173,7 +171,7 @@ public class GalerieController implements Initializable {
         statusFilter.valueProperty().addListener((obs, old, newValue) -> applyFilters());
         sortCombo.valueProperty().addListener((obs, old, newValue) -> applyFilters());
         orderCombo.valueProperty().addListener((obs, old, newValue) -> applyFilters());
-        
+
         statusFilter.setValue("Tous");
     }
 
@@ -193,7 +191,7 @@ public class GalerieController implements Initializable {
         });
 
         SortedList<Oeuvre> sortedData = new SortedList<>(filteredData);
-        
+
         // Sorting logic
         String sortOption = sortCombo.getValue();
         String orderOption = orderCombo.getValue();
@@ -212,7 +210,7 @@ public class GalerieController implements Initializable {
                     comparator = Comparator.comparing(Oeuvre::getTitre, String.CASE_INSENSITIVE_ORDER);
                     break;
             }
-            
+
             if (!ascending) {
                 comparator = comparator.reversed();
             }

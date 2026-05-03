@@ -243,7 +243,7 @@ public class IAFormDialogController {
 
     private void share(String url) {
         try {
-            java.awt.Desktop.getDesktop().browse(new URI(url));
+            java.awt.Desktop.getDesktop().browse(new java.net.URI(url));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -251,7 +251,7 @@ public class IAFormDialogController {
 
     private String encode(String text) {
         try {
-            return URLEncoder.encode(text, "UTF-8");
+            return java.net.URLEncoder.encode(text, "UTF-8");
         } catch (java.io.UnsupportedEncodingException e) {
             return text;
         }

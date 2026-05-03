@@ -88,12 +88,8 @@
 
         <HBox spacing="14">
             <VBox spacing="5" HBox.hgrow="ALWAYS">
-                <Label text="Image locale" style="-fx-font-weight: bold; -fx-text-fill: #2d1b4e;" />
-                <HBox spacing="8">
-                    <TextField fx:id="imageField" promptText="Selectionnez une image depuis votre PC"
-                               HBox.hgrow="ALWAYS" />
-                    <Button text="Importer" onAction="#chooseArticleImage" styleClass="btn-secondary" />
-                </HBox>
+                <Label text="Image (nom fichier)" style="-fx-font-weight: bold; -fx-text-fill: #2d1b4e;" />
+                <TextField fx:id="imageField" promptText="Ex: dragon.jpg" />
             </VBox>
             <VBox spacing="5" HBox.hgrow="ALWAYS">
                 <Label text="Magasin *" style="-fx-font-weight: bold; -fx-text-fill: #2d1b4e;" />

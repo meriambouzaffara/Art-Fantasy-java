@@ -10,7 +10,6 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.web.WebView?>
 
 <VBox spacing="0"
       xmlns="http://javafx.com/javafx/8"
@@ -88,29 +87,14 @@
             </VBox>
         </HBox>
 
-        <HBox spacing="16">
-            <VBox spacing="10" prefWidth="410">
-                <HBox spacing="14">
-                    <VBox spacing="5" HBox.hgrow="ALWAYS">
-                        <Label text="Latitude" style="-fx-font-weight: bold; -fx-text-fill: #2d1b4e;" />
-                        <TextField fx:id="latField" promptText="Ex: 36.8065" />
-                    </VBox>
-                    <VBox spacing="5" HBox.hgrow="ALWAYS">
-                        <Label text="Longitude" style="-fx-font-weight: bold; -fx-text-fill: #2d1b4e;" />
-                        <TextField fx:id="lonField" promptText="Ex: 10.1815" />
-                    </VBox>
-                </HBox>
-                <HBox alignment="CENTER_LEFT" spacing="10">
-                    <Button text="Centrer la carte" onAction="#centerMapOnFields" styleClass="btn-secondary" />
-                    <Label fx:id="selectedPositionLabel" text="Aucune position selectionnee"
-                           style="-fx-text-fill: #5a4a72; -fx-font-size: 12;" />
-                </HBox>
+        <HBox spacing="14">
+            <VBox spacing="5" prefWidth="200">
+                <Label text="Latitude" style="-fx-font-weight: bold; -fx-text-fill: #2d1b4e;" />
+                <TextField fx:id="latField" promptText="Ex: 36.8065" />
             </VBox>
-            <VBox spacing="5" HBox.hgrow="ALWAYS">
-                <Label text="Position OpenStreetMap"
-                       style="-fx-font-weight: bold; -fx-text-fill: #2d1b4e;" />
-                <WebView fx:id="locationMap" minHeight="240" prefHeight="260" prefWidth="460"
-                         style="-fx-border-color: rgba(36,17,151,0.16); -fx-border-radius: 12;" />
+            <VBox spacing="5" prefWidth="200">
+                <Label text="Longitude" style="-fx-font-weight: bold; -fx-text-fill: #2d1b4e;" />
+                <TextField fx:id="lonField" promptText="Ex: 10.1815" />
             </VBox>
         </HBox>
 

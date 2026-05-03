@@ -38,6 +38,9 @@ public class ArtisteBaseController {
     private Button navCertificats;
 
     @FXML
+    private Button navFavoris;
+
+    @FXML
     public void initialize() {
         // ── GUARD DE SÉCURITÉ ──
         if (!SessionManager.getInstance().checkAccess("ROLE_ARTISTE")) {
@@ -102,6 +105,13 @@ public class ArtisteBaseController {
     }
 
     @FXML
+    private void openFavoris(ActionEvent event) {
+        setActive(navFavoris);
+        pageTitle.setText("Mes Favoris");
+        Router.setContent(contentHost, "/ui/back/FavorisView.fxml");
+    }
+
+    @FXML
     private void openProfile(ActionEvent event) {
         clearActive();
         pageTitle.setText("Mon Profil");
@@ -147,5 +157,6 @@ public class ArtisteBaseController {
         navEvenements.getStyleClass().remove("active");
         navCours.getStyleClass().remove("active");
         navCertificats.getStyleClass().remove("active");
+        if (navFavoris != null) navFavoris.getStyleClass().remove("active");
     }
 }

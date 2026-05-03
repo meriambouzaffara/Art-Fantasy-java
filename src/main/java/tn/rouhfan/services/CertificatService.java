@@ -29,36 +29,6 @@ public class CertificatService {
         }
     }
 
-    @Override
-    public List<Certificat> recuperer() throws SQLException {
-        List<Certificat> liste = new ArrayList<>();
-        String sql = "SELECT cert.*, co.nom AS cours_nom, u.nom AS user_nom, u.prenom AS user_prenom " +
-                "FROM certificat cert " +
-                "LEFT JOIN cours co ON cert.id_cours = co.id " +
-                "LEFT JOIN user u ON cert.id_participant = u.id";
-        Statement st = cnx.createStatement();
-        ResultSet rs = st.executeQuery(sql);
-        while (rs.next())
-            liste.add(mapper(rs));
-        return liste;
-    }
-
-    @Override
-    public Certificat findById(int id) throws SQLException {
-        String sql = "SELECT cert.*, co.nom AS cours_nom, u.nom AS user_nom, u.prenom AS user_prenom " +
-                "FROM certificat cert " +
-                "LEFT JOIN cours co ON cert.id_cours = co.id " +
-                "LEFT JOIN user u ON cert.id_participant = u.id " +
-                "WHERE cert.id = ?";
-        PreparedStatement ps = cnx.prepareStatement(sql);
-        ps.setInt(1, id);
-        ResultSet rs = ps.executeQuery();
-        if (rs.next())
-            return mapper(rs);
-        return null;
-    }
-
-    @Override
     public void modifier(Certificat c) throws SQLException {
         String sql = "UPDATE certificat SET nom=?, niveau=?, score=?, id_cours=?, id_participant=?, date_obtention=? WHERE id=?";
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
@@ -101,26 +71,25 @@ public class CertificatService {
                 co.setNom(rs.getString("cours_nom"));
                 cert.setCours(co);
 
-        User u = new User();
-        u.setId(rs.getInt("id_participant"));
-        u.setNom(rs.getString("user_nom"));
-        u.setPrenom(rs.getString("user_prenom"));
-        c.setParticipant(u);
-        return c;
+                User u = new User();
+                u.setId(rs.getInt("id_participant"));
+                u.setNom(rs.getString("user_nom"));
+                u.setPrenom(rs.getString("user_prenom"));
+                cert.setParticipant(u);
+
+                liste.add(cert);
+            }
+        }
+        return liste;
     }
     public void supprimerParParticipant(int participantId) throws SQLException {
         String sql = "DELETE FROM certificat WHERE id_participant = ?";
-        PreparedStatement ps = cnx.prepareStatement(sql);
-        ps.setInt(1, idParticipant);
-        ps.executeUpdate();
-        System.out.println("🗑️ Tous les certificats de l'utilisateur (participant) supprimés");
-    }
 
-    public void supprimerParCours(int coursId) throws SQLException {
-        String sql = "DELETE FROM certificat WHERE id_cours = ?";
-        PreparedStatement ps = cnx.prepareStatement(sql);
-        ps.setInt(1, coursId);
-        ps.executeUpdate();
-        System.out.println("🗑️ Tous les certificats liés au cours supprimés");
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, participantId);
+            int rows = ps.executeUpdate();
+
+            System.out.println("Certificats supprimés pour participant #" + participantId + " : " + rows);
+        }
     }
 }

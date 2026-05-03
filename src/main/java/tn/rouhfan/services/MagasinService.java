@@ -25,8 +25,8 @@ public class MagasinService implements IService<Magasin> {
         ps.setString(2, m.getAdresse());
         ps.setString(3, m.getTel());
         ps.setString(4, m.getEmail());
-        setNullableDouble(ps, 5, m.getLatitude());
-        setNullableDouble(ps, 6, m.getLongitude());
+        ps.setDouble(5, m.getLatitude());
+        ps.setDouble(6, m.getLongitude());
 
         ps.executeUpdate();
         System.out.println(" Magasin ajouté");
@@ -53,8 +53,8 @@ public class MagasinService implements IService<Magasin> {
         ps.setString(2, m.getAdresse());
         ps.setString(3, m.getTel());
         ps.setString(4, m.getEmail());
-        setNullableDouble(ps, 5, m.getLatitude());
-        setNullableDouble(ps, 6, m.getLongitude());
+        ps.setDouble(5, m.getLatitude());
+        ps.setDouble(6, m.getLongitude());
         ps.setLong(7, m.getId());
 
         ps.executeUpdate();
@@ -77,8 +77,8 @@ public class MagasinService implements IService<Magasin> {
                     rs.getString("adresse"),
                     rs.getString("tel"),
                     rs.getString("email"),
-                    getNullableDouble(rs, "latitude"),
-                    getNullableDouble(rs, "longitude")
+                    rs.getDouble("latitude"),
+                    rs.getDouble("longitude")
             );
 
             magasins.add(m);
@@ -103,24 +103,11 @@ public class MagasinService implements IService<Magasin> {
                     rs.getString("adresse"),
                     rs.getString("tel"),
                     rs.getString("email"),
-                    getNullableDouble(rs, "latitude"),
-                    getNullableDouble(rs, "longitude")
+                    rs.getDouble("latitude"),
+                    rs.getDouble("longitude")
             );
         }
 
         return null;
-    }
-
-    private void setNullableDouble(PreparedStatement ps, int index, Double value) throws SQLException {
-        if (value == null) {
-            ps.setNull(index, Types.DOUBLE);
-        } else {
-            ps.setDouble(index, value);
-        }
-    }
-
-    private Double getNullableDouble(ResultSet rs, String column) throws SQLException {
-        double value = rs.getDouble(column);
-        return rs.wasNull() ? null : value;
     }
 }

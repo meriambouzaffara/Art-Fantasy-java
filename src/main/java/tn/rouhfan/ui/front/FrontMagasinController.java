@@ -1,25 +1,19 @@
 package tn.rouhfan.ui.front;
 
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
-import javafx.scene.web.WebView;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import tn.rouhfan.entities.Article;
 import tn.rouhfan.entities.Magasin;
 import tn.rouhfan.services.ArticleService;
 import tn.rouhfan.services.MagasinService;
-import tn.rouhfan.services.PanierService;
-import tn.rouhfan.tools.ImageUtils;
-import tn.rouhfan.tools.OpenStreetMapHelper;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -42,14 +36,10 @@ public class FrontMagasinController implements Initializable {
     @FXML private Label             totalLabel;
     @FXML private Label             resultCount;
     @FXML private VBox              emptyMessage;
-    @FXML private WebView           magasinMap;
-    @FXML private Label             selectedMagasinLabel;
-    @FXML private Label             selectedMagasinAddress;
 
     // ── État interne ──────────────────────────────────────────────
     private ArticleService articleService;
     private MagasinService magasinService;
-    private final PanierService panierService = PanierService.getInstance();
     private List<Article>  allArticles;
     private List<Magasin>  allMagasins;
 
@@ -62,7 +52,6 @@ public class FrontMagasinController implements Initializable {
         setupSortCombo();
         loadData();
         setupFilters();
-        updateMagasinMap(null);
     }
 
     private void setupSortCombo() {
@@ -117,7 +106,6 @@ public class FrontMagasinController implements Initializable {
             }
             @Override public Magasin fromString(String s) { return null; }
         });
-        updateMagasinMap(null);
     }
 
     // ── Rendu des cartes ──────────────────────────────────────────
@@ -158,7 +146,9 @@ public class FrontMagasinController implements Initializable {
         imagePlaceholder.setStyle("-fx-background-color: " + bgColor + "; -fx-background-radius: 16 16 0 0;");
 
         // Icône centrale
-        imagePlaceholder.getChildren().add(createArticleVisual(article, 240, 160, 52));
+        Label icon = new Label(getIconForArticle(article));
+        icon.setStyle("-fx-font-size: 52; -fx-text-fill: rgba(255,255,255,0.9);");
+        imagePlaceholder.getChildren().add(icon);
 
         // Badge stock
         Label stockBadge = new Label(getStockBadgeText(article.getStock()));
@@ -219,19 +209,7 @@ public class FrontMagasinController implements Initializable {
                         + "-fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 9 0; -fx-cursor: hand;"));
         btn.setOnAction(e -> showArticleDetail(article));
 
-        Button buyBtn = new Button("Acheter");
-        buyBtn.setMaxWidth(Double.MAX_VALUE);
-        buyBtn.setDisable(article.getStock() != null && article.getStock() <= 0);
-        buyBtn.setStyle("-fx-background-color: #c9a849; -fx-text-fill: white; "
-                + "-fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 9 0; "
-                + "-fx-cursor: hand; -fx-font-size: 12;");
-        buyBtn.setOnAction(e -> addToCart(article));
-
-        HBox actions = new HBox(8, btn, buyBtn);
-        HBox.setHgrow(btn, Priority.ALWAYS);
-        HBox.setHgrow(buyBtn, Priority.ALWAYS);
-
-        content.getChildren().addAll(titre, description, magasin, sep, prix, actions);
+        content.getChildren().addAll(titre, description, magasin, sep, prix, btn);
 
         card.getChildren().addAll(imagePlaceholder, content);
 
@@ -257,7 +235,6 @@ public class FrontMagasinController implements Initializable {
 
     @FXML
     private void onFilterMagasin(ActionEvent event) {
-        updateMagasinMap(magasinFilter.getSelectionModel().getSelectedItem());
         applyFilters();
     }
 
@@ -271,7 +248,6 @@ public class FrontMagasinController implements Initializable {
         searchField.clear();
         magasinFilter.getSelectionModel().selectFirst();
         sortCombo.getSelectionModel().selectFirst();
-        updateMagasinMap(null);
         renderArticles(allArticles);
     }
 
@@ -316,52 +292,11 @@ public class FrontMagasinController implements Initializable {
             }
         }
         renderArticles(filtered);
-        updateMagasinMap(magFilter);
     }
 
     // ── Détail article ────────────────────────────────────────────
 
-    private void addToCart(Article article) {
-        boolean added = panierService.addArticle(article);
-        Alert alert = new Alert(added ? Alert.AlertType.INFORMATION : Alert.AlertType.WARNING);
-        alert.setTitle(added ? "Panier" : "Stock indisponible");
-        alert.setHeaderText(null);
-        alert.setContentText(added
-                ? "Article ajoute au panier."
-                : "Impossible d'ajouter cet article: stock indisponible ou quantite maximale atteinte.");
-        alert.showAndWait();
-    }
-
-    private void updateMagasinMap(Magasin selected) {
-        if (magasinMap == null) {
-            return;
-        }
-
-        boolean allStores = selected == null || "Tous les magasins".equals(selected.getNom());
-        if (allStores) {
-            magasinMap.getEngine().loadContent(OpenStreetMapHelper.buildDisplayMap(allMagasins));
-            if (selectedMagasinLabel != null) {
-                selectedMagasinLabel.setText("Carte des magasins");
-            }
-            if (selectedMagasinAddress != null) {
-                selectedMagasinAddress.setText("Selectionnez un magasin pour voir sa position exacte.");
-            }
-            return;
-        }
-
-        magasinMap.getEngine().loadContent(OpenStreetMapHelper.buildDisplayMap(selected));
-        if (selectedMagasinLabel != null) {
-            selectedMagasinLabel.setText(selected.getNom() != null ? selected.getNom() : "Magasin");
-        }
-        if (selectedMagasinAddress != null) {
-            String coords = OpenStreetMapHelper.hasCoordinates(selected)
-                    ? String.format("Lat %.6f, Lon %.6f", selected.getLatitude(), selected.getLongitude())
-                    : "Position non renseignee";
-            selectedMagasinAddress.setText((selected.getAdresse() != null ? selected.getAdresse() + " - " : "") + coords);
-        }
-    }
-
-    private void showArticleDetailLegacy(Article article) {
+    private void showArticleDetail(Article article) {
         Alert dialog = new Alert(Alert.AlertType.INFORMATION);
         dialog.setTitle("Détail de l'article");
         dialog.setHeaderText(article.getTitre());
@@ -382,76 +317,6 @@ public class FrontMagasinController implements Initializable {
     }
 
     // ── Utilitaires visuels ───────────────────────────────────────
-
-    private void showArticleDetail(Article article) {
-        Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle("Detail de l'article");
-        dialog.setHeaderText(article.getTitre() != null ? article.getTitre() : "Article");
-        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
-
-        VBox details = new VBox(10);
-        details.setPrefWidth(330);
-        details.setPadding(new Insets(8));
-
-        Label price = detailLabel("Prix", String.format("%.2f DT", article.getPrix()));
-        Label stock = detailLabel("Stock", (article.getStock() != null ? article.getStock() : 0) + " unite(s)");
-        Label store = detailLabel("Magasin", article.getMagasin() != null && article.getMagasin().getNom() != null
-                ? article.getMagasin().getNom() : "-");
-        Label description = detailLabel("Description", article.getDescription() != null && !article.getDescription().isBlank()
-                ? article.getDescription() : "Aucune description");
-        description.setWrapText(true);
-
-        Button buyButton = new Button("Acheter");
-        buyButton.setMaxWidth(Double.MAX_VALUE);
-        buyButton.setDisable(article.getStock() != null && article.getStock() <= 0);
-        buyButton.setStyle("-fx-background-color: #c9a849; -fx-text-fill: white; -fx-font-weight: bold; "
-                + "-fx-background-radius: 10; -fx-padding: 9 0; -fx-cursor: hand;");
-        buyButton.setOnAction(event -> addToCart(article));
-
-        details.getChildren().addAll(price, stock, store, description, buyButton);
-
-        VBox mapBox = new VBox(8);
-        mapBox.setPrefWidth(340);
-        Label mapTitle = new Label("Position du magasin");
-        mapTitle.setStyle("-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #241197;");
-        mapBox.getChildren().add(mapTitle);
-
-        WebView detailMap = null;
-        if (OpenStreetMapHelper.hasCoordinates(article.getMagasin())) {
-            detailMap = new WebView();
-            detailMap.setContextMenuEnabled(false);
-            detailMap.setPrefSize(320, 220);
-            detailMap.setMinSize(320, 220);
-            detailMap.setMaxSize(320, 220);
-            detailMap.getEngine().loadContent(OpenStreetMapHelper.buildDisplayMap(article.getMagasin()));
-            mapBox.getChildren().add(detailMap);
-        } else {
-            Label noPosition = new Label("Position non renseignee pour ce magasin.");
-            noPosition.setWrapText(true);
-            noPosition.setStyle("-fx-text-fill: #5a4a72;");
-            mapBox.getChildren().add(noPosition);
-        }
-
-        HBox content = new HBox(18, details, mapBox);
-        content.setPadding(new Insets(6));
-        dialog.getDialogPane().setContent(content);
-        dialog.getDialogPane().setPrefWidth(760);
-
-        WebView finalDetailMap = detailMap;
-        if (finalDetailMap != null) {
-            dialog.setOnShown(event -> Platform.runLater(() ->
-                    finalDetailMap.getEngine().executeScript(
-                            "if(window.map){map.invalidateSize();setTimeout(function(){map.invalidateSize();},180);}")));
-        }
-
-        dialog.showAndWait();
-    }
-
-    private Label detailLabel(String label, String value) {
-        Label result = new Label(label + " : " + value);
-        result.setStyle("-fx-text-fill: #2d1b4e; -fx-font-size: 13;");
-        return result;
-    }
 
     private String getColorForMagasin(Magasin m) {
         if (m == null || m.getId() == null) return "linear-gradient(to bottom right, #241197, #6c2a90)";
@@ -475,22 +340,6 @@ public class FrontMagasinController implements Initializable {
         if (t.contains("livre") || t.contains("book")) return "📚";
         if (t.contains("poster") || t.contains("affiche")) return "📜";
         return "🎨";
-    }
-
-    private Node createArticleVisual(Article article, double width, double height, double iconSize) {
-        String imageUrl = ImageUtils.getAbsolutePath(article.getImage());
-        if (imageUrl != null) {
-            ImageView imageView = new ImageView(new Image(imageUrl, width, height, false, true, true));
-            imageView.setFitWidth(width);
-            imageView.setFitHeight(height);
-            imageView.setPreserveRatio(false);
-            imageView.setSmooth(true);
-            return imageView;
-        }
-
-        Label icon = new Label(getIconForArticle(article));
-        icon.setStyle("-fx-font-size: " + iconSize + "; -fx-text-fill: rgba(255,255,255,0.9);");
-        return icon;
     }
 
     private String getStockBadgeText(Integer stock) {

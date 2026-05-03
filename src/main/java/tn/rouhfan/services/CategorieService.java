@@ -98,10 +98,10 @@ public class CategorieService {
         return null;
     }
 
-    private boolean isNomExiste(String nom, int excludeId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM categorie WHERE nom_categorie = ? AND id_categorie != ?";
+    public boolean isNomExiste(String nom, int excludeId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM categorie WHERE LOWER(nom_categorie) = LOWER(?) AND id_categorie != ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
-        ps.setString(1, nom);
+        ps.setString(1, nom.trim());
         ps.setInt(2, excludeId);
         ResultSet rs = ps.executeQuery();
         if (rs.next()) {

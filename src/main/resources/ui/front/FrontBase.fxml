@@ -10,19 +10,14 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="800.0" prefWidth="1280.0" stylesheets="@../theme.css" styleClass="app-shell"
-            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="tn.rouhfan.ui.front.FrontBaseController">
+<BorderPane prefHeight="800.0" prefWidth="1280.0" stylesheets="@../theme.css" styleClass="app-shell" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.front.FrontBaseController">
     <top>
         <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="topbar">
             <padding>
                 <Insets left="40.0" right="40.0" />
             </padding>
-
-            <!-- Logo -->
             <HBox alignment="CENTER_LEFT" spacing="10">
                 <ImageView fitHeight="40.0" preserveRatio="true">
                     <Image url="@../logo.png" />
@@ -31,7 +26,6 @@
 
             <Region HBox.hgrow="ALWAYS" />
 
-            <!-- Navigation centrale -->
             <HBox alignment="CENTER" spacing="10.0">
                 <Button text="Accueil" mnemonicParsing="false" styleClass="navbar-link" onAction="#goHome" />
                 <Button text="Événements" mnemonicParsing="false" styleClass="navbar-link" onAction="#goEvenements" />
@@ -63,40 +57,33 @@
             <!-- Boutons CONNECTÉ : Bienvenue + Profil + Déconnexion -->
             <HBox fx:id="userButtons" alignment="CENTER" spacing="12.0" visible="false" managed="false">
                 <Label fx:id="welcomeLabel" text="Bienvenue" style="-fx-text-fill: #241197; -fx-font-weight: bold; -fx-font-size: 14;" />
+                
+                <!-- Notification Bell -->
+                <Button fx:id="notifBtn" text="🔔 (0)" mnemonicParsing="false" onAction="#openNotifications" style="-fx-background-color: transparent; -fx-text-fill: #6c2a90; -fx-font-weight: bold; -fx-font-size: 16; -fx-cursor: hand;" />
+                
                 <Button fx:id="profileBtn" text="👤 Mon Profil" mnemonicParsing="false" onAction="#openProfile" style="-fx-background-color: #6c2a90; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold;" />
+                <Button fx:id="iaBtn" text="✨ Créations IA" mnemonicParsing="false" onAction="#goIA" style="-fx-background-color: #241197; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold;" />
                 <Button text="🚪 Déconnexion" mnemonicParsing="false" onAction="#logout" style="-fx-background-color: #d63031; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold;" />
             </HBox>
         </HBox>
     </top>
 
     <center>
-        <StackPane>
-            <VBox spacing="0.0" fillWidth="true">
-                <!-- Section Hero (page d'accueil) -->
-                <VBox fx:id="heroSection" spacing="0.0" styleClass="hero-front" VBox.vgrow="ALWAYS">
-                    <Label text="Rouh el Fann" styleClass="hero-front-title" />
-                    <Label text="L'Âme de l'Art" styleClass="hero-front-subtitle" />
-                    <Label text="Découvrez une collection époustouflante d'œuvres d'art fantasy, de dragons majestueux aux royaumes enchantés. Art &amp; Fantaisie à chaque regard."
-                           styleClass="hero-front-description" wrapText="true" />
-                    <HBox spacing="20.0" alignment="CENTER" style="-fx-padding: 40 0 0 0;">
-                        <Button text="✨ Explorer la galerie" mnemonicParsing="false" styleClass="btn-front-primary" onAction="#goOeuvres" />
-                        <Button text="📖 En savoir plus" mnemonicParsing="false" styleClass="btn-front-secondary" onAction="#goAbout" />
-                    </HBox>
-                </VBox>
+        <VBox spacing="0.0" fillWidth="true">
+            <VBox fx:id="heroSection" spacing="0.0" styleClass="hero-front" VBox.vgrow="ALWAYS">
+                <Label text="Rouh el Fann" styleClass="hero-front-title" />
+                <Label text="L'Âme de l'Art" styleClass="hero-front-subtitle" />
 
-                <!-- Zone de contenu dynamique -->
-                <VBox fx:id="contentHost" spacing="20.0" styleClass="content" />
+                <Label text="Découvrez une collection époustouflante d'œuvres d'art fantasy, de dragons majestueux aux royaumes enchantés. Art &amp; Fantaisie à chaque regard."
+                       styleClass="hero-front-description" wrapText="true" />
+
+                <HBox spacing="20.0" alignment="CENTER" style="-fx-padding: 40 0 0 0;">
+                    <Button text="✨ Explorer la galerie" mnemonicParsing="false" styleClass="btn-front-primary" onAction="#goOeuvres" />
+                    <Button text="📖 En savoir plus" mnemonicParsing="false" styleClass="btn-front-secondary" onAction="#goAbout" />
+                </HBox>
             </VBox>
 
-            <!-- 🛒 Bouton Panier flottant (Magasin) -->
-            <Button fx:id="cartButton" text="Panier (0)" onAction="#openCart"
-                    StackPane.alignment="TOP_RIGHT"
-                    style="-fx-background-color: #c9a849; -fx-text-fill: white; -fx-font-weight: bold;
-                           -fx-background-radius: 22; -fx-padding: 11 18; -fx-cursor: hand;">
-                <StackPane.margin>
-                    <Insets top="22.0" right="26.0" />
-                </StackPane.margin>
-            </Button>
-        </StackPane>
+            <VBox fx:id="contentHost" spacing="20.0" styleClass="content" />
+        </VBox>
     </center>
 </BorderPane>

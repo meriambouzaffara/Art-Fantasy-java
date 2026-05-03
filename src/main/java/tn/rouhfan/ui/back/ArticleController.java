@@ -9,17 +9,12 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.stage.FileChooser;
 import tn.rouhfan.entities.Article;
 import tn.rouhfan.entities.Magasin;
 import tn.rouhfan.services.ArticleService;
 import tn.rouhfan.services.MagasinService;
-import tn.rouhfan.tools.ImageUtils;
 
-import java.io.File;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.List;
@@ -148,7 +143,8 @@ public class ArticleController implements Initializable {
                 "-fx-background-color: " + getGradient(a) + ";" +
                         "-fx-background-radius: 16 16 0 0;");
 
-        Node visual = createArticleVisual(a, 260, 100, 42);
+        Label icon = new Label(getIcon(a));
+        icon.setStyle("-fx-font-size: 42;");
 
         // Badge stock
         Label stockBadge = new Label(getStockText(a.getStock()));
@@ -159,7 +155,7 @@ public class ArticleController implements Initializable {
         StackPane.setAlignment(stockBadge, Pos.TOP_RIGHT);
         stockBadge.setTranslateX(-10);
         stockBadge.setTranslateY(10);
-        banner.getChildren().addAll(visual, stockBadge);
+        banner.getChildren().addAll(icon, stockBadge);
 
         // ── Contenu texte ───────────────────────────────────────
         VBox content = new VBox(5);
@@ -301,32 +297,6 @@ public class ArticleController implements Initializable {
         } catch (SQLException e) { showFormError("Erreur DB : " + e.getMessage()); }
     }
 
-    @FXML
-    private void chooseArticleImage(ActionEvent event) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Importer une image");
-
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg")
-        );
-
-        File file = fileChooser.showOpenDialog(imageField.getScene().getWindow());
-
-        if (file != null) {
-            // nom seulement (pas chemin complet)
-            imageField.setText(file.getName());
-
-            // option PRO : copier fichier dans resources/images
-            try {
-                File dest = new File("src/main/resources/images/" + file.getName());
-                java.nio.file.Files.copy(file.toPath(), dest.toPath(),
-                        java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     @FXML private void hideForm(ActionEvent e) { setFormVisible(false); clearForm(); hideError(); }
 
     private void setupCombos() {
@@ -372,22 +342,6 @@ public class ArticleController implements Initializable {
 
     private String getStockText(Integer s)  { if(s==null||s==0)return "Rupture"; if(s<=3)return s+" restant"+(s>1?"s":""); return "En stock"; }
     private String getStockColor(Integer s) { if(s==null||s==0)return "#d63031"; if(s<=3)return "#e17055"; return "#00b894"; }
-
-    private Node createArticleVisual(Article article, double width, double height, double iconSize) {
-        String imageUrl = ImageUtils.getAbsolutePath(article.getImage());
-        if (imageUrl != null) {
-            ImageView imageView = new ImageView(new Image(imageUrl, width, height, false, true, true));
-            imageView.setFitWidth(width);
-            imageView.setFitHeight(height);
-            imageView.setPreserveRatio(false);
-            imageView.setSmooth(true);
-            return imageView;
-        }
-
-        Label icon = new Label(getIcon(article));
-        icon.setStyle("-fx-font-size: " + iconSize + "; -fx-text-fill: rgba(255,255,255,0.9);");
-        return icon;
-    }
 
     // ── Utilitaires formulaire ────────────────────────────────────
     private void populateForm(Article a) {

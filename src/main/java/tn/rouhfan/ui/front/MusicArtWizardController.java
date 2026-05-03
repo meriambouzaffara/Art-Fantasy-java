@@ -94,22 +94,10 @@ public class MusicArtWizardController {
             fileNameLabel.setText(file.getName());
             startAnalysisBtn.setDisable(false);
             
-            // Pré-remplir le titre avec le nom du fichier embelli
+            // Pré-remplir le titre avec le nom du fichier
             String name = file.getName();
             if (name.lastIndexOf('.') > 0) name = name.substring(0, name.lastIndexOf('.'));
-            
-            // Embellir : remplacer - et _ par des espaces, capitaliser
-            name = name.replace("-", " ").replace("_", " ");
-            String[] words = name.split("\\s+");
-            StringBuilder beautified = new StringBuilder();
-            for (String word : words) {
-                if (word.length() > 0) {
-                    beautified.append(Character.toUpperCase(word.charAt(0)))
-                             .append(word.substring(1).toLowerCase())
-                             .append(" ");
-                }
-            }
-            titreField.setText(beautified.toString().trim());
+            titreField.setText(name);
         }
     }
 

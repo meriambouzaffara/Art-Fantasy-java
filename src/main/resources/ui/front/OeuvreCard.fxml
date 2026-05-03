@@ -7,10 +7,19 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.geometry.Insets?>
 
 <VBox spacing="0.0" prefWidth="300.0" styleClass="card" stylesheets="@../theme.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.front.OeuvreCardController">
     <StackPane styleClass="card-image-container" prefHeight="220.0">
         <ImageView fx:id="oeuvreImage" fitHeight="220.0" fitWidth="300.0" preserveRatio="true" />
+        <Button fx:id="favBtn" onAction="#handleToggleFavorite" style="-fx-background-color: rgba(255,255,255,0.8); -fx-background-radius: 50; -fx-padding: 8; -fx-cursor: hand;" StackPane.alignment="TOP_RIGHT">
+            <StackPane.margin>
+                <Insets top="10" right="10"/>
+            </StackPane.margin>
+            <graphic>
+                <Label fx:id="favIcon" text="⭐" style="-fx-font-size: 16;" />
+            </graphic>
+        </Button>
     </StackPane>
 
     <VBox spacing="15.0" styleClass="card-content">
@@ -39,6 +48,6 @@
         <Button fx:id="buyBtn" text="🛒 Acheter" onAction="#handleBuy" maxWidth="Infinity" visible="false" managed="false"
                 style="-fx-background-color: linear-gradient(to right, #00b894, #00cec9); -fx-text-fill: white; -fx-font-weight: 800; -fx-background-radius: 12; -fx-padding: 12 20; -fx-font-size: 14; -fx-cursor: hand;" />
         
-        <Button fx:id="viewBtn" text="👁️ Voir Détails" onAction="#handleView" styleClass="btn-front-secondary" maxWidth="Infinity" style="-fx-padding: 12 20;" />
+        <Button fx:id="viewBtn" text="Voir Détails" onAction="#handleView" styleClass="btn-front-secondary" maxWidth="Infinity" style="-fx-padding: 12 20;" />
     </VBox>
 </VBox>

@@ -59,7 +59,10 @@ public class RecommendationAnalysisController {
 
     private void renderAiAnalysis(JSONArray oeuvresAnalysis) {
         analysisContainer.getChildren().clear();
-        if (oeuvresAnalysis == null) return;
+        if (oeuvresAnalysis == null || oeuvresAnalysis.length() == 0) {
+            renderFallbackAnalysis();
+            return;
+        }
 
         Map<Integer, Oeuvre> recMap = recommendations.stream()
                 .collect(Collectors.toMap(Oeuvre::getId, Function.identity()));

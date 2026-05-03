@@ -17,9 +17,7 @@ public class AudioAnalyzerService {
     private double bassSpikes = 0;
     private int sampleCount = 0;
     private double lastBassAverage = -60.0;
-    private double highFrequencySum = 0;
     private long startTime = 0;
-    private java.util.Random random = new java.util.Random();
 
     // Durée d'analyse (en ms)
     private static final long ANALYSIS_DURATION = 8000; 
@@ -49,17 +47,12 @@ public class AudioAnalyzerService {
                     currentBassSum += magnitudes[i];
                 }
                 double currentBassAvg = currentBassSum / 10.0;
+
+                // Si on a un pic de basse significatif
                 if (currentBassAvg > lastBassAverage + 5.0) {
                     bassSpikes++;
                 }
                 lastBassAverage = currentBassAvg;
-
-                // 3. Hautes fréquences (Bandes 100 à 127) pour la clarté/détail
-                double currentHighSum = 0;
-                for (int i = 100; i < 127; i++) {
-                    currentHighSum += magnitudes[i];
-                }
-                highFrequencySum += (currentHighSum / 27.0);
 
                 sampleCount++;
 
@@ -102,63 +95,46 @@ public class AudioAnalyzerService {
             }
         }
 
-        double finalAvgMagnitude = totalMagnitude / sampleCount;
-        double finalBassSpikes = bassSpikes;
-        double finalHighAvg = highFrequencySum / sampleCount;
+        double finalAvgMagnitude = totalMagnitude / sampleCount; // Ex: -30 dB (Fort), -50 dB (Calme)
+        double finalBassSpikes = bassSpikes; // Nombre de pics sur la durée
 
-        // --- POOLS DE MOTS-CLÉS ---
-        String[] shapesPool;
-        String[] stylesPool;
-        String[] moodPool;
-        
-        // 1. Rythme (Basses) -> Formes et Énergie
-        if (finalBassSpikes > 15) { // Électro, Rock intense
-            shapesPool = new String[]{"sharp geometric structures", "shattered glass patterns", "exploding polygons", "jagged neon lines", "aggressive glitch architecture"};
-            moodPool = new String[]{"electrifying", "frenetic", "powerful", "rebellious", "chaotic"};
-        } else if (finalBassSpikes > 5) { // Pop, Jazz, Tempo modéré
-            shapesPool = new String[]{"intertwined flowing lines", "pulsating waves", "dynamic curves", "vibrant swirls", "rhythmic geometric patterns"};
-            moodPool = new String[]{"upbeat", "expressive", "lively", "harmonious", "soulful"};
-        } else { // Calme, Classique
-            shapesPool = new String[]{"ethereal mist", "soft floating spheres", "gentle organic ripples", "undulating silk textures", "drifting celestial clouds"};
-            moodPool = new String[]{"zen", "meditative", "dreamy", "serene", "mystical"};
-        }
-
-        // 2. Intensité (Volume) -> Style Artistique
-        if (finalAvgMagnitude > -25) { // Fort
-            stylesPool = new String[]{"maximalism", "cyberpunk aesthetic", "abstract expressionism", "futuristic 3D surrealism", "vibrant street art"};
-        } else if (finalAvgMagnitude > -35) { // Moyen
-            stylesPool = new String[]{"contemporary impressionism", "lush fantasy illustration", "expressive oil painting", "modern digital fusion", "art nouveau style"};
-        } else { // Doux
-            stylesPool = new String[]{"minimalist watercolor", "ethereal digital painting", "soft focus impressionism", "delicate pencil sketch with wash", "fine art photography style"};
-        }
-
-        // 3. Clarté (Hautes fréquences) -> Couleurs et Détails
+        // Dérivation des mots-clés
+        String shapes;
+        String style;
         String colors;
-        if (finalHighAvg > -35) { // Très clair/cristallin
-            String[] colorPool = {"prismatic rainbow hues", "glowing neon accents on dark background", "iridescent pearls and silver", "electric cyan and magenta"};
-            colors = colorPool[random.nextInt(colorPool.length)];
-        } else { // Plus sombre ou sourd
-            String[] colorPool = {"deep amber and charcoal", "muted earth tones and copper", "velvet indigo and gold", "dark moody gradients with soft highlights"};
-            colors = colorPool[random.nextInt(colorPool.length)];
+        String mood;
+
+        // Rythme -> Formes
+        if (finalBassSpikes > 15) { // Rythme très marqué (Rock, Electro)
+            shapes = "sharp geometric shapes, shattered lines, chaotic geometry";
+            style = "dynamic, abstract, high energy, cyberpunk";
+            mood = "energetic and powerful";
+        } else if (finalBassSpikes > 5) { // Rythme modéré (Pop, Jazz)
+            shapes = "flowing curves mixed with structured lines";
+            style = "modern art, vibrant, expressive";
+            mood = "uplifting and engaging";
+        } else { // Rythme lent (Classique, Ambiance)
+            shapes = "soft organic curves, fluid elements, dreamlike clouds";
+            style = "ethereal painting, soft focus, fantasy illustration";
+            mood = "peaceful, calm, and majestic";
         }
 
-        // --- SÉLECTION ALÉATOIRE ---
-        String chosenShape = shapesPool[random.nextInt(shapesPool.length)];
-        String chosenStyle = stylesPool[random.nextInt(stylesPool.length)];
-        String chosenMood = moodPool[random.nextInt(moodPool.length)];
-        
-        // Texture supplémentaire basée sur les hautes fréquences
-        String texture = (finalHighAvg > -40) ? "intricate crystalline details, sharp focus" : "soft blurred textures, painterly strokes";
+        // Intensité -> Couleurs (Magnitudes en JavaFX sont souvent entre -60 et 0)
+        if (finalAvgMagnitude > -25) { // Son très fort/dense
+            colors = "vibrant contrasting colors, neon glowing colors, highly saturated";
+        } else if (finalAvgMagnitude > -35) { // Son moyen
+            colors = "rich warm colors, deep hues, balanced palette";
+        } else { // Son doux/clairsemé
+            colors = "pastel colors, soft watercolor palette, muted tones";
+        }
 
         // Construction du prompt final
-        String prompt = "A unique " + chosenStyle + " masterpiece, " + chosenMood + " atmosphere, featuring " + 
-                chosenShape + ", with " + colors + ", " + texture + ", inspired by music, " +
-                "highly detailed, 8k resolution, cinematic lighting, masterpiece, trending on artstation";
+        String prompt = "A beautiful artwork inspired by music, " + mood + " atmosphere, " +
+                style + ", " + shapes + ", " + colors + ", masterpiece, highly detailed, 8k resolution, trending on artstation";
 
         // Réinitialiser
         totalMagnitude = 0;
         bassSpikes = 0;
-        highFrequencySum = 0;
         sampleCount = 0;
         startTime = 0;
 

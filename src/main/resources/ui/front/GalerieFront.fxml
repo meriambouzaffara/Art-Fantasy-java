@@ -11,53 +11,63 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.geometry.Insets?>
 
-<VBox spacing="25.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.front.GalerieFrontController" styleClass="content" stylesheets="@../back/oeuvres_categories.css">
-    <VBox spacing="5.0">
-        <Label fx:id="pageTitle" text="Galerie d'Art" styleClass="text-title" />
-        <Label fx:id="pageSubtitle" text="Explorez nos collections et découvrez des talents uniques." styleClass="text-subtitle" />
+<ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.front.GalerieFrontController" vbarPolicy="AS_NEEDED" hbarPolicy="NEVER">
+    <VBox spacing="25.0" styleClass="content" stylesheets="@../back/oeuvres_categories.css" style="-fx-padding: 30;">
+        <VBox spacing="5.0">
+            <Label fx:id="pageTitle" text="🖼️ Galerie d'Art" styleClass="text-title" />
+            <Label fx:id="pageSubtitle" text="Découvrez les créations de nos artistes." styleClass="text-subtitle" />
+        </VBox>
+
+        <!-- SECTION RECOMMANDATIONS (S'AFFICHE SANS SCROLLBAR DÉDIÉE) -->
+        <VBox fx:id="recommendationsBox" spacing="15.0" visible="false" managed="false" style="-fx-background-color: rgba(36, 17, 151, 0.03); -fx-padding: 25; -fx-background-radius: 20;">
+            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                <Label text="✨ Juste pour vous" style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #241197;" />
+                <Button text="🔍 Pourquoi ces choix ?" onAction="#handleViewAnalysis" style="-fx-background-color: transparent; -fx-border-color: #241197; -fx-border-radius: 20; -fx-text-fill: #241197; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 5 15;" />
+            </HBox>
+            <FlowPane fx:id="recommendationsPane" hgap="25.0" vgap="25.0" prefWrapLength="1100.0" alignment="TOP_LEFT" />
+        </VBox>
+
+        <!-- Barre de filtres pour les OEUVRES -->
+        <HBox fx:id="filterBar" spacing="20.0" alignment="BOTTOM_LEFT" styleClass="surface" style="-fx-padding: 25; -fx-background-radius: 20;">
+            <VBox spacing="8.0">
+                <Label text="Nom (titre)" styleClass="filter-label" />
+                <TextField fx:id="searchField" promptText="Titre..." prefWidth="240" styleClass="text-field" />
+            </VBox>
+            
+            <VBox spacing="8.0" fx:id="categoryFilterBox">
+                <Label text="Catégorie" styleClass="filter-label" />
+                <ComboBox fx:id="categoryFilter" promptText="Toutes" prefWidth="200" styleClass="combo-box" />
+            </VBox>
+            
+            <VBox spacing="8.0" fx:id="sortBox">
+                <Label text="Tri" styleClass="filter-label" />
+                <ComboBox fx:id="sortCombo" promptText="Trier par" prefWidth="180" styleClass="combo-box" />
+            </VBox>
+
+            <VBox spacing="8.0" fx:id="orderBox">
+                <Label text="Ordre" styleClass="filter-label" />
+                <ComboBox fx:id="orderCombo" prefWidth="110" styleClass="combo-box" />
+            </VBox>
+
+            <Region HBox.hgrow="ALWAYS" />
+            
+            <Button fx:id="viewFavorisBtn" text="⭐ Mes Favoris" onAction="#handleViewFavoris" styleClass="btn-secondary" style="-fx-background-color: white; -fx-text-fill: #241197; -fx-border-color: #241197; -fx-border-radius: 25; -fx-background-radius: 25; -fx-padding: 10 25; -fx-font-weight: bold; -fx-border-width: 1.5; -fx-cursor: hand;" />
+
+            <Button fx:id="addOeuvreBtn" text="➕ Publier une œuvre" onAction="#handleAddOeuvre" styleClass="btn-front-primary" visible="false" managed="false" />
+        </HBox>
+
+        <!-- Barre de recherche pour les CATÉGORIES -->
+        <HBox fx:id="categorySearchBar" spacing="20.0" alignment="BOTTOM_LEFT" styleClass="surface" style="-fx-padding: 25; -fx-background-radius: 20;" visible="false" managed="false">
+            <VBox spacing="8.0">
+                <Label text="Rechercher une catégorie" styleClass="filter-label" />
+                <TextField fx:id="categorySearchField" promptText="Nom de la catégorie..." prefWidth="400" styleClass="text-field" />
+            </VBox>
+        </HBox>
+
+        <!-- LA GALLERY GÉNÉRALE -->
+        <VBox spacing="15.0">
+            <Label text="🎨 Toute la collection" fx:id="galleryTitle" style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+            <FlowPane fx:id="cardsPane" hgap="25.0" vgap="25.0" prefWrapLength="1100.0" alignment="TOP_LEFT" />
+        </VBox>
     </VBox>
-
-    <!-- Barre de filtres pour les OEUVRES -->
-    <HBox fx:id="filterBar" spacing="20.0" alignment="BOTTOM_LEFT" styleClass="surface" style="-fx-padding: 25;">
-        <VBox spacing="8.0">
-            <Label text="Nom (titre)" styleClass="filter-label" />
-            <TextField fx:id="searchField" promptText="Titre..." prefWidth="200" styleClass="text-field" />
-        </VBox>
-        
-        <VBox spacing="8.0" fx:id="categoryFilterBox">
-            <Label text="Catégorie" styleClass="filter-label" />
-            <ComboBox fx:id="categoryFilter" promptText="Toutes" prefWidth="180" styleClass="combo-box" />
-        </VBox>
-        
-        <VBox spacing="8.0" fx:id="sortBox">
-            <Label text="Tri" styleClass="filter-label" />
-            <ComboBox fx:id="sortCombo" promptText="Trier par" prefWidth="150" styleClass="combo-box" />
-        </VBox>
-
-        <VBox spacing="8.0" fx:id="orderBox">
-            <Label text="Ordre" styleClass="filter-label" />
-            <ComboBox fx:id="orderCombo" prefWidth="90" styleClass="combo-box" />
-        </VBox>
-
-        <Region HBox.hgrow="ALWAYS" />
-        
-        <!-- Visible only for Artists/Admin -->
-        <Button fx:id="addOeuvreBtn" text="➕ Publier une œuvre" onAction="#handleAddOeuvre" styleClass="btn-front-primary" visible="false" managed="false" />
-    </HBox>
-
-    <!-- Barre de recherche pour les CATÉGORIES -->
-    <HBox fx:id="categorySearchBar" spacing="20.0" alignment="BOTTOM_LEFT" styleClass="surface" style="-fx-padding: 25;" visible="false" managed="false">
-        <VBox spacing="8.0">
-            <Label text="Rechercher une catégorie" styleClass="filter-label" />
-            <TextField fx:id="categorySearchField" promptText="Nom de la catégorie..." prefWidth="350" styleClass="text-field" />
-        </VBox>
-    </HBox>
-
-    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
-        <FlowPane fx:id="cardsPane" hgap="25.0" vgap="25.0" prefWrapLength="1100.0" alignment="TOP_LEFT">
-            <padding>
-                <Insets top="10" right="10" bottom="10" left="10"/>
-            </padding>
-        </FlowPane>
-    </ScrollPane>
-</VBox>
+</ScrollPane>

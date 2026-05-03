@@ -1,24 +1,24 @@
 package tn.rouhfan.ui.front;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import tn.rouhfan.entities.Notification;
 import tn.rouhfan.entities.Oeuvre;
 import tn.rouhfan.entities.User;
 import tn.rouhfan.services.NotificationService;
 import tn.rouhfan.services.OeuvreService;
 import tn.rouhfan.tools.SessionManager;
+import javafx.scene.control.Button;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.layout.Region;
 
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -129,3 +129,4 @@ public class NotificationsFrontController implements Initializable {
         }
     }
 }
+//////////:

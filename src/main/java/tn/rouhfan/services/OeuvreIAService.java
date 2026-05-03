@@ -2,6 +2,7 @@ package tn.rouhfan.services;
 
 import tn.rouhfan.entities.Categorie;
 import tn.rouhfan.entities.OeuvreIA;
+import tn.rouhfan.entities.User;
 import tn.rouhfan.tools.MyDatabase;
 
 import java.sql.*;

@@ -1,31 +1,23 @@
 package tn.rouhfan.ui.front;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
-import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.control.*;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import tn.rouhfan.entities.Reclamation;
-import tn.rouhfan.entities.ReponseReclamation;
+import javafx.scene.control.Alert;
 import tn.rouhfan.entities.User;
-import tn.rouhfan.services.ReclamationService;
-import tn.rouhfan.services.ReponseReclamationService;
+import tn.rouhfan.services.NotificationService;
 import tn.rouhfan.tools.SessionManager;
 import tn.rouhfan.ui.Router;
 
 import java.io.IOException;
-import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
 
 public class FrontBaseController {
 
@@ -37,6 +29,10 @@ public class FrontBaseController {
     @FXML private HBox userButtons;
     @FXML private Label welcomeLabel;
     @FXML private Button profileBtn;
+    @FXML private Button iaBtn;
+    @FXML private Button notifBtn;
+    
+    private NotificationService notificationService = new NotificationService();
 
     @FXML
     public void initialize() {
@@ -70,12 +66,28 @@ public class FrontBaseController {
 
             String role = session.getRole();
             String roleEmoji;
+            boolean isParticipant = false;
             if (role != null && role.toUpperCase().contains("ARTISTE")) {
                 roleEmoji = "🎨";
             } else {
                 roleEmoji = "🎭";
+                isParticipant = true;
             }
             welcomeLabel.setText(roleEmoji + " " + currentUser.getPrenom() + " " + currentUser.getNom());
+
+            // Afficher le bouton IA uniquement pour les participants
+            iaBtn.setVisible(isParticipant);
+            iaBtn.setManaged(isParticipant);
+            
+            // Notifications
+            int unread = notificationService.countUnread(currentUser.getId());
+            if (unread > 0) {
+                notifBtn.setText("\uD83D\uDD14 (" + unread + ")");
+                notifBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #fac62d; -fx-font-weight: bold; -fx-font-size: 16; -fx-cursor: hand; -fx-border-color: #fac62d; -fx-border-radius: 15; -fx-border-width: 1;");
+            } else {
+                notifBtn.setText("\uD83D\uDD14");
+                notifBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #fac62d; -fx-font-weight: bold; -fx-font-size: 16; -fx-cursor: hand;");
+            }
         }
     }
 
@@ -143,20 +155,47 @@ public class FrontBaseController {
         }
     }
 
-    @FXML private void goCours(ActionEvent event) { showHero(false); contentHost.getChildren().clear(); }
-    @FXML private void goMagasin(ActionEvent event) { showHero(false); contentHost.getChildren().clear(); }
-    @FXML private void goAbout(ActionEvent event) { showHero(false); contentHost.getChildren().clear(); }
+    @FXML
+    private void goCours() {
+        showContent();
+        // Utilisation du chemin relatif géré par votre Router
+        Router.setContent(contentHost, "/ui/front/Cours2View.fxml");
+    }
+    @FXML
+    private void goCertificats() {
+        showContent();
+        Router.setContent(contentHost, "/ui/front/Certificats2View.fxml");
+    }
+    private void showContent() {
+        heroSection.setVisible(false);
+        heroSection.setManaged(false);
 
         contentHost.setVisible(true);
         contentHost.setManaged(true);
     }
     @FXML
+    private void goMagasin(ActionEvent event) {
+        showHero(false);
+        Router.setContent(contentHost, "/ui/front/front_magasins.fxml");
+    }
 
+    @FXML
+    private void goIA(ActionEvent event) {
+        showHero(false);
+        contentHost.getChildren().clear();
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/ui/front/IAOeuvresFront.fxml"));
+            contentHost.getChildren().add(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    @FXML
     private void goAvis(ActionEvent event) {
         showHero(false);
         contentHost.getChildren().clear();
 
-        // 🔐 Vérifier session
+        // 🔐 Vérifier si utilisateur connecté
         if (SessionManager.getInstance().getCurrentUser() == null) {
 
             Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -166,27 +205,30 @@ public class FrontBaseController {
             alert.showAndWait();
 
             try {
-                // Redirection vers login
                 Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
                 Parent root = FXMLLoader.load(getClass().getResource("/ui/front/Login.fxml"));
                 stage.getScene().setRoot(root);
-            } catch (Exception e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
 
             return;
         }
 
-        // ✅ Si connecté → charger page
+        // ✅ Charger la vue des réclamations
         try {
-            Parent view = FXMLLoader.load(
-                    getClass().getResource("/ui/front/ReclamationFront.fxml")
-            );
-            contentHost.getChildren().add(view);
-        } catch (Exception e) {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/front/ReclamationFront.fxml"));
+            Parent root = loader.load();
+
+            contentHost.getChildren().add(root);
+
+        } catch (IOException e) {
+            System.err.println("[FrontBase] Erreur chargement Réclamations: " + e.getMessage());
             e.printStackTrace();
         }
     }
+    @FXML private void goAbout(ActionEvent event) { showHero(false); contentHost.getChildren().clear(); }
+
     // ==================== Auth ====================
 
     @FXML
@@ -224,6 +266,23 @@ public class FrontBaseController {
             e.printStackTrace();
         }
     }
+    
+    @FXML
+    private void openNotifications(ActionEvent event) {
+        showHero(false);
+        contentHost.getChildren().clear();
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/ui/front/NotificationsFront.fxml"));
+            contentHost.getChildren().add(root);
+            
+            // Mettre à jour le compteur (réinitialiser)
+            notifBtn.setText("\uD83D\uDD14");
+            notifBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #fac62d; -fx-font-weight: bold; -fx-font-size: 16; -fx-cursor: hand;");
+        } catch (IOException e) {
+            System.err.println("[FrontBase] Erreur chargement Notifications: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
     @FXML
     private void logout(ActionEvent event) {
@@ -240,249 +299,6 @@ public class FrontBaseController {
 
     @FXML
     private void contact(ActionEvent event) {
-    }
-
-    // ==================== Helpers ====================
-
-    private void showHero(boolean show) {
-        heroSection.setVisible(show);
-        heroSection.setManaged(show);
-        contentHost.setVisible(!show);
-        contentHost.setManaged(!show);
-    }
-    @FXML private void goAbout(ActionEvent event) { showHero(false); contentHost.getChildren().clear(); }
-
-    // ==================== Auth ====================
-
-    public static class ReclamationFrontController {
-
-        @FXML private TextField searchField;
-        @FXML private ComboBox<String> statutFilter;
-
-        @FXML private TableView<Reclamation> table;
-        @FXML private TableColumn<Reclamation, String> colSujet;
-        @FXML private TableColumn<Reclamation, String> colDesc;
-        @FXML private TableColumn<Reclamation, Date> colDate;
-        @FXML private TableColumn<Reclamation, String> colStatut;
-
-        private ReclamationService rs = new ReclamationService();
-        private ObservableList<Reclamation> list;
-
-        private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-
-        @FXML
-        public void initialize() {
-
-            // ================= TABLE =================
-            colSujet.setCellValueFactory(data ->
-                    new javafx.beans.property.SimpleStringProperty(
-                            data.getValue().getSujet() != null ? data.getValue().getSujet() : ""
-                    ));
-
-            colDesc.setCellValueFactory(data ->
-                    new javafx.beans.property.SimpleStringProperty(
-                            data.getValue().getDescription() != null ? data.getValue().getDescription() : ""
-                    ));
-
-            colDate.setCellValueFactory(data ->
-                    new javafx.beans.property.SimpleObjectProperty<>(data.getValue().getCreatedAt())
-            );
-
-            colDate.setCellFactory(col -> new TableCell<Reclamation, Date>() {
-                @Override
-                protected void updateItem(Date item, boolean empty) {
-                    super.updateItem(item, empty);
-                    setText(empty || item == null ? null : sdf.format(item));
-                }
-            });
-
-            colStatut.setCellValueFactory(data ->
-                    new javafx.beans.property.SimpleStringProperty(
-                            data.getValue().getStatut() != null ? data.getValue().getStatut() : ""
-                    ));
-
-            // 🔽 TRI PAR DÉFAUT
-            colDate.setSortType(TableColumn.SortType.DESCENDING);
-            table.getSortOrder().add(colDate);
-
-            // ================= FILTER =================
-            statutFilter.setItems(FXCollections.observableArrayList(
-                    "Tous", "en_attente", "en_cours", "traitee"
-            ));
-            statutFilter.setValue("Tous");
-
-            loadData();
-        }
-
-        // ================= LOAD =================
-        private void loadData() {
-            try {
-                User currentUser = SessionManager.getInstance().getCurrentUser();
-                int currentUserId = (currentUser != null) ? currentUser.getId() : -1;
-                
-                if (currentUserId != -1) {
-                    list = FXCollections.observableArrayList(rs.recupererParUser(currentUserId));
-                } else {
-                    list = FXCollections.observableArrayList();
-                }
-
-                FilteredList<Reclamation> filtered = new FilteredList<>(list, b -> true);
-
-                Runnable updateFilter = () -> {
-                    String search = searchField.getText() == null ? "" : searchField.getText().toLowerCase();
-                    String statut = statutFilter.getValue();
-
-                    filtered.setPredicate(r -> {
-
-                        boolean matchSearch =
-                                (r.getSujet() != null && r.getSujet().toLowerCase().contains(search))
-                                        || (r.getDescription() != null && r.getDescription().toLowerCase().contains(search));
-
-                        boolean matchStatut =
-                                statut.equals("Tous") ||
-                                        (r.getStatut() != null && r.getStatut().equalsIgnoreCase(statut));
-
-                        return matchSearch && matchStatut;
-                    });
-                };
-
-                searchField.textProperty().addListener((obs, o, n) -> updateFilter.run());
-                statutFilter.valueProperty().addListener((obs, o, n) -> updateFilter.run());
-
-                SortedList<Reclamation> sorted = new SortedList<>(filtered);
-                sorted.comparatorProperty().bind(table.comparatorProperty());
-
-                table.setItems(sorted);
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-
-        // ================= POPUP AJOUT =================
-        @FXML
-        private void openPopupAjout(ActionEvent event) {
-
-            Dialog<ButtonType> dialog = new Dialog<>();
-            dialog.setTitle("Ajouter Réclamation");
-
-            TextField sujet = new TextField();
-            sujet.setPromptText("Sujet");
-
-            TextField desc = new TextField();
-            desc.setPromptText("Description");
-
-            VBox box = new VBox(10, sujet, desc);
-            dialog.getDialogPane().setContent(box);
-            dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-            dialog.showAndWait().ifPresent(response -> {
-                if (response == ButtonType.OK) {
-
-                    String sujetTxt = sujet.getText().trim();
-                    String descTxt = desc.getText().trim();
-
-                    // ================= VALIDATION =================
-
-                    // ❌ vide
-                    if (sujetTxt.isEmpty() || descTxt.isEmpty()) {
-                        showAlert("Erreur", "Champs vides !");
-                        return;
-                    }
-
-                    // ❌ longueur sujet
-                    if (sujetTxt.length() < 3) {
-                        showAlert("Erreur", "Sujet trop court (min 3 caractères)");
-                        return;
-                    }
-
-                    // ❌ longueur description (🔥 TON PROBLÈME ICI)
-                    if (descTxt.length() < 5) {
-                        showAlert("Erreur", "Description trop courte (min 5 caractères)");
-                        return;
-                    }
-
-                    // ❌ trop long
-                    if (descTxt.length() > 500) {
-                        showAlert("Erreur", "Message trop long !");
-                        return;
-                    }
-
-                    // ❌ validation texte (lettres + espaces)
-                    if (!sujetTxt.matches("[a-zA-ZÀ-ÿ\\s]+")) {
-                        showAlert("Erreur", "Sujet invalide (lettres seulement)");
-                        return;
-                    }
-
-                    try {
-                        User currentUser = SessionManager.getInstance().getCurrentUser();
-                        int currentUserId = (currentUser != null) ? currentUser.getId() : 1;
-
-                        Reclamation r = new Reclamation(
-                                sujetTxt,
-                                descTxt,
-                                "en_attente",
-                                new Date(),
-                                currentUserId,
-                                "autre"
-                        );
-
-                        rs.ajouter(r);
-                        loadData();
-
-                        showAlert("Succès", "Réclamation ajoutée ✅");
-
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        }
-
-        // ================= VOIR REPONSES =================
-        @FXML
-        private void voirReponses(ActionEvent event) {
-
-            Reclamation selected = table.getSelectionModel().getSelectedItem();
-
-            if (selected == null) {
-                showAlert("Erreur", "Sélectionner une réclamation");
-                return;
-            }
-
-            try {
-                ReponseReclamationService service = new ReponseReclamationService();
-                List<ReponseReclamation> list = service.recuperer();
-
-                StringBuilder content = new StringBuilder();
-
-                for (ReponseReclamation r : list) {
-                    if (r.getReclamationId() == selected.getId()) {
-                        content.append("• ").append(r.getMessage()).append("\n");
-                    }
-                }
-
-                if (content.length() == 0) {
-                    content.append("Aucune réponse.");
-                }
-
-                showAlert("Réponses", content.toString());
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        // ================= ALERT =================
-        private void showAlert(String title, String msg) {
-            Alert a = new Alert(Alert.AlertType.INFORMATION);
-            a.setTitle(title);
-            a.setHeaderText(null);
-            a.setContentText(msg);
-            a.showAndWait();
-        }
-
-
     }
 
     // ==================== Helpers ====================

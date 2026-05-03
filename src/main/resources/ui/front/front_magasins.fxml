@@ -1,42 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 
-<VBox spacing="0.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.front.FrontMagasinController">
+<VBox spacing="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.rouhfan.ui.front.FrontMagasinController">
 
     <!-- Hero Banner Boutique -->
-    <VBox alignment="CENTER" spacing="10.0" style="-fx-background-color: linear-gradient(to right, #241197, #6c2a90);                  -fx-padding: 50 40 40 40;">
-        <Label style="-fx-font-size: 42; -fx-font-weight: 800; -fx-text-fill: white;" text="🖌️ Notre Boutique" />
-        <Label style="-fx-font-size: 16; -fx-text-fill: rgba(255,255,255,0.85); -fx-font-style: italic;" text="Découvrez nos œuvres d'art fantasy disponibles à l'achat" />
-        <Label fx:id="totalLabel" style="-fx-font-size: 13; -fx-text-fill: #c9a849; -fx-font-weight: bold;" text="0 articles disponibles" />
+    <VBox alignment="CENTER" spacing="10.0"
+          style="-fx-background-color: linear-gradient(to right, #241197, #6c2a90);
+                 -fx-padding: 50 40 40 40;">
+        <Label text="🖌️ Notre Boutique" style="-fx-font-size: 42; -fx-font-weight: 800; -fx-text-fill: white;" />
+        <Label text="Découvrez nos œuvres d'art fantasy disponibles à l'achat"
+               style="-fx-font-size: 16; -fx-text-fill: rgba(255,255,255,0.85); -fx-font-style: italic;" />
+        <Label fx:id="totalLabel" text="0 articles disponibles"
+               style="-fx-font-size: 13; -fx-text-fill: #c9a849; -fx-font-weight: bold;" />
     </VBox>
 
     <!-- Barre de recherche et filtres -->
-    <HBox alignment="CENTER_LEFT" spacing="12.0" style="-fx-background-color: #f0eef5; -fx-padding: 16 30; -fx-border-color: rgba(36,17,151,0.08);                  -fx-border-width: 0 0 1 0;">
-        <Label style="-fx-font-size: 16; -fx-text-fill: #241197;" text="🔍" />
-        <TextField fx:id="searchField" onKeyReleased="#onSearch" prefWidth="280" promptText="Rechercher un article..." style="-fx-background-radius: 20; -fx-padding: 8 16; -fx-border-radius: 20;                           -fx-border-color: rgba(36,17,151,0.15);" />
-        <ComboBox fx:id="magasinFilter" onAction="#onFilterMagasin" prefWidth="200" promptText="Tous les magasins" style="-fx-background-radius: 20; -fx-border-radius: 20;" />
-        <ComboBox fx:id="sortCombo" onAction="#onSort" prefWidth="160" promptText="Trier par..." style="-fx-background-radius: 20; -fx-border-radius: 20;" />
+    <HBox spacing="12.0" alignment="CENTER_LEFT"
+          style="-fx-background-color: #f0eef5; -fx-padding: 16 30; -fx-border-color: rgba(36,17,151,0.08);
+                 -fx-border-width: 0 0 1 0;">
+        <Label text="🔍" style="-fx-font-size: 16; -fx-text-fill: #241197;" />
+        <TextField fx:id="searchField" promptText="Rechercher un article..." prefWidth="280"
+                   onKeyReleased="#onSearch"
+                   style="-fx-background-radius: 20; -fx-padding: 8 16; -fx-border-radius: 20;
+                          -fx-border-color: rgba(36,17,151,0.15);" />
+        <ComboBox fx:id="magasinFilter" promptText="Tous les magasins" prefWidth="200"
+                  onAction="#onFilterMagasin"
+                  style="-fx-background-radius: 20; -fx-border-radius: 20;" />
+        <ComboBox fx:id="sortCombo" promptText="Trier par..." prefWidth="160"
+                  onAction="#onSort"
+                  style="-fx-background-radius: 20; -fx-border-radius: 20;" />
         <Region HBox.hgrow="ALWAYS" />
-        <Label fx:id="resultCount" style="-fx-text-fill: #5a4a72; -fx-font-size: 13;" text="" />
-        <Button onAction="#clearFilters" style="-fx-background-color: transparent; -fx-text-fill: #241197;                        -fx-font-weight: bold; -fx-cursor: hand;" text="✖ Effacer" />
+        <Label fx:id="resultCount" text="" style="-fx-text-fill: #5a4a72; -fx-font-size: 13;" />
+        <Button text="✖ Effacer" onAction="#clearFilters"
+                style="-fx-background-color: transparent; -fx-text-fill: #241197;
+                       -fx-font-weight: bold; -fx-cursor: hand;" />
     </HBox>
 
     <!-- Grille d'articles (scrollable) -->
-    <ScrollPane fitToWidth="true" style="-fx-background-color: #faf9fc; -fx-background: #faf9fc; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: #faf9fc; -fx-background: #faf9fc; -fx-border-color: transparent;">
         <VBox style="-fx-background-color: #faf9fc; -fx-padding: 30;">
 
             <!-- Message si vide -->
-            <VBox fx:id="emptyMessage" alignment="CENTER" managed="false" spacing="15" style="-fx-padding: 60 0;" visible="false">
-                <Label style="-fx-font-size: 48;" text="🔍" />
-                <Label style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #241197;" text="Aucun article trouvé" />
-                <Label style="-fx-font-size: 14; -fx-text-fill: #5a4a72;" text="Essayez de modifier vos critères de recherche." />
-                <Button onAction="#clearFilters" styleClass="btn-primary" text="Voir tous les articles" />
+            <VBox fx:id="emptyMessage" alignment="CENTER" spacing="15" visible="false" managed="false"
+                  style="-fx-padding: 60 0;">
+                <Label text="🔍" style="-fx-font-size: 48;" />
+                <Label text="Aucun article trouvé" style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #241197;" />
+                <Label text="Essayez de modifier vos critères de recherche."
+                       style="-fx-font-size: 14; -fx-text-fill: #5a4a72;" />
+                <Button text="Voir tous les articles" onAction="#clearFilters" styleClass="btn-primary" />
             </VBox>
 
             <!-- FlowPane pour les cartes d'articles -->
-            <FlowPane fx:id="articlesFlow" hgap="20.0" prefWrapLength="900" vgap="20.0" />
+            <FlowPane fx:id="articlesFlow" hgap="20.0" vgap="20.0" prefWrapLength="900" />
         </VBox>
     </ScrollPane>
 

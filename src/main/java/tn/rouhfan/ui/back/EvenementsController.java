@@ -20,17 +20,6 @@ import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import java.awt.Desktop;
 import java.net.URI;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.geometry.Pos;
-import javafx.geometry.Insets;
-import java.time.YearMonth;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 
 public class EvenementsController implements Initializable {
 
@@ -53,11 +42,6 @@ public class EvenementsController implements Initializable {
     @FXML private PieChart typePieChart;
     @FXML private BarChart<String, Number> participantsBarChart;
 
-    // ✅ Calendar
-    @FXML private GridPane calendarGrid;
-    @FXML private Label monthYearLabel;
-    private YearMonth currentYearMonth;
-
     private EvenementService evenementService;
     private ObservableList<Evenement> evenementsList;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -65,7 +49,6 @@ public class EvenementsController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         evenementService = new EvenementService();
-        currentYearMonth = YearMonth.now();
         setupColumns();
         setupSortCombo();
         setupSearch();
@@ -94,7 +77,7 @@ public class EvenementsController implements Initializable {
         sortCombo.getItems().addAll(
                 "Titre (A-Z)", "Titre (Z-A)",
                 "Date Croissante", "Date Décroissante",
-                "Lieu (A-Z)", "Capacité", "Statut"
+                "Lieu (A-Z)", "Capacité"
         );
         sortCombo.setValue("Titre (A-Z)");
         sortCombo.setOnAction(e -> handleSort());
@@ -109,7 +92,6 @@ public class EvenementsController implements Initializable {
             evenementsList = FXCollections.observableArrayList(evenementService.recuperer());
             evenementTable.setItems(evenementsList);
             updateStats(evenementsList); // ✅ stats
-            drawCalendar(); // ✅ calendar
         } catch (SQLException e) {
             showAlert("Erreur", "❌ Impossible de charger les événements: " + e.getMessage());
         }
@@ -208,10 +190,6 @@ public class EvenementsController implements Initializable {
                             evenementService.rechercherEtTrier(keyword, "capacite", true)
                     );
                     break;
-                case "Statut":
-                    results = FXCollections.observableArrayList(evenementService.rechercher(keyword));
-                    results.sort((e1, e2) -> e1.getStatut().compareToIgnoreCase(e2.getStatut()));
-                    break;
             }
 
             if (results != null) {
@@ -308,81 +286,5 @@ public class EvenementsController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-    }
-
-    // --- CALENDAR LOGIC ---
-    @FXML
-    private void previousMonth() {
-        currentYearMonth = currentYearMonth.minusMonths(1);
-        drawCalendar();
-    }
-
-    @FXML
-    private void nextMonth() {
-        currentYearMonth = currentYearMonth.plusMonths(1);
-        drawCalendar();
-    }
-
-    private void drawCalendar() {
-        if (calendarGrid == null || monthYearLabel == null) return;
-        
-        calendarGrid.getChildren().clear();
-        
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.FRENCH);
-        String formattedMonth = currentYearMonth.format(formatter);
-        monthYearLabel.setText(formattedMonth.substring(0, 1).toUpperCase() + formattedMonth.substring(1));
-        
-        LocalDate firstOfMonth = currentYearMonth.atDay(1);
-        int daysInMonth = currentYearMonth.lengthOfMonth();
-        int dayOfWeek = firstOfMonth.getDayOfWeek().getValue(); // 1 = Lundi, 7 = Dimanche
-        
-        int row = 0;
-        int col = dayOfWeek - 1; // 0-indexé pour GridPane (0 = Lundi)
-        
-        for (int day = 1; day <= daysInMonth; day++) {
-            LocalDate date = currentYearMonth.atDay(day);
-            VBox dayBox = new VBox(2);
-            dayBox.setPadding(new Insets(5));
-            dayBox.setStyle("-fx-border-color: #e2e8f0; -fx-background-color: white;");
-            dayBox.setPrefWidth(120);
-            dayBox.setPrefHeight(100);
-            
-            if (date.equals(LocalDate.now())) {
-                dayBox.setStyle("-fx-border-color: #6c2a90; -fx-background-color: #f3e5f5; -fx-border-width: 2;");
-            }
-            
-            Label dayLabel = new Label(String.valueOf(day));
-            dayLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #333;");
-            dayBox.getChildren().add(dayLabel);
-            
-            // Trouver les événements pour ce jour
-            if (evenementsList != null) {
-                for (Evenement e : evenementsList) {
-                    if (e.getDateEvent() != null) {
-                        LocalDate eventDate = e.getDateEvent().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                        if (eventDate.equals(date)) {
-                            Label eventLabel = new Label("• " + e.getTitre());
-                            eventLabel.setStyle("-fx-font-size: 10; -fx-text-fill: white; -fx-background-color: #6c2a90; -fx-background-radius: 4; -fx-padding: 2 4;");
-                            eventLabel.setWrapText(true);
-                            eventLabel.setMaxWidth(110);
-                            eventLabel.setOnMouseClicked(event -> {
-                                evenementTable.getSelectionModel().select(e);
-                                editEvenement(null);
-                            });
-                            eventLabel.setStyle(eventLabel.getStyle() + "-fx-cursor: hand;");
-                            dayBox.getChildren().add(eventLabel);
-                        }
-                    }
-                }
-            }
-            
-            calendarGrid.add(dayBox, col, row);
-            
-            col++;
-            if (col > 6) {
-                col = 0;
-                row++;
-            }
-        }
     }
 }
