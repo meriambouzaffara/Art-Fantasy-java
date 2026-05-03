@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.*?>
+
+
+<VBox spacing="15"
+      xmlns="http://javafx.com/javafx/8"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.rouhfan.ui.front.ReclamationFrontController"
+
+      styleClass="content">
+    <Label text="📢 Mes Réclamations"
+           styleClass="text-title"/>
+
+    <!-- 🔍 RECHERCHE + FILTRE -->
+    <HBox spacing="10">
+        <TextField fx:id="searchField" promptText="🔍 Rechercher..." prefWidth="200"/>
+        <ComboBox fx:id="statutFilter" prefWidth="150"/>
+        <Button text="➕ Ajouter"  styleClass="btn-add" onAction="#openPopupAjout"/>
+
+    </HBox>
+
+    <!-- TABLE -->
+    <TableView fx:id="table" prefHeight="400" styleClass="surface">
+        <columns>
+            <TableColumn fx:id="colSujet" text="Sujet" prefWidth="150"/>
+            <TableColumn fx:id="colDesc" text="Description" prefWidth="250"/>
+            <TableColumn fx:id="colDate" text="Date" prefWidth="120"/>
+            <TableColumn fx:id="colStatut" text="Statut" prefWidth="120"/>
+            <TableColumn fx:id="colActionImg" text="Images" prefWidth="120"/>
+        </columns>
+    </TableView>
+
+    <!-- ACTION -->
+    <HBox spacing="10">
+        <Button text="👁 Voir réponses"  styleClass="btn-primary" onAction="#voirReponses"/>
+    </HBox>
+
+
+</VBox>

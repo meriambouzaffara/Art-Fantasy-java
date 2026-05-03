@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="15" alignment="TOP_CENTER"
+      xmlns="http://javafx.com/javafx/8"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.rouhfan.ui.back.AdminDashboardController"
+      styleClass="content"
+      prefWidth="700" prefHeight="500">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="📊 Historique &amp; Statistiques Globales " style="-fx-font-size: 20px; -fx-font-weight: bold;-fx-text-fill:   #241197;"/>
+    <Label fx:id="totalLabel" text="Total des réclamations/avis : 0" style="-fx-font-size: 14px; -fx-text-fill: #555;"/>
+
+    <HBox spacing="10" VBox.vgrow="ALWAYS">
+        <!-- Dashboard Chart -->
+        <VBox alignment="CENTER" prefWidth="450" style="-fx-background-color: #f9f9f9; -fx-border-color: #ddd; -fx-border-radius: 5; -fx-background-radius: 5;">
+            <Label text="Répartition IA Globale" style="-fx-font-weight: bold; -fx-padding: 10px;-fx-text-fill: #6c2a90"/>
+            <PieChart fx:id="categoryPieChart" prefHeight="400" prefWidth="400"/>
+        </VBox>
+
+        <!-- Detailed List -->
+        <VBox spacing="5" HBox.hgrow="ALWAYS">
+            <Label text="📋 Détails de l'historique complet :" style="-fx-font-weight: bold;-fx-text-fill: #6c2a90;"/>
+            <ListView fx:id="historyListView" VBox.vgrow="ALWAYS" style="-fx-font-family: 'Consolas';"/>
+        </VBox>
+    </HBox>
+
+</VBox>

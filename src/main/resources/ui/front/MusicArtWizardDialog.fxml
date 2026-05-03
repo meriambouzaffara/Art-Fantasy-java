@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.control.ComboBox?>
+
+<VBox spacing="0" prefWidth="850.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.front.MusicArtWizardController"
+      style="-fx-background-color: transparent;">
+    
+    <VBox spacing="25.0" style="-fx-background-color: white; -fx-background-radius: 30; -fx-padding: 40; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 40, 0, 0, 10);">
+        
+        <!-- HEADER -->
+        <HBox alignment="CENTER_LEFT">
+            <VBox spacing="5">
+                <Label text="🎵 Musique vers Art" style="-fx-font-size: 28; -fx-font-weight: 900; -fx-text-fill: #4c1d95;" />
+                <Label text="L'IA va écouter votre musique et peindre ce qu'elle ressent." style="-fx-text-fill: #64748b; -fx-font-size: 14;" />
+            </VBox>
+            <Region HBox.hgrow="ALWAYS" />
+            <Button text="✕" onAction="#handleClose" style="-fx-background-color: #f1f5f9; -fx-background-radius: 50; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-min-width: 40; -fx-min-height: 40; -fx-cursor: hand;" />
+        </HBox>
+
+        <VBox fx:id="step1Container" spacing="20">
+            <Label text="1. Choisissez un fichier audio" style="-fx-font-weight: bold; -fx-font-size: 16; -fx-text-fill: #1e293b;" />
+            
+            <HBox spacing="15" alignment="CENTER_LEFT" style="-fx-background-color: #f8fafc; -fx-padding: 20; -fx-background-radius: 15; -fx-border-color: #e2e8f0; -fx-border-radius: 15;">
+                <StackPane style="-fx-background-color: #e0e7ff; -fx-background-radius: 50; -fx-padding: 15;">
+                    <Label text="🎧" style="-fx-font-size: 24;" />
+                </StackPane>
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label fx:id="fileNameLabel" text="Aucun fichier sélectionné" style="-fx-font-weight: bold; -fx-text-fill: #475569;" />
+                    <Label text="Format supporté: MP3, WAV" style="-fx-text-fill: #94a3b8; -fx-font-size: 12;" />
+                </VBox>
+                <Button text="Parcourir..." onAction="#handleBrowseAudio" styleClass="btn-secondary" style="-fx-background-color: white; -fx-border-color: #4c1d95; -fx-text-fill: #4c1d95; -fx-border-radius: 20; -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand; -fx-font-weight: bold;" />
+            </HBox>
+            
+            <HBox alignment="CENTER_RIGHT">
+                <Button fx:id="startAnalysisBtn" text="Commencer l'Analyse ✨" onAction="#handleStartAnalysis" disable="true" 
+                        style="-fx-background-color: linear-gradient(to right, #4c1d95, #db2777); -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16; -fx-padding: 12 30; -fx-background-radius: 25; -fx-cursor: hand;" />
+            </HBox>
+        </VBox>
+
+        <VBox fx:id="step2Container" spacing="20" visible="false" managed="false" alignment="CENTER">
+            <Label text="🎧 Écoute et Analyse en cours..." style="-fx-font-weight: bold; -fx-font-size: 18; -fx-text-fill: #4c1d95;" />
+            
+            <!-- Visualiseur Audio Simulé -->
+            <HBox fx:id="visualizerBox" spacing="5" alignment="CENTER" prefHeight="60">
+                <!-- Les barres seront ajoutées dynamiquement dans le contrôleur -->
+            </HBox>
+            
+            <Label fx:id="analysisStatusLabel" text="Extraction du rythme et des fréquences..." style="-fx-text-fill: #64748b; -fx-font-size: 14;" />
+            <ProgressBar fx:id="analysisProgress" prefWidth="400" style="-fx-accent: #db2777;" />
+            <Button text="Annuler" onAction="#handleCancelAnalysis" style="-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-underline: true; -fx-cursor: hand;" />
+        </VBox>
+
+        <VBox fx:id="step3Container" spacing="20" visible="false" managed="false" alignment="CENTER">
+            <Label text="🎨 Création de l'Œuvre..." style="-fx-font-weight: bold; -fx-font-size: 18; -fx-text-fill: #db2777;" />
+            <ProgressBar prefWidth="400" />
+            <Label text="Traduction de la musique en image via l'IA..." style="-fx-text-fill: #64748b;" />
+        </VBox>
+
+        <VBox fx:id="step4Container" spacing="20" visible="false" managed="false">
+            <Label text="✨ Votre chef-d'œuvre musical" style="-fx-font-weight: bold; -fx-font-size: 20; -fx-text-fill: #15803d; -fx-alignment: center;" maxWidth="Infinity" />
+            
+            <HBox spacing="20">
+                <StackPane style="-fx-background-color: #f8fafc; -fx-background-radius: 15; -fx-border-color: #e2e8f0; -fx-border-radius: 15; -fx-padding: 10;">
+                    <ImageView fx:id="resultImageView" fitWidth="260" fitHeight="260" preserveRatio="true" />
+                </StackPane>
+                
+                <VBox spacing="20" HBox.hgrow="ALWAYS" prefWidth="400">
+                    <VBox spacing="8">
+                        <Label text="Titre de l'œuvre" style="-fx-font-weight: bold; -fx-text-fill: #475569; -fx-font-size: 14;" />
+                        <TextField fx:id="titreField" promptText="Nommez votre création..." style="-fx-padding: 12; -fx-background-radius: 8; -fx-border-color: #cbd5e1; -fx-border-radius: 8; -fx-font-size: 14;" />
+                    </VBox>
+                    <VBox spacing="8">
+                        <Label text="Catégorie" style="-fx-font-weight: bold; -fx-text-fill: #475569; -fx-font-size: 14;" />
+                        <ComboBox fx:id="categorieCombo" prefWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #cbd5e1; -fx-border-radius: 8; -fx-padding: 8; -fx-font-size: 14;" />
+                    </VBox>
+                    <VBox spacing="8" VBox.vgrow="ALWAYS">
+                        <Label text="Vision de l'IA (Prompt Généré)" style="-fx-font-weight: bold; -fx-text-fill: #475569; -fx-font-size: 14;" />
+                        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" prefHeight="80" minHeight="80">
+                            <Label fx:id="promptLabel" wrapText="true" style="-fx-font-size: 13; -fx-text-fill: #64748b; -fx-background-color: #f1f5f9; -fx-padding: 12; -fx-background-radius: 8;" />
+                        </ScrollPane>
+                    </VBox>
+                </VBox>
+            </HBox>
+            
+            <HBox alignment="CENTER_RIGHT" spacing="15">
+                <Button text="Ignorer" onAction="#handleClose" style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-cursor: hand;" />
+                <Button text="Enregistrer l'Œuvre 💾" onAction="#handleSave" style="-fx-background-color: #15803d; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16; -fx-padding: 10 25; -fx-background-radius: 8; -fx-cursor: hand;" />
+            </HBox>
+        </VBox>
+
+    </VBox>
+</VBox>

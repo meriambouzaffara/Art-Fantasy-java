@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.rouhfan.ui.front.FrontHistoriqueAchatsController"
+      stylesheets="@../theme.css">
+
+    <!-- ══ Hero Banner ══════════════════════════════════════════════ -->
+    <VBox alignment="CENTER" spacing="10.0"
+          style="-fx-background-color: linear-gradient(to right, #241197, #6c2a90);
+                 -fx-padding: 40 40 35 40;">
+        <Label text="&#x1F4CB; Mes Achats"
+               style="-fx-font-size: 38; -fx-font-weight: 800; -fx-text-fill: white;" />
+        <Label text="Historique complet de vos commandes pay&#233;es"
+               style="-fx-font-size: 15; -fx-text-fill: rgba(255,255,255,0.85); -fx-font-style: italic;" />
+        <Label fx:id="totalLabel" text="0 commande"
+               style="-fx-font-size: 13; -fx-text-fill: #c9a849; -fx-font-weight: bold;" />
+    </VBox>
+
+    <!-- ══ Barre retour ══════════════════════════════════════════════ -->
+    <HBox style="-fx-background-color: #f0eef5; -fx-padding: 10 30;">
+        <Button text="&#x2190; Retour au panier" onAction="#goBackToCheckout"
+                style="-fx-background-color: transparent; -fx-text-fill: #241197;
+                       -fx-font-weight: bold; -fx-cursor: hand; -fx-font-size: 12;
+                       -fx-underline: true;" />
+        <Region HBox.hgrow="ALWAYS" />
+        <Label fx:id="countLabel" text=""
+               style="-fx-text-fill: #5a4a72; -fx-font-size: 13;" />
+    </HBox>
+
+    <!-- ══ Liste des tickets (scrollable) ═══════════════════════════ -->
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: #faf9fc; -fx-background: #faf9fc; -fx-border-color: transparent;">
+        <VBox fx:id="ticketsBox" spacing="18"
+              style="-fx-background-color: #faf9fc; -fx-padding: 28 40 40 40;" />
+    </ScrollPane>
+
+</VBox>
