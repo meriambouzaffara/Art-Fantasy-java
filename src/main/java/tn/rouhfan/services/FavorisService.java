@@ -183,7 +183,6 @@ public class FavorisService {
             ajouter(userId, oeuvreId);
         }
     }
-
     public void supprimerParUser(int userId) throws SQLException {
         String sql = "DELETE FROM favoris WHERE id_user = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);

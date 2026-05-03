@@ -37,6 +37,7 @@
 
     <TableView fx:id="categorieTable" VBox.vgrow="ALWAYS" styleClass="table-art-fantasy">
         <columns>
+            <TableColumn fx:id="colId" text="Id" prefWidth="50" minWidth="50" />
             <TableColumn fx:id="colNom" text="Nom" prefWidth="300" minWidth="250" />
             <TableColumn fx:id="colImage" text="Image" prefWidth="150" minWidth="100" />
             <TableColumn fx:id="colActions" text="Actions" prefWidth="350" minWidth="300" />

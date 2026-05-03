@@ -10,10 +10,9 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.ScrollPane?>
 
-<ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.ProfileController">
-<VBox spacing="20.0">
+<VBox spacing="20.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.rouhfan.ui.back.ProfileController">
     <padding>
         <Insets top="10" right="10" bottom="10" left="10" />
     </padding>
@@ -113,16 +112,4 @@
                     style="-fx-background-color: linear-gradient(to right, #241197, #6c2a90); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 700; -fx-background-radius: 12; -fx-padding: 12 28; -fx-cursor: hand;" />
         </HBox>
     </VBox>
-
-    <!-- Section : Historique des participations -->
-    <VBox spacing="16" styleClass="surface" style="-fx-padding: 30; -fx-background-radius: 20;">
-        <Label text="🎫 Mon Historique Événements"
-               style="-fx-font-size: 18; -fx-font-weight: 700; -fx-text-fill: #241197;" />
-        <Label text="Consultez les événements auxquels vous avez participé." wrapText="true" style="-fx-text-fill: #5a4a72;" />
-        <HBox alignment="CENTER_LEFT">
-            <Button text="📋 Voir mes participations" onAction="#handleViewHistorique"
-                    style="-fx-background-color: linear-gradient(to right, #009688, #4db6ac); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 700; -fx-background-radius: 12; -fx-padding: 12 28; -fx-cursor: hand;" />
-        </HBox>
-    </VBox>
 </VBox>
-</ScrollPane>

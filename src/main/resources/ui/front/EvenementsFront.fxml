@@ -19,14 +19,15 @@
         <Label text="Découvrez les événements à venir et participez aux expériences artistiques." styleClass="text-subtitle" />
     </VBox>
 
-        <!-- AI Recommendations Container (hidden by default) -->
-        <VBox fx:id="recommendationsBox" spacing="15.0" visible="false" managed="false" style="-fx-background-color: rgba(36, 17, 151, 0.03); -fx-padding: 25; -fx-background-radius: 20;">
-            <HBox spacing="15.0" alignment="CENTER_LEFT">
-                <Label text="✨ Juste pour vous" style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #241197;" />
-                <Button text="🔍 Pourquoi ces choix ?" onAction="#handleViewAnalysis" style="-fx-background-color: transparent; -fx-border-color: #241197; -fx-border-radius: 20; -fx-text-fill: #241197; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 5 15;" />
-            </HBox>
-            <FlowPane fx:id="recommendationsPane" hgap="25.0" vgap="25.0" prefWrapLength="1100.0" alignment="TOP_LEFT" />
-        </VBox>
+    <!-- TOP Row: Search and Buttons -->
+    <HBox spacing="10.0" alignment="CENTER_LEFT">
+        <TextField fx:id="searchField" promptText="🔍 Rechercher un événement..." prefWidth="280" />
+        <Label text="Tri:" />
+        <ComboBox fx:id="sortCombo" prefWidth="180" />
+        <Button text="🔄 Rafraîchir" onAction="#refresh" styleClass="btn-secondary" />
+        <HBox HBox.hgrow="ALWAYS" />
+        <Button fx:id="addButton" text="➕ Ajouter Événement" onAction="#addEvenement" styleClass="btn-primary" visible="false" managed="false" />
+    </HBox>
 
         <!-- TOP Row: Search and Buttons -->
         <HBox spacing="20.0" alignment="BOTTOM_LEFT" styleClass="surface" style="-fx-padding: 25; -fx-background-radius: 20;">

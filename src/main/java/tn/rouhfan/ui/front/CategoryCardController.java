@@ -22,9 +22,9 @@ public class CategoryCardController {
         countLabel.setText("Explorer les œuvres"); // TODO: actual count
 
         if (c.getImageCategorie() != null && !c.getImageCategorie().isEmpty()) {
-            String fullPath = tn.rouhfan.tools.ImageUtils.getAbsolutePath(c.getImageCategorie());
-            if (fullPath != null) {
-                categoryImage.setImage(new Image(fullPath));
+            File file = new File(c.getImageCategorie());
+            if (file.exists()) {
+                categoryImage.setImage(imgFromPath(file));
             }
         }
     }

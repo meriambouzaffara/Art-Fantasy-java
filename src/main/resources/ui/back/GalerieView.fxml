@@ -80,6 +80,7 @@
 
     <TableView fx:id="oeuvreTable" VBox.vgrow="ALWAYS" styleClass="table-art-fantasy">
         <columns>
+            <TableColumn fx:id="colId" text="Id" prefWidth="40" minWidth="40" />
             <TableColumn fx:id="colImage" text="Image" prefWidth="85" minWidth="80" />
             <TableColumn fx:id="colTitre" text="Titre" prefWidth="180" minWidth="150" />
             <TableColumn fx:id="colCategorie" text="Catégorie" prefWidth="120" minWidth="100" />

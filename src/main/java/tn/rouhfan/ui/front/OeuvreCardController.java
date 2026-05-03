@@ -15,12 +15,11 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import tn.rouhfan.entities.Oeuvre;
 import tn.rouhfan.entities.User;
-import tn.rouhfan.services.FavorisService;
-import tn.rouhfan.services.OeuvrePaymentService;
 import tn.rouhfan.services.OeuvreService;
 import tn.rouhfan.tools.SessionManager;
 import tn.rouhfan.ui.back.OeuvreFormController;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -35,15 +34,11 @@ public class OeuvreCardController {
     @FXML private HBox actionsPane;
     @FXML private Button viewBtn;
     @FXML private Button buyBtn;
-    @FXML private Button favBtn;
-    @FXML private Label favIcon;
 
     private Oeuvre oeuvre;
     private String userRole;
     private Runnable refreshCallback;
     private OeuvreService oeuvreService = new OeuvreService();
-    private FavorisService favorisService = new FavorisService();
-    private OeuvrePaymentService paymentService = new OeuvrePaymentService();
 
     public void setOeuvre(Oeuvre o, String role, Runnable callback) {
         this.oeuvre = o;
@@ -63,11 +58,12 @@ public class OeuvreCardController {
             statusLabel.setStyle("-fx-background-color: #fee2e2; -fx-text-fill: #b91c1c; -fx-padding: 6 12; -fx-background-radius: 20; -fx-font-size: 11; -fx-font-weight: bold;");
         }
 
-        // Image loading via ImageUtils
+        // Image loading
         if (o.getImage() != null && !o.getImage().isEmpty()) {
-            String fullPath = tn.rouhfan.tools.ImageUtils.getAbsolutePath(o.getImage());
-            if (fullPath != null) {
-                oeuvreImage.setImage(new Image(fullPath));
+            File file = new File(o.getImage());
+            if (file.exists()) {
+                Image img = new Image(file.toURI().toString());
+                oeuvreImage.setImage(img);
             }
         }
 
@@ -91,46 +87,6 @@ public class OeuvreCardController {
         boolean canBuy = isParticipant && isDisponible;
         buyBtn.setVisible(canBuy);
         buyBtn.setManaged(canBuy);
-
-        // Initialiser l'état du favori
-        updateFavoriteIcon();
-    }
-
-    private void updateFavoriteIcon() {
-        User currentUser = SessionManager.getInstance().getCurrentUser();
-        if (currentUser == null) {
-            if (favBtn != null) {
-                favBtn.setVisible(false);
-                favBtn.setManaged(false);
-            }
-            return;
-        }
-        try {
-            if (favorisService.exists(currentUser.getId(), oeuvre.getId())) {
-                favIcon.setText("⭐");
-                favIcon.setStyle("-fx-text-fill: #fac62d; -fx-font-size: 22; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 0);");
-            } else {
-                favIcon.setText("☆");
-                favIcon.setStyle("-fx-text-fill: #241197; -fx-font-size: 22; -fx-font-weight: bold;");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void handleToggleFavorite() {
-        User currentUser = SessionManager.getInstance().getCurrentUser();
-        if (currentUser == null) return;
-
-        try {
-            favorisService.toggle(currentUser.getId(), oeuvre.getId());
-            updateFavoriteIcon();
-            // Optionnel : rafraîchir la liste si on est dans la vue favoris
-            if (refreshCallback != null) refreshCallback.run();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     @FXML
@@ -156,37 +112,34 @@ public class OeuvreCardController {
 
     @FXML
     private void handleBuy() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/front/OeuvreStripePaymentDialog.fxml"));
-            Parent root = loader.load();
-            OeuvreStripePaymentDialogController controller = loader.getController();
-            controller.setOeuvre(oeuvre);
-
-            Stage paymentStage = new Stage();
-            paymentStage.initModality(Modality.APPLICATION_MODAL);
-            paymentStage.setTitle("Paiement Sécurisé — " + oeuvre.getTitre());
-            paymentStage.setScene(new Scene(root));
-            paymentStage.showAndWait();
-
-            // Rafraîchir la liste si le paiement a réussi
-            if (controller.isSuccess()) {
-                if (refreshCallback != null) refreshCallback.run();
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Acheter l'œuvre");
+        confirm.setHeaderText("🛒 Confirmer l'achat");
+        confirm.setContentText("Voulez-vous acheter \"" + oeuvre.getTitre() + "\" pour " + 
+            (oeuvre.getPrix() != null ? oeuvre.getPrix().toString() : "0") + " DT ?");
+        
+        confirm.showAndWait().ifPresent(res -> {
+            if (res == ButtonType.OK) {
+                try {
+                    // Marquer l'oeuvre comme vendue
+                    oeuvre.setStatut("vendue");
+                    oeuvreService.modifier(oeuvre);
+                    
+                    Alert success = new Alert(Alert.AlertType.INFORMATION);
+                    success.setTitle("Achat réussi");
+                    success.setHeaderText(null);
+                    success.setContentText("✅ Vous avez acheté \"" + oeuvre.getTitre() + "\" avec succès !");
+                    success.showAndWait();
+                    
+                    if (refreshCallback != null) refreshCallback.run();
+                } catch (SQLException e) {
+                    Alert error = new Alert(Alert.AlertType.ERROR);
+                    error.setTitle("Erreur");
+                    error.setContentText("Erreur lors de l'achat: " + e.getMessage());
+                    error.showAndWait();
+                }
             }
-        } catch (IOException e) {
-            Alert error = new Alert(Alert.AlertType.ERROR);
-            error.setTitle("Erreur");
-            error.setHeaderText("Impossible d'ouvrir le paiement");
-            error.setContentText(e.getMessage());
-            error.showAndWait();
-            e.printStackTrace();
-        }
-    }
-
-    private void finaliserAchat() throws Exception {
-        oeuvre.setStatut("vendue");
-        oeuvre.setDateVente(new java.util.Date());
-        oeuvreService.modifier(oeuvre);
-        if (refreshCallback != null) refreshCallback.run();
+        });
     }
 
     @FXML

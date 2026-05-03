@@ -213,10 +213,4 @@ public class ProfileController implements Initializable {
         if (profileMessage != null) profileMessage.setText("");
         if (passwordMessage != null) passwordMessage.setText("");
     }
-
-    @FXML
-    private void handleViewHistorique(ActionEvent event) {
-        HistoriqueParticipationsDialog dialog = new HistoriqueParticipationsDialog(currentUser.getId());
-        dialog.show();
-    }
 }

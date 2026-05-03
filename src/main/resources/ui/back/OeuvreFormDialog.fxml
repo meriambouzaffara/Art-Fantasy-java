@@ -8,8 +8,10 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.collections.FXCollections?>
 <?import java.lang.String?>
@@ -62,7 +64,7 @@
                 <Label text="Catégorie" styleClass="form-label" />
                 <ComboBox fx:id="categorieCombo" maxWidth="Infinity" styleClass="combo-box" promptText="Choisir une catégorie" />
                 <Label fx:id="categorieErrorLabel" style="-fx-text-fill: #ef4444; -fx-font-size: 12px; -fx-font-weight: bold;" managed="false" visible="false" />
-            </VBox>
+        </VBox>
         </VBox>
 
         <!-- Right Side: Image Upload & Preview -->

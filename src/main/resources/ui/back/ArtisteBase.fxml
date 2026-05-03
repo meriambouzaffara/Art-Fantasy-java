@@ -31,7 +31,6 @@
                 <Button fx:id="navEvenements" text="📅  Mes Événements" mnemonicParsing="false" styleClass="sidebar-link" onAction="#openEvenements" maxWidth="Infinity" />
                 <Button fx:id="navCours" text="🎨  Mes Cours" mnemonicParsing="false" styleClass="sidebar-link" onAction="#openCours" maxWidth="Infinity" />
                 <Button fx:id="navCertificats" text="📜  Certificats" mnemonicParsing="false" styleClass="sidebar-link" onAction="#openCertificats" maxWidth="Infinity" />
-                <Button fx:id="navFavoris" text="⭐  Mes Favoris" mnemonicParsing="false" styleClass="sidebar-link" onAction="#openFavoris" maxWidth="Infinity" />
             </VBox>
 
             <VBox spacing="10.0" style="-fx-padding: 20 0 0 0;">

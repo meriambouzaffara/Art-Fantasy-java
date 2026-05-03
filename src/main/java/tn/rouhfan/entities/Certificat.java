@@ -10,6 +10,7 @@ public class Certificat {
     private BigDecimal score;
     private Date dateObtention;
     private Cours cours;
+    //  Remplacement de Participant par User
     private User participant;
 
     public Certificat() {}
@@ -36,6 +37,8 @@ public class Certificat {
     public void setDateObtention(Date dateObtention) { this.dateObtention = dateObtention; }
     public Cours getCours() { return cours; }
     public void setCours(Cours cours) { this.cours = cours; }
+
+    //  Getter/Setter mis à jour
     public User getParticipant() { return participant; }
     public void setParticipant(User participant) { this.participant = participant; }
 

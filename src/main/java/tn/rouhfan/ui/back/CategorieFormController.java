@@ -30,6 +30,7 @@ public class CategorieFormController implements Initializable {
     @FXML private ImageView imagePreview;
     @FXML private Label placeholderLabel;
     @FXML private StackPane imageContainer;
+    
     @FXML private Label nomErrorLabel;
     @FXML private Label imageErrorLabel;
 
@@ -48,12 +49,11 @@ public class CategorieFormController implements Initializable {
         if (categorie != null) {
             formTitle.setText("✏️ Modifier la catégorie");
             nomField.setText(categorie.getNomCategorie());
-
+            
             if (categorie.getImageCategorie() != null && !categorie.getImageCategorie().isEmpty()) {
-                String fullPath = tn.rouhfan.tools.ImageUtils.getAbsolutePath(categorie.getImageCategorie());
-                if (fullPath != null) {
-                    imagePreview.setImage(new Image(fullPath));
-                    placeholderLabel.setVisible(false);
+                File file = new File(categorie.getImageCategorie());
+                if (file.exists()) {
+                    updateImagePreview(file);
                 }
             }
         }
@@ -63,18 +63,17 @@ public class CategorieFormController implements Initializable {
     private void browseImage(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choisir une image de catégorie");
-
-        // Ouvrir directement dans le dossier uploads/categories
-        File initialDir = new File(tn.rouhfan.tools.ImageUtils.UPLOADS_DIR + "/categories");
-        if (initialDir.exists()) {
-            fileChooser.setInitialDirectory(initialDir);
-        }
+        
+        // Ouvrir directement dans le dossier uploads
+        File uploadsDir = new File("uploads");
+        if (!uploadsDir.exists()) uploadsDir.mkdirs();
+        fileChooser.setInitialDirectory(uploadsDir);
 
         // Accepter n'importe quel type d'image
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
+            new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp", "*.webp")
         );
-
+        
         File file = fileChooser.showOpenDialog(nomField.getScene().getWindow());
         if (file != null) {
             selectedImageFile = file;
@@ -83,7 +82,8 @@ public class CategorieFormController implements Initializable {
     }
 
     private void updateImagePreview(File file) {
-        imagePreview.setImage(new Image(file.toURI().toString()));
+        Image img = new Image(file.toURI().toString());
+        imagePreview.setImage(img);
         placeholderLabel.setVisible(false);
     }
 
@@ -93,13 +93,18 @@ public class CategorieFormController implements Initializable {
 
         try {
             if (currentCategorie == null) currentCategorie = new Categorie();
-
+            
             currentCategorie.setNomCategorie(nomField.getText());
 
-            // Gérer l'upload d'image via ImageUtils
+            // Gérer l'upload d'image
             if (selectedImageFile != null) {
-                String dbPath = tn.rouhfan.tools.ImageUtils.saveUpload(selectedImageFile, "categories");
-                currentCategorie.setImageCategorie(dbPath);
+                String fileName = UUID.randomUUID().toString() + "_" + selectedImageFile.getName();
+                File destDir = new File("uploads/categories");
+                if (!destDir.exists()) destDir.mkdirs();
+                
+                File destFile = new File(destDir, fileName);
+                Files.copy(selectedImageFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                currentCategorie.setImageCategorie(destFile.getPath());
             }
 
             if (currentCategorie.getIdCategorie() == 0) {
@@ -118,7 +123,7 @@ public class CategorieFormController implements Initializable {
 
     private boolean validateFields() {
         boolean isValid = true;
-
+        
         // Hide errors initially
         nomErrorLabel.setVisible(false);
         nomErrorLabel.setManaged(false);
@@ -137,20 +142,9 @@ public class CategorieFormController implements Initializable {
             nomErrorLabel.setVisible(true);
             nomErrorLabel.setManaged(true);
             isValid = false;
-        } else {
-            try {
-                int excludeId = (currentCategorie != null) ? currentCategorie.getIdCategorie() : 0;
-                if (categorieService.isNomExiste(nom, excludeId)) {
-                    nomErrorLabel.setText("Cette catégorie existe déjà.");
-                    nomErrorLabel.setVisible(true);
-                    nomErrorLabel.setManaged(true);
-                    isValid = false;
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
 
+        // Vérification de l'image obligatoire
         boolean hasImage = (selectedImageFile != null) || (currentCategorie != null && currentCategorie.getImageCategorie() != null && !currentCategorie.getImageCategorie().isEmpty());
         if (!hasImage) {
             imageErrorLabel.setText("Veuillez sélectionner une image.");

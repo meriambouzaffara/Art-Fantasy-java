@@ -56,30 +56,15 @@
 
             <!-- Boutons NON connecté : Sign Up + Login -->
             <HBox fx:id="guestButtons" alignment="CENTER" spacing="12.0">
-                <Button text="Sign up" mnemonicParsing="false" styleClass="btn-primary" onAction="#signup"
-                        style="-fx-background-color: #241197; -fx-background-radius: 20; -fx-font-weight: bold;" />
-                <Button text="Login" mnemonicParsing="false" styleClass="btn-secondary" onAction="#login"
-                        style="-fx-background-radius: 20; -fx-font-weight: bold; -fx-text-fill: #241197;" />
+                <Button text="Sign up" mnemonicParsing="false" styleClass="btn-primary" onAction="#signup" style="-fx-background-color: #241197; -fx-background-radius: 20; -fx-font-weight: bold;" />
+                <Button text="Login" mnemonicParsing="false" styleClass="btn-secondary" onAction="#login" style="-fx-background-radius: 20; -fx-font-weight: bold; -fx-text-fill: #241197;" />
             </HBox>
 
-            <!-- Boutons CONNECTÉ : Bienvenue + Notif + Profil + IA + Déconnexion -->
+            <!-- Boutons CONNECTÉ : Bienvenue + Profil + Déconnexion -->
             <HBox fx:id="userButtons" alignment="CENTER" spacing="12.0" visible="false" managed="false">
-                <Label fx:id="welcomeLabel" text="Bienvenue"
-                       style="-fx-text-fill: #241197; -fx-font-weight: bold; -fx-font-size: 14;" />
-
-                <!-- Cloche de notifications -->
-                <Button fx:id="notifBtn" text="🔔" mnemonicParsing="false" onAction="#openNotifications"
-                        style="-fx-background-color: transparent; -fx-text-fill: #fac62d; -fx-font-weight: bold; -fx-font-size: 16; -fx-cursor: hand;" />
-
-                <Button fx:id="profileBtn" text="👤 Mon Profil" mnemonicParsing="false" onAction="#openProfile"
-                        style="-fx-background-color: #6c2a90; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold;" />
-
-                <!-- Bouton IA visible uniquement pour les Participants -->
-                <Button fx:id="iaBtn" text="✨ Créations IA" mnemonicParsing="false" onAction="#goIA"
-                        style="-fx-background-color: #241197; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold;" />
-
-                <Button text="🚪 Déconnexion" mnemonicParsing="false" onAction="#logout"
-                        style="-fx-background-color: #d63031; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold;" />
+                <Label fx:id="welcomeLabel" text="Bienvenue" style="-fx-text-fill: #241197; -fx-font-weight: bold; -fx-font-size: 14;" />
+                <Button fx:id="profileBtn" text="👤 Mon Profil" mnemonicParsing="false" onAction="#openProfile" style="-fx-background-color: #6c2a90; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold;" />
+                <Button text="🚪 Déconnexion" mnemonicParsing="false" onAction="#logout" style="-fx-background-color: #d63031; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold;" />
             </HBox>
         </HBox>
     </top>

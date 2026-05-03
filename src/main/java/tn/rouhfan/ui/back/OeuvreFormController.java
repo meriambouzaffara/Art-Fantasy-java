@@ -36,12 +36,13 @@ public class OeuvreFormController implements Initializable {
     @FXML private TextField prixField;
     @FXML private ComboBox<String> statutCombo;
     @FXML private ComboBox<Categorie> categorieCombo;
-
+    
     @FXML private ImageView imagePreview;
     @FXML private Label placeholderLabel;
     @FXML private StackPane imageContainer;
     @FXML private Button saveBtn;
     @FXML private Button browseBtn;
+    
     @FXML private Label titreErrorLabel;
     @FXML private Label descriptionErrorLabel;
     @FXML private Label prixErrorLabel;
@@ -50,7 +51,7 @@ public class OeuvreFormController implements Initializable {
 
     private OeuvreService oeuvreService;
     private CategorieService categorieService;
-
+    
     private Oeuvre currentOeuvre;
     private File selectedImageFile;
     private boolean saved = false;
@@ -60,7 +61,7 @@ public class OeuvreFormController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         oeuvreService = new OeuvreService();
         categorieService = new CategorieService();
-
+        
         setupCombos();
         loadData();
     }
@@ -74,7 +75,7 @@ public class OeuvreFormController implements Initializable {
             prixField.setEditable(false);
             statutCombo.setDisable(true);
             categorieCombo.setDisable(true);
-
+            
             if (saveBtn != null) {
                 saveBtn.setVisible(false);
                 saveBtn.setManaged(false);
@@ -91,7 +92,7 @@ public class OeuvreFormController implements Initializable {
             @Override public String toString(Categorie c) { return c == null ? "" : c.getNomCategorie(); }
             @Override public Categorie fromString(String string) { return null; }
         });
-
+        
         statutCombo.setValue("disponible");
     }
 
@@ -111,7 +112,7 @@ public class OeuvreFormController implements Initializable {
             descriptionField.setText(oeuvre.getDescription());
             prixField.setText(oeuvre.getPrix() != null ? oeuvre.getPrix().toString() : "");
             statutCombo.setValue(oeuvre.getStatut());
-
+            
             // Selectionner la bonne catégorie
             for (Categorie c : categorieCombo.getItems()) {
                 if (oeuvre.getCategorie() != null && c.getIdCategorie() == oeuvre.getCategorie().getIdCategorie()) {
@@ -121,10 +122,9 @@ public class OeuvreFormController implements Initializable {
             }
 
             if (oeuvre.getImage() != null && !oeuvre.getImage().isEmpty()) {
-                String fullPath = tn.rouhfan.tools.ImageUtils.getAbsolutePath(oeuvre.getImage());
-                if (fullPath != null) {
-                    imagePreview.setImage(new Image(fullPath));
-                    placeholderLabel.setVisible(false);
+                File file = new File(oeuvre.getImage());
+                if (file.exists()) {
+                    updateImagePreview(file);
                 }
             }
         }
@@ -134,11 +134,19 @@ public class OeuvreFormController implements Initializable {
     private void browseImage(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choisir une image");
-
-        // Ouvrir directement dans le dossier uploads/oeuvres
-        File initialDir = new File(tn.rouhfan.tools.ImageUtils.UPLOADS_DIR + "/oeuvres");
-        if (initialDir.exists()) {
-            fileChooser.setInitialDirectory(initialDir);
+        
+        File uploadsDir = new File("uploads");
+        if (!uploadsDir.exists()) uploadsDir.mkdirs();
+        fileChooser.setInitialDirectory(uploadsDir);
+        
+        fileChooser.getExtensionFilters().addAll(
+            new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp", "*.webp")
+        );
+        
+        File file = fileChooser.showOpenDialog(titreField.getScene().getWindow());
+        if (file != null) {
+            selectedImageFile = file;
+            updateImagePreview(file);
         }
 
         fileChooser.getExtensionFilters().addAll(
@@ -157,6 +165,12 @@ public class OeuvreFormController implements Initializable {
         placeholderLabel.setVisible(false);
     }
 
+    private void updateImagePreview(File file) {
+        Image img = new Image(file.toURI().toString());
+        imagePreview.setImage(img);
+        placeholderLabel.setVisible(false);
+    }
+
     @FXML
     private void save(ActionEvent event) {
         if (!validateFields()) return;
@@ -169,17 +183,22 @@ public class OeuvreFormController implements Initializable {
             currentOeuvre.setPrix(new BigDecimal(prixField.getText()));
             currentOeuvre.setStatut(statutCombo.getValue());
             currentOeuvre.setCategorie(categorieCombo.getValue());
-
+            
             // Utiliser l'utilisateur connecté automatiquement comme artiste
             User currentUser = SessionManager.getInstance().getCurrentUser();
             if (currentOeuvre.getUser() == null && currentUser != null) {
                 currentOeuvre.setUser(currentUser);
             }
 
-            // Gérer l'upload d'image via ImageUtils
+            // Gérer l'upload d'image
             if (selectedImageFile != null) {
-                String dbPath = tn.rouhfan.tools.ImageUtils.saveUpload(selectedImageFile, "oeuvres");
-                currentOeuvre.setImage(dbPath);
+                String fileName = UUID.randomUUID().toString() + "_" + selectedImageFile.getName();
+                File destDir = new File("uploads/oeuvres");
+                if (!destDir.exists()) destDir.mkdirs();
+                
+                File destFile = new File(destDir, fileName);
+                Files.copy(selectedImageFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                currentOeuvre.setImage(destFile.getPath());
             }
 
             if (currentOeuvre.getId() == 0) {
@@ -225,30 +244,6 @@ public class OeuvreFormController implements Initializable {
             titreErrorLabel.setVisible(true);
             titreErrorLabel.setManaged(true);
             isValid = false;
-        } else {
-            try {
-                // Créer une oeuvre temporaire pour le test
-                Oeuvre tempOeuvre = new Oeuvre();
-                tempOeuvre.setTitre(titre);
-
-                // Utiliser l'utilisateur courant pour le test
-                User currentUser = SessionManager.getInstance().getCurrentUser();
-                if (currentOeuvre != null && currentOeuvre.getUser() != null) {
-                    tempOeuvre.setUser(currentOeuvre.getUser());
-                } else {
-                    tempOeuvre.setUser(currentUser);
-                }
-
-                int excludeId = (currentOeuvre != null) ? currentOeuvre.getId() : 0;
-                if (oeuvreService.isOeuvreExiste(tempOeuvre, excludeId)) {
-                    titreErrorLabel.setText("Vous avez déjà une œuvre avec ce titre.");
-                    titreErrorLabel.setVisible(true);
-                    titreErrorLabel.setManaged(true);
-                    isValid = false;
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
 
         if (description.isEmpty()) {
@@ -287,6 +282,7 @@ public class OeuvreFormController implements Initializable {
             isValid = false;
         }
 
+        // Vérification de l'image obligatoire
         boolean hasImage = (selectedImageFile != null) || (currentOeuvre != null && currentOeuvre.getImage() != null && !currentOeuvre.getImage().isEmpty());
         if (!hasImage) {
             imageErrorLabel.setText("Veuillez sélectionner une image.");

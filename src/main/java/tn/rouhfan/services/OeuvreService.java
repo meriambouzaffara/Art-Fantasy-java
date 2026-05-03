@@ -25,8 +25,8 @@ public class OeuvreService implements IService<Oeuvre> {
             throw new SQLException("Une œuvre identique existe déjà pour cet artiste.");
         }
 
-        String sql = "INSERT INTO oeuvre (description, titre, prix, statut, image, date_vente, user_id, categorie_id) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO oeuvre (description, titre, prix, statut, image, favori, date_vente, user_id, categorie_id) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
@@ -82,7 +82,7 @@ public class OeuvreService implements IService<Oeuvre> {
             throw new SQLException("Une autre œuvre identique existe déjà pour cet artiste.");
         }
 
-        String sql = "UPDATE oeuvre SET description=?, titre=?, prix=?, statut=?, image=?, date_vente=?, user_id=?, categorie_id=? WHERE id=?";
+        String sql = "UPDATE oeuvre SET description=?, titre=?, prix=?, statut=?, image=?, favori=?, date_vente=?, user_id=?, categorie_id=? WHERE id=?";
 
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, o.getDescription());
@@ -95,23 +95,24 @@ public class OeuvreService implements IService<Oeuvre> {
 
         ps.setString(4, o.getStatut());
         ps.setString(5, o.getImage());
+        ps.setBoolean(6, o.isFavori());
 
         if (o.getDateVente() != null)
-            ps.setTimestamp(6, new Timestamp(o.getDateVente().getTime()));
+            ps.setTimestamp(7, new Timestamp(o.getDateVente().getTime()));
         else
-            ps.setNull(6, Types.TIMESTAMP);
+            ps.setNull(7, Types.TIMESTAMP);
 
         if (o.getUser() != null)
-            ps.setInt(7, o.getUser().getId());
-        else
-            ps.setNull(7, Types.INTEGER);
-
-        if (o.getCategorie() != null)
-            ps.setInt(8, o.getCategorie().getIdCategorie());
+            ps.setInt(8, o.getUser().getId());
         else
             ps.setNull(8, Types.INTEGER);
 
-        ps.setInt(9, o.getId());
+        if (o.getCategorie() != null)
+            ps.setInt(9, o.getCategorie().getIdCategorie());
+        else
+            ps.setNull(9, Types.INTEGER);
+
+        ps.setInt(10, o.getId());
 
         ps.executeUpdate();
         System.out.println("✏️ Oeuvre modifiée");
@@ -174,30 +175,6 @@ public class OeuvreService implements IService<Oeuvre> {
         return oeuvres;
     }
 
-    public List<Oeuvre> recupererParUser(int userId) throws SQLException {
-        List<Oeuvre> oeuvres = new ArrayList<>();
-        String sql = "SELECT o.*, c.nom_categorie FROM oeuvre o " +
-                "LEFT JOIN categorie c ON o.categorie_id = c.id_categorie " +
-                "WHERE o.user_id = ?";
-        PreparedStatement ps = cnx.prepareStatement(sql);
-        ps.setInt(1, userId);
-        ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            Oeuvre o = new Oeuvre();
-            o.setId(rs.getInt("id"));
-            o.setTitre(rs.getString("titre"));
-            o.setImage(rs.getString("image"));
-            o.setStatut(rs.getString("statut"));
-            
-            Categorie c = new Categorie();
-            c.setIdCategorie(rs.getInt("categorie_id"));
-            c.setNomCategorie(rs.getString("nom_categorie"));
-            o.setCategorie(c);
-            oeuvres.add(o);
-        }
-        return oeuvres;
-    }
-
     @Override
     public Oeuvre findById(int id) throws SQLException {
         String sql = "SELECT o.*, " +
@@ -254,16 +231,17 @@ public class OeuvreService implements IService<Oeuvre> {
         return null;
     }
 
-    public boolean isOeuvreExiste(Oeuvre o, int excludeId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM oeuvre WHERE LOWER(titre) = LOWER(?) AND user_id = ? AND id != ?";
+    private boolean isOeuvreExiste(Oeuvre o, int excludeId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM oeuvre WHERE titre = ? AND description = ? AND user_id = ? AND id != ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
-        ps.setString(1, o.getTitre().trim());
+        ps.setString(1, o.getTitre());
+        ps.setString(2, o.getDescription());
         if (o.getUser() != null) {
-            ps.setInt(2, o.getUser().getId());
+            ps.setInt(3, o.getUser().getId());
         } else {
-            ps.setNull(2, Types.INTEGER);
+            ps.setNull(3, Types.INTEGER);
         }
-        ps.setInt(3, excludeId);
+        ps.setInt(4, excludeId);
         ResultSet rs = ps.executeQuery();
         if (rs.next()) {
             return rs.getInt(1) > 0;
