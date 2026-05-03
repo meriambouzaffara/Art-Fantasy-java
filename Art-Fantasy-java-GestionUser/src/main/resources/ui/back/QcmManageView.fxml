@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.rouhfan.ui.back.QcmManageController"
+      style="-fx-background-color: #f0f2f8;">
+
+    <!-- ══ EN-TÊTE GRADIENT ══════════════════════════════════════════════════ -->
+    <VBox style="-fx-background-color: linear-gradient(to right, #0f1c3f, #1a3a6e); -fx-padding: 22 28 18 28;" spacing="6">
+        <HBox spacing="12" alignment="CENTER_LEFT">
+            <Button text="⬅  Retour" onAction="#handleRetour"
+                    style="-fx-background-color: rgba(255,255,255,0.15);
+                           -fx-text-fill: white; -fx-font-size: 12; -fx-font-weight: bold;
+                           -fx-background-radius: 8; -fx-padding: 6 14; -fx-cursor: hand;" />
+            <Label fx:id="lblTitreCours" text="Gestion du QCM"
+                   style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: white;" />
+        </HBox>
+        <Label text="Ajoutez des questions manuellement ou laissez l'IA les générer automatiquement."
+               style="-fx-font-size: 12; -fx-text-fill: rgba(255,255,255,0.65);" />
+    </VBox>
+
+    <!-- ══ SECTION IA ════════════════════════════════════════════════════════ -->
+    <HBox spacing="14" alignment="CENTER_LEFT"
+          style="-fx-background-color: #eef2ff;
+                 -fx-padding: 14 28;
+                 -fx-border-color: #c3dafe;
+                 -fx-border-width: 0 0 1 0;">
+
+        <Label text="🤖" style="-fx-font-size: 22;" />
+        <VBox spacing="2">
+            <Label text="Génération automatique par IA"
+                   style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #3730a3;" />
+            <Label text="L'IA analyse le contenu du cours et génère des questions pertinentes."
+                   style="-fx-font-size: 11; -fx-text-fill: #6366f1;" />
+        </VBox>
+
+        <Region HBox.hgrow="ALWAYS" />
+
+        <Label text="Nombre :" style="-fx-font-size: 13; -fx-text-fill: #4a5568; -fx-font-weight: bold;" />
+        <Spinner fx:id="spinnerNombre" prefWidth="75" prefHeight="34"
+                 style="-fx-background-radius: 8; -fx-border-radius: 8;" />
+
+        <Button fx:id="btnGenererAi" text="⚡  Générer" onAction="#handleGenererAi"
+                style="-fx-background-color: linear-gradient(to right, #4f46e5, #7c3aed);
+                       -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13;
+                       -fx-padding: 9 20; -fx-background-radius: 10; -fx-cursor: hand;
+                       -fx-effect: dropshadow(gaussian, rgba(79,70,229,0.35), 10, 0, 0, 3);" />
+
+        <ProgressIndicator fx:id="aiLoader" prefWidth="26" prefHeight="26"
+                           visible="false" managed="false" />
+        <Label fx:id="lblAiStatus"
+               style="-fx-font-size: 12; -fx-text-fill: #4f46e5; -fx-font-style: italic;" />
+    </HBox>
+
+    <!-- ══ CONTENU PRINCIPAL (Table + Formulaire) ════════════════════════════ -->
+    <HBox spacing="20" VBox.vgrow="ALWAYS" style="-fx-padding: 22 28 28 28;">
+
+        <!-- ── LISTE DES QUESTIONS + RÉPONSES ─────────────────────────────── -->
+        <VBox spacing="12" HBox.hgrow="ALWAYS">
+
+            <HBox alignment="CENTER_LEFT">
+                <Label text="📋  Questions &amp; Réponses"
+                       style="-fx-font-size: 15; -fx-font-weight: bold; -fx-text-fill: #0f1c3f;" />
+            </HBox>
+
+            <ListView fx:id="questionListView" VBox.vgrow="ALWAYS"
+                      style="-fx-background-color: white;
+                             -fx-background-radius: 14;
+                             -fx-border-color: #e2e8f0;
+                             -fx-border-radius: 14;
+                             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 10, 0, 0, 3);" />
+        </VBox>
+
+        <!-- ── FORMULAIRE AJOUT MANUEL ────────────────────────────────────── -->
+        <VBox spacing="16" prefWidth="390"
+              style="-fx-background-color: white;
+                     -fx-background-radius: 14;
+                     -fx-padding: 22 20;
+                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 12, 0, 0, 4);">
+
+            <!-- Titre formulaire -->
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label text="✏️" style="-fx-font-size: 18;" />
+                <Label text="Ajouter une question"
+                       style="-fx-font-size: 15; -fx-font-weight: bold; -fx-text-fill: #0f1c3f;" />
+            </HBox>
+
+            <Separator style="-fx-background-color: #e2e8f0;" />
+
+            <!-- Texte de la question -->
+            <VBox spacing="5">
+                <Label text="Question *"
+                       style="-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #4a5568;" />
+                <TextArea fx:id="taQuestion" promptText="Saisissez le texte de la question..."
+                          prefHeight="90" wrapText="true"
+                          style="-fx-background-color: #f8faff;
+                                 -fx-border-color: #c3dafe; -fx-border-radius: 8;
+                                 -fx-background-radius: 8; -fx-font-size: 13; -fx-padding: 8;" />
+            </VBox>
+
+            <!-- Réponses -->
+            <VBox spacing="6">
+                <Label text="Réponses  (✔ = correcte)"
+                       style="-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #4a5568;" />
+
+                <!-- Réponse 1 -->
+                <HBox spacing="8" alignment="CENTER_LEFT"
+                      style="-fx-background-color: #f8faff; -fx-padding: 7 10;
+                             -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;">
+                    <CheckBox fx:id="checkR1" />
+                    <TextField fx:id="tfR1" promptText="Réponse 1" HBox.hgrow="ALWAYS"
+                               style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-font-size: 13;" />
+                </HBox>
+
+                <!-- Réponse 2 -->
+                <HBox spacing="8" alignment="CENTER_LEFT"
+                      style="-fx-background-color: #f8faff; -fx-padding: 7 10;
+                             -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;">
+                    <CheckBox fx:id="checkR2" />
+                    <TextField fx:id="tfR2" promptText="Réponse 2" HBox.hgrow="ALWAYS"
+                               style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-font-size: 13;" />
+                </HBox>
+
+                <!-- Réponse 3 -->
+                <HBox spacing="8" alignment="CENTER_LEFT"
+                      style="-fx-background-color: #f8faff; -fx-padding: 7 10;
+                             -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;">
+                    <CheckBox fx:id="checkR3" />
+                    <TextField fx:id="tfR3" promptText="Réponse 3" HBox.hgrow="ALWAYS"
+                               style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-font-size: 13;" />
+                </HBox>
+
+                <!-- Réponse 4 -->
+                <HBox spacing="8" alignment="CENTER_LEFT"
+                      style="-fx-background-color: #f8faff; -fx-padding: 7 10;
+                             -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;">
+                    <CheckBox fx:id="checkR4" />
+                    <TextField fx:id="tfR4" promptText="Réponse 4" HBox.hgrow="ALWAYS"
+                               style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-font-size: 13;" />
+                </HBox>
+            </VBox>
+
+            <Region VBox.vgrow="ALWAYS" />
+
+            <!-- Bouton Enregistrer -->
+            <Button text="💾  Enregistrer la question" onAction="#handleSaveQuestion"
+                    maxWidth="Infinity"
+                    style="-fx-background-color: linear-gradient(to right, #0f1c3f, #1a3a6e);
+                           -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14;
+                           -fx-padding: 12 0; -fx-background-radius: 10; -fx-cursor: hand;
+                           -fx-effect: dropshadow(gaussian, rgba(15,28,63,0.30), 10, 0, 0, 3);" />
+        </VBox>
+
+    </HBox>
+</VBox>
