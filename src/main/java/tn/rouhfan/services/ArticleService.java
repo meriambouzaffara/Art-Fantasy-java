@@ -43,57 +43,26 @@ public class ArticleService implements IService<Article> {
                     rs.getString("image"),
                     m
             );
-            a.setReference(rs.getString("reference"));
             articles.add(a);
         }
         return articles;
     }
-    //  Ajouter (ou incrémenter le stock si même référence)
+    //  Ajouter
     @Override
     public void ajouter(Article a) throws SQLException {
-
-        // ── Si une référence est renseignée, vérifier si elle existe déjà ──
-        if (a.getReference() != null && !a.getReference().isBlank()) {
-            String checkSql = "SELECT id_article FROM article WHERE reference = ?";
-            try (PreparedStatement check = cnx.prepareStatement(checkSql)) {
-                check.setString(1, a.getReference().trim());
-                try (ResultSet rs = check.executeQuery()) {
-                    if (rs.next()) {
-                        // Référence déjà présente → on ajoute le stock saisi au stock existant
-                        long existingId = rs.getLong("id_article");
-                        int stockAAjouter = a.getStock() != null ? a.getStock() : 1;
-                        String updateSql = "UPDATE article SET stock = stock + ? WHERE id_article = ?";
-                        try (PreparedStatement upd = cnx.prepareStatement(updateSql)) {
-                            upd.setInt(1, stockAAjouter);
-                            upd.setLong(2, existingId);
-                            upd.executeUpdate();
-                        }
-                        System.out.println("📦 Stock mis à jour (+" + stockAAjouter + ") pour la référence : " + a.getReference());
-                        return; // on arrête ici, pas d'INSERT
-                    }
-                }
-            }
-        }
-
-        // ── Aucune référence existante → INSERT normal ──
-        String sql = "INSERT INTO article (titre, reference, prix, stock, description, created_at, image, magasin_id) " +
-                "VALUES (?, ?, ?, ?, ?, NOW(), ?, ?)";
+        String sql = "INSERT INTO article (titre, prix, stock, description, created_at, image, magasin_id) " +
+                "VALUES (?, ?, ?, ?, NOW(), ?, ?)";
 
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, a.getTitre());
-        if (a.getReference() != null && !a.getReference().isBlank()) {
-            ps.setString(2, a.getReference().trim());
-        } else {
-            ps.setNull(2, java.sql.Types.VARCHAR);
-        }
-        ps.setDouble(3, a.getPrix());
-        ps.setInt(4, a.getStock());
-        ps.setString(5, a.getDescription());
-        ps.setString(6, a.getImage());
-        ps.setLong(7, a.getMagasin().getId());
+        ps.setDouble(2, a.getPrix());
+        ps.setInt(3, a.getStock());
+        ps.setString(4, a.getDescription());
+        ps.setString(5, a.getImage());
+        ps.setLong(6, a.getMagasin().getId());
 
         ps.executeUpdate();
-        System.out.println("✅ Article ajouté");
+        System.out.println(" Article ajouté");
     }
 
     //  Supprimer
@@ -110,21 +79,16 @@ public class ArticleService implements IService<Article> {
     //  Modifier
     @Override
     public void modifier(Article a) throws SQLException {
-        String sql = "UPDATE article SET titre=?, reference=?, prix=?, stock=?, description=?, image=?, magasin_id=? WHERE id_article=?";
+        String sql = "UPDATE article SET titre=?, prix=?, stock=?, description=?, image=?, magasin_id=? WHERE id_article=?";
 
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, a.getTitre());
-        if (a.getReference() != null && !a.getReference().isBlank()) {
-            ps.setString(2, a.getReference().trim());
-        } else {
-            ps.setNull(2, java.sql.Types.VARCHAR);
-        }
-        ps.setDouble(3, a.getPrix());
-        ps.setInt(4, a.getStock());
-        ps.setString(5, a.getDescription());
-        ps.setString(6, a.getImage());
-        ps.setLong(7, a.getMagasin().getId());
-        ps.setLong(8, a.getIdArticle());
+        ps.setDouble(2, a.getPrix());
+        ps.setInt(3, a.getStock());
+        ps.setString(4, a.getDescription());
+        ps.setString(5, a.getImage());
+        ps.setLong(6, a.getMagasin().getId());
+        ps.setLong(7, a.getIdArticle());
 
         ps.executeUpdate();
         System.out.println("Article modifié");
@@ -157,7 +121,7 @@ public class ArticleService implements IService<Article> {
                     rs.getString("image"),
                     m
             );
-            a.setReference(rs.getString("reference"));
+
             articles.add(a);
         }
 
@@ -177,7 +141,7 @@ public class ArticleService implements IService<Article> {
             Magasin m = new Magasin();
             m.setId(rs.getLong("magasin_id"));
 
-            Article a = new Article(
+            return new Article(
                     rs.getLong("id_article"),
                     rs.getString("titre"),
                     rs.getDouble("prix"),
@@ -187,8 +151,6 @@ public class ArticleService implements IService<Article> {
                     rs.getString("image"),
                     m
             );
-            a.setReference(rs.getString("reference"));
-            return a;
         }
 
         return null;

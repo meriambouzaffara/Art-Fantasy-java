@@ -26,10 +26,6 @@
             <Label fx:id="cartCountLabel" text="0 article" styleClass="text-subtitle" />
         </VBox>
         <Region HBox.hgrow="ALWAYS" />
-        <Button text="&#x1F4CB; Mes Achats" onAction="#goToHistorique"
-                style="-fx-background-color: #6c2a90; -fx-text-fill: white;
-                       -fx-font-weight: bold; -fx-background-radius: 20;
-                       -fx-padding: 8 18; -fx-cursor: hand;" />
         <Button text="Vider le panier" onAction="#clearCart" styleClass="btn-secondary" />
     </HBox>
 

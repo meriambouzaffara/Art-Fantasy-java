@@ -2,24 +2,14 @@ package tn.rouhfan.tools;
 
 import tn.rouhfan.entities.User;
 
-import java.net.InetAddress;
-import java.util.Date;
-
 /**
  * Singleton qui stocke l'utilisateur connecté pendant toute la session.
  * Permet d'accéder au user courant depuis n'importe quel contrôleur.
- *
- * Améliorations :
- * - Tracking de la date de connexion
- * - Tracking de l'adresse IP locale
- * - Compteur de tentatives échouées
  */
 public class SessionManager {
 
     private static SessionManager instance;
     private User currentUser;
-    private Date loginTime;
-    private String loginIP;
 
     private SessionManager() {}
 
@@ -35,21 +25,13 @@ public class SessionManager {
      */
     public void login(User user) {
         this.currentUser = user;
-        this.loginTime = new Date();
-        this.loginIP = getLocalIP();
-        AppLogger.auth("SESSION_START", user.getEmail() + " | IP: " + loginIP);
     }
 
     /**
      * Déconnecte l'utilisateur (vide la session).
      */
     public void logout() {
-        if (currentUser != null) {
-            AppLogger.auth("SESSION_END", currentUser.getEmail());
-        }
         this.currentUser = null;
-        this.loginTime = null;
-        this.loginIP = null;
     }
 
     /**
@@ -116,51 +98,13 @@ public class SessionManager {
      */
     public boolean checkAccess(String requiredRole) {
         if (!isLoggedIn()) {
-            AppLogger.security("Accès refusé: aucun utilisateur connecté");
+            System.err.println("[SECURITY] Accès refusé: aucun utilisateur connecté");
             return false;
         }
         if (!hasRole(requiredRole)) {
-            AppLogger.security("Accès refusé: rôle requis=" + requiredRole + ", rôle actuel=" + getRole()
-                    + " | User: " + currentUser.getEmail());
+            System.err.println("[SECURITY] Accès refusé: rôle requis=" + requiredRole + ", rôle actuel=" + getRole());
             return false;
         }
         return true;
-    }
-
-    // ═══════════════════════════════════════
-    //  Nouvelles méthodes
-    // ═══════════════════════════════════════
-
-    /**
-     * Retourne la date et heure de connexion de la session actuelle.
-     */
-    public Date getLoginTime() {
-        return loginTime;
-    }
-
-    /**
-     * Retourne l'adresse IP de la session actuelle.
-     */
-    public String getLoginIP() {
-        return loginIP;
-    }
-
-    /**
-     * Retourne la durée de la session en minutes.
-     */
-    public long getSessionDurationMinutes() {
-        if (loginTime == null) return 0;
-        return (System.currentTimeMillis() - loginTime.getTime()) / (60 * 1000);
-    }
-
-    /**
-     * Récupère l'adresse IP locale.
-     */
-    private String getLocalIP() {
-        try {
-            return InetAddress.getLocalHost().getHostAddress();
-        } catch (Exception e) {
-            return "127.0.0.1";
-        }
     }
 }

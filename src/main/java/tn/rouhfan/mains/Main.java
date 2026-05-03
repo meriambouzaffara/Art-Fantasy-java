@@ -161,42 +161,28 @@ public class Main {
                 System.out.println(user);
             }
 
-            System.out.println("\n Liste des réclamations :");
-            List<Reclamation> recs = rs.recuperer();
-            for (Reclamation rec : recs) {
-                System.out.println(rec);
-            }
-
-            System.out.println("\n Liste des réponses aux réclamations :");
-            List<ReponseReclamation> reps = rrs.recuperer();
-            for (ReponseReclamation rep : reps) {
-                System.out.println(rep);
-            }
-
-
             // =========================
             // RECLAMATION
             // =========================
             Reclamation r = new Reclamation(
                     "Problème livraison",
-                    "Ma commande n'est pas arrivée",
+                    "Commande non reçue",
                     "en_cours",
                     new Date(),
-                    dbUser.getId(),   // 🔥 auteur_id
-                    "Livraison"       // 🔥 categorie
+                    dbUser.getId(),
+                    "Livraison"
             );
             rs.ajouter(r);
-            System.out.println("✅ Réclamation ajoutée : " + r);
+
             // =========================
-            // REPONSE RECLAMATION
+            // REPONSE
             // =========================
             ReponseReclamation rr = new ReponseReclamation(
-                    "Votre problème sera résolu sous 48h",
+                    "Réponse sous 48h",
                     new Date(),
                     r.getId()
             );
             rrs.ajouter(rr);
-            System.out.println("✅ Réponse ajoutée : " + rr);
 
         } catch (SQLException e) {
             System.out.println("Erreur SQL : " + e.getMessage());

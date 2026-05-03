@@ -21,29 +21,29 @@
 
     <!-- Statistiques -->
     <HBox spacing="14.0" alignment="CENTER_LEFT">
-        <VBox spacing="2" alignment="CENTER" prefWidth="160" styleClass="stat-card"
-              style="-fx-border-color: #241197;">
-            <Label fx:id="statTotal" text="0" style="-fx-font-size: 30; -fx-font-weight: 800; -fx-text-fill: #241197;" />
+        <VBox spacing="2" alignment="CENTER" prefWidth="160"
+              style="-fx-background-color: #ffffff; -fx-background-radius: 16; -fx-padding: 18 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.04), 8, 0, 0, 3);">
+            <Label fx:id="statTotal" text="0" style="-fx-font-size: 28; -fx-font-weight: 800; -fx-text-fill: #241197;" />
             <Label text="Total" style="-fx-font-size: 12; -fx-text-fill: #5a4a72; -fx-font-weight: 600;" />
         </VBox>
-        <VBox spacing="2" alignment="CENTER" prefWidth="160" styleClass="stat-card"
-              style="-fx-border-color: #d63031;">
-            <Label fx:id="statAdmins" text="0" style="-fx-font-size: 30; -fx-font-weight: 800; -fx-text-fill: #d63031;" />
+        <VBox spacing="2" alignment="CENTER" prefWidth="160"
+              style="-fx-background-color: #ffffff; -fx-background-radius: 16; -fx-padding: 18 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.04), 8, 0, 0, 3);">
+            <Label fx:id="statAdmins" text="0" style="-fx-font-size: 28; -fx-font-weight: 800; -fx-text-fill: #d63031;" />
             <Label text="👑 Admins" style="-fx-font-size: 12; -fx-text-fill: #5a4a72; -fx-font-weight: 600;" />
         </VBox>
-        <VBox spacing="2" alignment="CENTER" prefWidth="160" styleClass="stat-card"
-              style="-fx-border-color: #6c5ce7;">
-            <Label fx:id="statArtistes" text="0" style="-fx-font-size: 30; -fx-font-weight: 800; -fx-text-fill: #6c5ce7;" />
+        <VBox spacing="2" alignment="CENTER" prefWidth="160"
+              style="-fx-background-color: #ffffff; -fx-background-radius: 16; -fx-padding: 18 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.04), 8, 0, 0, 3);">
+            <Label fx:id="statArtistes" text="0" style="-fx-font-size: 28; -fx-font-weight: 800; -fx-text-fill: #6c5ce7;" />
             <Label text="🎨 Artistes" style="-fx-font-size: 12; -fx-text-fill: #5a4a72; -fx-font-weight: 600;" />
         </VBox>
-        <VBox spacing="2" alignment="CENTER" prefWidth="160" styleClass="stat-card"
-              style="-fx-border-color: #00b894;">
-            <Label fx:id="statParticipants" text="0" style="-fx-font-size: 30; -fx-font-weight: 800; -fx-text-fill: #00b894;" />
+        <VBox spacing="2" alignment="CENTER" prefWidth="160"
+              style="-fx-background-color: #ffffff; -fx-background-radius: 16; -fx-padding: 18 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.04), 8, 0, 0, 3);">
+            <Label fx:id="statParticipants" text="0" style="-fx-font-size: 28; -fx-font-weight: 800; -fx-text-fill: #00b894;" />
             <Label text="🎭 Participants" style="-fx-font-size: 12; -fx-text-fill: #5a4a72; -fx-font-weight: 600;" />
         </VBox>
-        <VBox spacing="2" alignment="CENTER" prefWidth="160" styleClass="stat-card"
-              style="-fx-border-color: #0984e3;">
-            <Label fx:id="statActifs" text="0" style="-fx-font-size: 30; -fx-font-weight: 800; -fx-text-fill: #0984e3;" />
+        <VBox spacing="2" alignment="CENTER" prefWidth="160"
+              style="-fx-background-color: #ffffff; -fx-background-radius: 16; -fx-padding: 18 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.04), 8, 0, 0, 3);">
+            <Label fx:id="statActifs" text="0" style="-fx-font-size: 28; -fx-font-weight: 800; -fx-text-fill: #0984e3;" />
             <Label text="✅ Actifs" style="-fx-font-size: 12; -fx-text-fill: #5a4a72; -fx-font-weight: 600;" />
         </VBox>
     </HBox>
@@ -55,7 +55,7 @@
         <ComboBox fx:id="filterStatutCombo" promptText="Filtrer par statut" prefWidth="160" />
         <Button text="🔄 Rafraîchir" onAction="#refresh" styleClass="btn-secondary" />
         <Region HBox.hgrow="ALWAYS" />
-        <Button text="📤 Exporter CSV" onAction="#exportCSV" styleClass="btn-secondary" />
+        <!--        <Button text="📤 Exporter CSV" onAction="#exportCSV" styleClass="btn-secondary" />-->
         <Button text="➕ Ajouter" onAction="#addUser" styleClass="btn-primary" />
         <Button text="✏️ Modifier" onAction="#editUser" styleClass="btn-secondary" />
         <Button text="🗑️ Supprimer" onAction="#deleteUser" style="-fx-background-color: #fee2e2; -fx-text-fill: #d63031; -fx-font-weight: 600; -fx-background-radius: 12; -fx-padding: 10 20; -fx-cursor: hand;" />

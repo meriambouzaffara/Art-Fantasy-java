@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.VBox?>
 
-<VBox spacing="20" alignment="TOP_LEFT" prefWidth="600" prefHeight="500"
-      style="-fx-background-color: white; -fx-padding: 30;"
-      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+<VBox spacing="10" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="tn.rouhfan.ui.back.ReponseListController">
 
-    <Label text="Gestion des réponses" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #241197;" />
+    <TableView fx:id="table">
+        <columns>
+            <TableColumn fx:id="colId" text="ID"/>
+            <TableColumn fx:id="colMessage" text="Message"/>
+            <TableColumn fx:id="colDate" text="Date"/>
+        </columns>
+    </TableView>
 
-    <ListView fx:id="listReponses" VBox.vgrow="ALWAYS"
-              style="-fx-background-color: transparent; -fx-control-inner-background: white; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-background-radius: 5;"/>
-
-    <HBox spacing="10.0" alignment="CENTER_RIGHT">
-        <Button text="Modifier" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20; -fx-background-radius: 5; -fx-cursor: hand;" onAction="#modifier"/>
-        <Button text="Supprimer" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20; -fx-background-radius: 5; -fx-cursor: hand;" onAction="#supprimer"/>
-    </HBox>
+    <Button text="✏️ Modifier" styleClass="btn-primary"  onAction="#modifier"/>
+    <Button text="🗑️  Supprimer" styleClass="btn-primary"  onAction="#supprimer"/>
 
 </VBox>

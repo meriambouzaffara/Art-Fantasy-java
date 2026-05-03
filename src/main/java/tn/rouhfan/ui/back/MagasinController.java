@@ -17,7 +17,6 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
 import tn.rouhfan.entities.Magasin;
-import javafx.scene.control.Tooltip;
 import tn.rouhfan.services.ArticleService;
 import tn.rouhfan.services.MagasinService;
 import tn.rouhfan.tools.OpenStreetMapHelper;
@@ -159,20 +158,6 @@ public class MagasinController implements Initializable {
                         "-fx-background-radius: 10; -fx-padding: 9 0; -fx-cursor: hand;"));
         voirBtn.setOnAction(e -> navigateToArticles(m));
 
-        // ── Bouton Itinéraire ─────────────────────────────────────
-        boolean hasCoords = OpenStreetMapHelper.hasCoordinates(m);
-        Button itinBtn = new Button("🗺️ Itinéraire");
-        itinBtn.setMaxWidth(Double.MAX_VALUE);
-        itinBtn.setDisable(!hasCoords);
-        itinBtn.setStyle("-fx-background-color: " + (hasCoords ? "#00b894" : "#e0ddf0")
-                + "; -fx-text-fill: white; -fx-font-weight: bold;"
-                + "-fx-background-radius: 10; -fx-padding: 9 0; -fx-cursor: hand; -fx-font-size: 12;");
-        if (!hasCoords) {
-            itinBtn.setTooltip(new Tooltip("Position GPS non configurée pour ce magasin"));
-        }
-        itinBtn.setOnAction(e -> showBackItineraire(m));
-        // ─────────────────────────────────────────────────────────
-
         HBox editDelete = new HBox(8);
         editDelete.setAlignment(Pos.CENTER);
         Button editBtn = new Button("✏️ Modifier");
@@ -187,7 +172,7 @@ public class MagasinController implements Initializable {
                         "-fx-border-color: #d63031; -fx-border-radius: 8;");
         deleteBtn.setOnAction(e -> deleteMagasin(m));
         editDelete.getChildren().addAll(editBtn, deleteBtn);
-        actions.getChildren().addAll(voirBtn, itinBtn, editDelete);
+        actions.getChildren().addAll(voirBtn, editDelete);
 
         card.getChildren().addAll(banner, content, actions);
         card.setOnMouseEntered(e -> card.setStyle(
@@ -197,36 +182,6 @@ public class MagasinController implements Initializable {
                 "-fx-background-color: white; -fx-background-radius: 16;" +
                         "-fx-effect: dropshadow(three-pass-box, rgba(36,17,151,0.10), 14, 0, 0, 4);"));
         return card;
-    }
-
-    // ── Itinéraire ────────────────────────────────────────────────
-
-    private void showBackItineraire(Magasin m) {
-        Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle("🗺️ Itinéraire — " + m.getNom());
-        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
-        dialog.getDialogPane().setPrefSize(740, 540);
-
-        WebView routeMap = new WebView();
-        routeMap.setContextMenuEnabled(false);
-        routeMap.setPrefSize(720, 480);
-        routeMap.getEngine().loadContent(
-                OpenStreetMapHelper.buildRouteMap(m.getLatitude(), m.getLongitude(), m.getNom()));
-
-        VBox content = new VBox(8);
-        Label hint = new Label(
-                "📍 Position : " + (m.getAdresse() != null ? m.getAdresse() : "")
-                + String.format("  (lat %.5f, lon %.5f)", m.getLatitude(), m.getLongitude()));
-        hint.setStyle("-fx-font-size: 12; -fx-text-fill: #5a4a72;");
-        Label hint2 = new Label("Entrez votre adresse de départ dans la barre en haut de la carte.");
-        hint2.setStyle("-fx-font-size: 11; -fx-text-fill: #6c2a90;");
-        content.getChildren().addAll(hint, hint2, routeMap);
-        dialog.getDialogPane().setContent(content);
-
-        dialog.setOnShown(ev -> Platform.runLater(() ->
-                routeMap.getEngine().executeScript(
-                        "if(window.map){map.invalidateSize();setTimeout(function(){map.invalidateSize();},200);}")));
-        dialog.showAndWait();
     }
 
     // ── Navigation directe vers ArticleView ───────────────────────
@@ -283,13 +238,7 @@ public class MagasinController implements Initializable {
         if (nom.isEmpty()||adresse.isEmpty()||tel.isEmpty()||email.isEmpty()) {
             showFormError("Nom, Adresse, Téléphone et Email sont obligatoires."); return; }
         if (!email.contains("@"))  { showFormError("Email invalide."); return; }
-        if (!tel.matches("\\d{8}")) {
-            showFormError("Téléphone invalide : exactement 8 chiffres requis."); return;
-        }
-        char firstDigit = tel.charAt(0);
-        if (firstDigit != '2' && firstDigit != '5' && firstDigit != '9') {
-            showFormError("Téléphone invalide : doit commencer par 2 (Ooredoo), 5 (Orange) ou 9 (Telecom)."); return;
-        }
+        if (tel.length() < 8)      { showFormError("Téléphone : 8 chiffres minimum."); return; }
         Double lat=null, lon=null;
         try {
             if (!latTxt.isEmpty() || !lonTxt.isEmpty()) {

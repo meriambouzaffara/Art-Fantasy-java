@@ -26,18 +26,13 @@
             <Button text="➕ Ajouter" onAction="#addCours"
                     style="-fx-background-color: #0f1c3f; -fx-text-fill: white;" />
             <Button text="✏️ Modifier" onAction="#editCours" />
-            <Button text="⭐ Voir les notes" onAction="#handleVoirNotes"
-                    style="-fx-background-color: #f6d365; -fx-text-fill: #0f1c3f; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 6; -fx-padding: 6 12;" />
-            <Button text="⚡ Gérer le QCM (IA)" onAction="#handleGererQcm"
-                    style="-fx-background-color: linear-gradient(to right, #4f46e5, #7c3aed);
-                           -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;
-                           -fx-background-radius: 6; -fx-padding: 6 12;" />
             <Button text="🗑️ Supprimer" onAction="#deleteCours"
                     style="-fx-background-color: #d94a3d; -fx-text-fill: white;" />
         </HBox>
 
         <TableView fx:id="coursTable" VBox.vgrow="ALWAYS">
             <columns>
+                <TableColumn fx:id="colId"      text="ID"      prefWidth="50"/>
                 <TableColumn fx:id="colNom"     text="Nom"     prefWidth="150"/>
                 <TableColumn fx:id="colNiveau"  text="Niveau"  prefWidth="90"/>
                 <TableColumn fx:id="colDuree"   text="Durée"   prefWidth="70"/>

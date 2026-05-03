@@ -8,15 +8,6 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import tn.rouhfan.entities.User;
 import tn.rouhfan.services.UserService;
-import javafx.stage.FileChooser;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import tn.rouhfan.tools.AppLogger;
 import tn.rouhfan.tools.PasswordUtils;
 import tn.rouhfan.tools.SessionManager;
 
@@ -39,12 +30,8 @@ public class ProfileController implements Initializable {
     // Informations en lecture seule
     @FXML private Label roleLabel;
     @FXML private Label statutLabel;
+    @FXML private Label typeLabel;
     @FXML private Label dateCreationLabel;
-    
-    // Nouveaux éléments UI
-    @FXML private Label userNameTitle;
-    @FXML private Label verifiedBadge;
-    @FXML private ImageView profileImageView;
 
     // Changement de mot de passe
     @FXML private PasswordField currentPasswordField;
@@ -94,13 +81,7 @@ public class ProfileController implements Initializable {
         }
         roleLabel.setText(roleDisplay);
         statutLabel.setText(currentUser.getStatut() != null ? currentUser.getStatut() : "—");
-        
-        // Titre et Badge de vérification
-        userNameTitle.setText(currentUser.getPrenom() + " " + currentUser.getNom());
-        verifiedBadge.setVisible(currentUser.isVerified());
-
-        // Chargement de la photo
-        loadProfileImage();
+        typeLabel.setText(currentUser.getType() != null ? currentUser.getType() : "—");
 
         if (currentUser.getCreatedAt() != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy à HH:mm");
@@ -110,9 +91,6 @@ public class ProfileController implements Initializable {
         }
 
         clearMessages();
-
-        // Initialiser le statut de la reconnaissance faciale
-        initFaceStatus();
     }
 
     /**
@@ -240,218 +218,5 @@ public class ProfileController implements Initializable {
     private void handleViewHistorique(ActionEvent event) {
         HistoriqueParticipationsDialog dialog = new HistoriqueParticipationsDialog(currentUser.getId());
         dialog.show();
-    }
-
-    /**
-     * Gère l'upload de la photo de profil.
-     */
-    @FXML
-    private void handleUploadPhoto(ActionEvent event) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Choisir une photo de profil");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg")
-        );
-
-        File selectedFile = fileChooser.showOpenDialog(nomField.getScene().getWindow());
-        if (selectedFile != null) {
-            try {
-                // Créer le dossier uploads s'il n'existe pas
-                File uploadDir = new File("uploads/profiles");
-                if (!uploadDir.exists()) uploadDir.mkdirs();
-
-                // Nouveau nom de fichier unique
-                String fileName = "profile_" + currentUser.getId() + "_" + System.currentTimeMillis() + 
-                                 selectedFile.getName().substring(selectedFile.getName().lastIndexOf("."));
-                File destFile = new File(uploadDir, fileName);
-
-                // Copier le fichier
-                Files.copy(selectedFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-                // Mettre à jour l'utilisateur
-                currentUser.setPhotoProfile(destFile.getPath());
-                userService.modifierProfil(currentUser);
-                
-                // Rafraîchir l'UI
-                loadProfileImage();
-                showProfileSuccess("✅ Photo mise à jour !");
-                
-            } catch (Exception e) {
-                AppLogger.error("Erreur upload photo: " + e.getMessage());
-                showProfileError("Erreur lors de l'upload de la photo.");
-            }
-        }
-    }
-
-    private void loadProfileImage() {
-        if (currentUser.getPhotoProfile() != null && !currentUser.getPhotoProfile().isEmpty()) {
-            File imgFile = new File(currentUser.getPhotoProfile());
-            if (imgFile.exists()) {
-                try {
-                    profileImageView.setImage(new Image(new FileInputStream(imgFile)));
-                    return;
-                } catch (FileNotFoundException ignored) {}
-            }
-        }
-        // Image par défaut si aucune photo ou erreur
-        profileImageView.setImage(new Image(getClass().getResourceAsStream("/ui/placeholder-user.png")));
-    }
-
-    // ═══════════════════════════════════════
-    //  RECONNAISSANCE FACIALE
-    // ═══════════════════════════════════════
-
-    @FXML private Label faceStatusLabel;
-    @FXML private javafx.scene.layout.VBox faceCameraBox;
-    @FXML private ImageView facePreview;
-    @FXML private Label faceDetectionLabel;
-    @FXML private javafx.scene.control.Button enrollFaceBtn;
-    @FXML private javafx.scene.control.Button disableFaceBtn;
-    @FXML private javafx.scene.control.Button captureFaceBtn;
-    @FXML private javafx.scene.control.Button cancelFaceBtn;
-
-    private tn.rouhfan.services.FaceRecognitionService faceRecognitionService;
-    private tn.rouhfan.services.FaceCameraService faceCameraService;
-
-    /**
-     * Initialise l'affichage du statut face login.
-     * Appelé depuis loadProfileData().
-     */
-    private void initFaceStatus() {
-        if (faceStatusLabel == null) return; // FXML pas encore chargé
-
-        if (currentUser.isFaceEnabled()) {
-            faceStatusLabel.setText("✅ Reconnaissance faciale activée — Vous pouvez vous connecter avec votre visage.");
-            faceStatusLabel.setStyle("-fx-text-fill: #00b894; -fx-font-weight: 600;");
-            enrollFaceBtn.setVisible(false);
-            enrollFaceBtn.setManaged(false);
-            disableFaceBtn.setVisible(true);
-            disableFaceBtn.setManaged(true);
-        } else {
-            faceStatusLabel.setText("⚠️ Reconnaissance faciale désactivée — Enregistrez votre visage pour activer le login facial.");
-            faceStatusLabel.setStyle("-fx-text-fill: #5a4a72;");
-            enrollFaceBtn.setVisible(true);
-            enrollFaceBtn.setManaged(true);
-            disableFaceBtn.setVisible(false);
-            disableFaceBtn.setManaged(false);
-        }
-    }
-
-    @FXML
-    private void handleEnrollFace(ActionEvent event) {
-        // Initialiser OpenCV
-        faceRecognitionService = new tn.rouhfan.services.FaceRecognitionService();
-        if (!faceRecognitionService.initialize()) {
-            faceStatusLabel.setText("❌ Erreur: Impossible d'initialiser OpenCV. Vérifiez l'installation.");
-            faceStatusLabel.setStyle("-fx-text-fill: #d63031;");
-            return;
-        }
-
-        faceCameraService = new tn.rouhfan.services.FaceCameraService(faceRecognitionService);
-
-        // Afficher la zone caméra
-        faceCameraBox.setVisible(true);
-        faceCameraBox.setManaged(true);
-        enrollFaceBtn.setVisible(false);
-        enrollFaceBtn.setManaged(false);
-        captureFaceBtn.setVisible(true);
-        captureFaceBtn.setManaged(true);
-        captureFaceBtn.setDisable(true);
-        cancelFaceBtn.setVisible(true);
-        cancelFaceBtn.setManaged(true);
-
-        faceStatusLabel.setText("📷 Positionnez votre visage devant la caméra...");
-        faceStatusLabel.setStyle("-fx-text-fill: #241197; -fx-font-weight: 600;");
-
-        // Démarrer la caméra
-        boolean started = faceCameraService.startCamera(facePreview, faceCount -> {
-            if (faceCount == 1) {
-                faceDetectionLabel.setText("✅ Visage détecté");
-                faceDetectionLabel.setStyle("-fx-text-fill: #00b894; -fx-font-weight: bold;");
-                captureFaceBtn.setDisable(false);
-            } else if (faceCount == 0) {
-                faceDetectionLabel.setText("🔍 Aucun visage détecté");
-                faceDetectionLabel.setStyle("-fx-text-fill: #e17055; -fx-font-weight: bold;");
-                captureFaceBtn.setDisable(true);
-            } else {
-                faceDetectionLabel.setText("⚠️ " + faceCount + " visages — 1 seul requis");
-                faceDetectionLabel.setStyle("-fx-text-fill: #e17055; -fx-font-weight: bold;");
-                captureFaceBtn.setDisable(true);
-            }
-        });
-
-        if (!started) {
-            faceStatusLabel.setText("❌ Impossible d'ouvrir la caméra");
-            faceStatusLabel.setStyle("-fx-text-fill: #d63031;");
-            handleCancelFace(null);
-        }
-    }
-
-    @FXML
-    private void handleCaptureFace(ActionEvent event) {
-        if (faceCameraService == null) return;
-
-        faceStatusLabel.setText("🔄 Extraction de l'embedding facial...");
-        captureFaceBtn.setDisable(true);
-
-        new Thread(() -> {
-            double[] embedding = faceCameraService.captureAndExtract();
-
-            javafx.application.Platform.runLater(() -> {
-                if (embedding != null) {
-                    boolean success = faceRecognitionService.enrollFace(currentUser, embedding);
-                    if (success) {
-                        faceStatusLabel.setText("✅ Visage enregistré avec succès ! Le login facial est maintenant activé.");
-                        faceStatusLabel.setStyle("-fx-text-fill: #00b894; -fx-font-weight: 600;");
-                        // Mettre à jour la session
-                        SessionManager.getInstance().getCurrentUser().setFaceEnabled(true);
-                        SessionManager.getInstance().getCurrentUser().setFaceEmbedding(currentUser.getFaceEmbedding());
-                    } else {
-                        faceStatusLabel.setText("❌ Erreur lors de l'enregistrement du visage.");
-                        faceStatusLabel.setStyle("-fx-text-fill: #d63031;");
-                    }
-                } else {
-                    faceStatusLabel.setText("❌ Impossible d'extraire l'embedding. Vérifiez que le modèle DNN est présent.");
-                    faceStatusLabel.setStyle("-fx-text-fill: #d63031;");
-                }
-
-                // Arrêter la caméra et nettoyer l'UI
-                handleCancelFace(null);
-                initFaceStatus();
-            });
-        }).start();
-    }
-
-    @FXML
-    private void handleDisableFace(ActionEvent event) {
-        faceRecognitionService = new tn.rouhfan.services.FaceRecognitionService();
-        faceRecognitionService.initialize();
-
-        boolean success = faceRecognitionService.disableFace(currentUser);
-        if (success) {
-            SessionManager.getInstance().getCurrentUser().setFaceEnabled(false);
-            SessionManager.getInstance().getCurrentUser().setFaceEmbedding(null);
-            faceStatusLabel.setText("🚫 Reconnaissance faciale désactivée.");
-            faceStatusLabel.setStyle("-fx-text-fill: #5a4a72;");
-        }
-        initFaceStatus();
-    }
-
-    @FXML
-    private void handleCancelFace(ActionEvent event) {
-        if (faceCameraService != null) {
-            faceCameraService.stopCamera();
-        }
-
-        faceCameraBox.setVisible(false);
-        faceCameraBox.setManaged(false);
-        captureFaceBtn.setVisible(false);
-        captureFaceBtn.setManaged(false);
-        cancelFaceBtn.setVisible(false);
-        cancelFaceBtn.setManaged(false);
-        facePreview.setImage(null);
-        faceDetectionLabel.setText("");
-
-        initFaceStatus();
     }
 }

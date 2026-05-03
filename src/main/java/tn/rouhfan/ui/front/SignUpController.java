@@ -6,36 +6,42 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import tn.rouhfan.entities.User;
-import tn.rouhfan.services.EmailVerificationService;
 import tn.rouhfan.services.UserService;
-import tn.rouhfan.tools.AppLogger;
 import tn.rouhfan.tools.PasswordUtils;
 
-/**
- * Contrôleur d'inscription enrichi :
- * - Validation forte du mot de passe
- * - Envoi email de vérification
- * - Le compte est créé avec isVerified=false
- */
 public class SignUpController {
 
-    @FXML private TextField nomField;
-    @FXML private TextField prenomField;
-    @FXML private TextField emailField;
-    @FXML private PasswordField passwordField;
-    @FXML private PasswordField confirmPasswordField;
-    @FXML private ComboBox<String> typeCombo;
-    @FXML private Label errorLabel;
+    @FXML
+    private TextField nomField;
+
+    @FXML
+    private TextField prenomField;
+
+    @FXML
+    private TextField emailField;
+
+    @FXML
+    private PasswordField passwordField;
+
+    @FXML
+    private PasswordField confirmPasswordField;
+
+    @FXML
+    private ComboBox<String> typeCombo;
+
+    @FXML
+    private Label errorLabel;
 
     private final UserService userService = new UserService();
-    private final EmailVerificationService verificationService = new EmailVerificationService();
 
     @FXML
     public void initialize() {
         errorLabel.setText("");
+        // Options de rôle à l'inscription (Admin n'est pas disponible à l'inscription)
         typeCombo.setItems(FXCollections.observableArrayList("Artiste", "Participant"));
         typeCombo.getSelectionModel().selectFirst();
     }
@@ -49,39 +55,22 @@ public class SignUpController {
         String confirmPassword = confirmPasswordField.getText();
         String type = typeCombo.getValue();
 
-        // Validation nom/prénom
+        // Validation
         if (nom.isEmpty() || prenom.isEmpty() || email.isEmpty() || password.isEmpty()) {
             errorLabel.setText("Veuillez remplir tous les champs.");
             return;
         }
-        if (nom.length() < 2 || !nom.matches("^[a-zA-ZÀ-ÿ\\s'-]+$")) {
-            errorLabel.setText("Nom invalide (min 2 lettres).");
-            return;
-        }
-        if (prenom.length() < 2 || !prenom.matches("^[a-zA-ZÀ-ÿ\\s'-]+$")) {
-            errorLabel.setText("Prénom invalide (min 2 lettres).");
-            return;
-        }
 
-        // Validation email
         if (!email.matches("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")) {
-            errorLabel.setText("Adresse e-mail invalide.");
+            errorLabel.setText("Veuillez entrer une adresse e-mail valide.");
             return;
         }
 
-        // Validation password forte
         if (password.length() < 6) {
             errorLabel.setText("Le mot de passe doit contenir au moins 6 caractères.");
             return;
         }
-        if (!password.matches(".*[a-zA-Z].*")) {
-            errorLabel.setText("Le mot de passe doit contenir au moins une lettre.");
-            return;
-        }
-        if (!password.matches(".*\\d.*")) {
-            errorLabel.setText("Le mot de passe doit contenir au moins un chiffre.");
-            return;
-        }
+
         if (!password.equals(confirmPassword)) {
             errorLabel.setText("Les mots de passe ne correspondent pas.");
             return;
@@ -93,12 +82,14 @@ public class SignUpController {
         }
 
         try {
+            // Vérifier si l'email existe déjà
             User existing = userService.findByEmail(email);
             if (existing != null) {
                 errorLabel.setText("Un compte avec cet e-mail existe déjà.");
                 return;
             }
 
+            // Déterminer le rôle selon le type choisi
             String role;
             String typeValue;
             switch (type) {
@@ -106,35 +97,35 @@ public class SignUpController {
                     role = "[\"ROLE_ARTISTE\"]";
                     typeValue = "artiste";
                     break;
+                case "Participant":
+                    role = "[\"ROLE_PARTICIPANT\"]";
+                    typeValue = "participant";
+                    break;
                 default:
                     role = "[\"ROLE_PARTICIPANT\"]";
                     typeValue = "participant";
                     break;
             }
 
-            // Créer le compte avec isVerified=false
+            // Créer et sauvegarder l'utilisateur (password hashé avec BCrypt)
             String hashedPassword = PasswordUtils.hashPassword(password);
-            User newUser = new User(nom, prenom, email, hashedPassword, role, "actif", false, typeValue);
+            User newUser = new User(nom, prenom, email, hashedPassword, role, "actif", true, typeValue);
             userService.ajouter(newUser);
 
-            AppLogger.auth("SIGNUP", email + " | Type: " + typeValue);
+            System.out.println("Inscription réussie pour: " + nom + " " + prenom + " | Rôle: " + role);
 
-            // Envoyer email de vérification
-            String userName = prenom + " " + nom;
-            verificationService.generateVerificationToken(newUser.getId(), email, userName);
+            // Afficher succès et naviguer vers login
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Inscription réussie");
+            alert.setHeaderText(null);
+            alert.setContentText("Votre compte a été créé avec succès !\nVous pouvez maintenant vous connecter.");
+            alert.showAndWait();
 
-            // Naviguer vers la page de vérification
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/front/EmailVerification.fxml"));
-            Parent root = loader.load();
-            EmailVerificationController controller = loader.getController();
-            controller.setVerificationData(email, userName);
-
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.getScene().setRoot(root);
+            navigateTo(event, "/ui/front/Login.fxml");
 
         } catch (Exception e) {
-            errorLabel.setText("Erreur: " + e.getMessage());
-            AppLogger.error("[SignUp] Erreur inscription", e);
+            errorLabel.setText("Erreur lors de l'inscription: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

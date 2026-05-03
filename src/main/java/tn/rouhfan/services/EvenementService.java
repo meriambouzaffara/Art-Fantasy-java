@@ -187,17 +187,6 @@ public class EvenementService implements IService<Evenement> {
         }
 
         System.out.println("✅ Evenement ajouté en BD: " + e.getTitre());
-        
-        // Envoi SMS au sponsor s'il y a un sponsor
-        if (e.getSponsor() != null) {
-            SponsorService sponsorService = new SponsorService();
-            Sponsor fullSponsor = sponsorService.findById(e.getSponsor().getId());
-            if (fullSponsor != null && fullSponsor.getTel() != null && !fullSponsor.getTel().trim().isEmpty()) {
-                TwilioSmsService smsService = new TwilioSmsService();
-                String message = "Bonjour " + fullSponsor.getNom() + ", l'événement '" + e.getTitre() + "' que vous sponsorisez a été créé avec succès.";
-                smsService.sendSms(fullSponsor.getTel(), message);
-            }
-        }
     }
 
     @Override
@@ -278,36 +267,6 @@ public class EvenementService implements IService<Evenement> {
             System.out.println("✅ Evenement modifié: " + e.getTitre());
             if (e.getGoogleEventId() != null && !e.getGoogleEventId().isEmpty()) {
                 calendarService.modifierEvenement(e.getGoogleEventId(), e);
-            }
-            
-            // Envoi SMS au sponsor s'il y a un sponsor
-            if (e.getSponsor() != null) {
-                SponsorService sponsorService = new SponsorService();
-                Sponsor fullSponsor = sponsorService.findById(e.getSponsor().getId());
-                if (fullSponsor != null && fullSponsor.getTel() != null && !fullSponsor.getTel().trim().isEmpty()) {
-                    TwilioSmsService smsService = new TwilioSmsService();
-                    String message = "Bonjour " + fullSponsor.getNom() + ", l'événement '" + e.getTitre() + "' que vous sponsorisez a été modifié.";
-                    smsService.sendSms(fullSponsor.getTel(), message);
-                }
-            }
-            
-            // Génération et envoi de tickets mis à jour aux participants
-            try {
-                List<User> participants = getParticipantsByEvent(e.getId());
-                if (!participants.isEmpty()) {
-                    TicketPdfGenerator pdfGenerator = new TicketPdfGenerator();
-                    TicketEmailService emailService = new TicketEmailService();
-                    for (User p : participants) {
-                        if (p.getEmail() != null && !p.getEmail().trim().isEmpty()) {
-                            String participantName = (p.getPrenom() != null ? p.getPrenom() : "") + " " + (p.getNom() != null ? p.getNom() : "");
-                            java.io.File pdfFile = pdfGenerator.generateTicket(e, participantName.trim().isEmpty() ? "Participant" : participantName);
-                            emailService.sendTicket(p.getEmail(), e.getTitre() + " (Mise à jour)", pdfFile);
-                        }
-                    }
-                    System.out.println("✅ Tickets mis à jour envoyés à " + participants.size() + " participants.");
-                }
-            } catch (Exception ex) {
-                System.err.println("⚠️ Erreur lors de l'envoi des tickets mis à jour : " + ex.getMessage());
             }
         }
     }
@@ -437,10 +396,6 @@ public class EvenementService implements IService<Evenement> {
             throw new SQLException("Événement complet");
         }
 
-        if ("TERMINÉ".equals(event.getStatut())) {
-            throw new SQLException("L'événement est terminé, vous ne pouvez plus y participer.");
-        }
-
         String sql = "UPDATE evenement SET nb_participants = nb_participants + 1 WHERE id = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, eventId);
@@ -466,42 +421,6 @@ public class EvenementService implements IService<Evenement> {
                      "WHERE p.user_id = ? ORDER BY p.date_participation DESC";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, userId);
-        ResultSet rs = ps.executeQuery();
-        
-        List<Evenement> events = new ArrayList<>();
-        while (rs.next()) {
-            events.add(mapResultSetToEvenement(rs));
-        }
-        return events;
-    }
-
-    public List<User> getParticipantsByEvent(int eventId) throws SQLException {
-        String sql = "SELECT u.* FROM `user` u JOIN participation p ON u.id = p.user_id WHERE p.evenement_id = ?";
-        PreparedStatement ps = cnx.prepareStatement(sql);
-        ps.setInt(1, eventId);
-        ResultSet rs = ps.executeQuery();
-        
-        List<User> participants = new ArrayList<>();
-        while (rs.next()) {
-            User u = new User();
-            u.setId(rs.getInt("id"));
-            u.setNom(rs.getString("nom"));
-            u.setPrenom(rs.getString("prenom"));
-            u.setEmail(rs.getString("email"));
-            // Ne pas récupérer le mot de passe pour des raisons de sécurité
-            participants.add(u);
-        }
-        return participants;
-    }
-
-    public List<Evenement> getEvenementsBySponsor(int sponsorId) throws SQLException {
-        String sql = "SELECT e.*, s.id AS s_id, s.nom AS s_nom, u.nom AS u_nom, u.prenom AS u_prenom " +
-                     "FROM evenement e " +
-                     "LEFT JOIN sponsor s ON e.sponsor_id = s.id " +
-                     "LEFT JOIN `user` u ON e.createur_id = u.id " +
-                     "WHERE e.sponsor_id = ?";
-        PreparedStatement ps = cnx.prepareStatement(sql);
-        ps.setInt(1, sponsorId);
         ResultSet rs = ps.executeQuery();
         
         List<Evenement> events = new ArrayList<>();

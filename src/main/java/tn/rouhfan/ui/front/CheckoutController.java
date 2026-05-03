@@ -15,15 +15,10 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import tn.rouhfan.entities.Article;
-import tn.rouhfan.entities.User;
 import tn.rouhfan.services.CheckoutReceiptService;
 import tn.rouhfan.services.GmailInvoiceService;
-import tn.rouhfan.services.HistoriqueAchatService;
 import tn.rouhfan.services.PanierItem;
 import tn.rouhfan.services.PanierService;
-import tn.rouhfan.ui.Router;
-import tn.rouhfan.tools.SessionManager;
-import javafx.scene.layout.VBox;
 
 import java.io.File;
 import java.net.URL;
@@ -53,10 +48,9 @@ public class CheckoutController implements Initializable {
     @FXML private ImageView qrPreview;
     @FXML private Label qrStatusLabel;
 
-    private final PanierService         panierService         = PanierService.getInstance();
-    private final CheckoutReceiptService receiptService        = new CheckoutReceiptService();
-    private final GmailInvoiceService    gmailInvoiceService   = new GmailInvoiceService();
-    private final HistoriqueAchatService historiqueAchatService = new HistoriqueAchatService();
+    private final PanierService panierService = PanierService.getInstance();
+    private final CheckoutReceiptService receiptService = new CheckoutReceiptService();
+    private final GmailInvoiceService gmailInvoiceService = new GmailInvoiceService();
     private boolean stripeStarted = false;
 
     @Override
@@ -66,14 +60,6 @@ public class CheckoutController implements Initializable {
         stripeWebView.getEngine().locationProperty().addListener((obs, oldUrl, newUrl) -> detectStripeConfirmation(newUrl));
         stripeWebView.getEngine().loadContent("<html><body style='font-family:Segoe UI,Arial;padding:24px;color:#241197'>"
                 + "<h2>Stripe Checkout</h2><p>Le paiement securise s'affichera ici apres clic sur le bouton.</p></body></html>");
-    }
-
-    @FXML
-    private void goToHistorique() {
-        VBox contentHost = (VBox) cartItemsBox.getScene().lookup("#contentHost");
-        if (contentHost != null) {
-            Router.setContent(contentHost, "/ui/front/front_historique_achats.fxml");
-        }
     }
 
     @FXML
@@ -137,20 +123,6 @@ public class CheckoutController implements Initializable {
             setBusy(false, "Paiement confirme. Facture envoyee a " + email + ".");
             CheckoutReceiptService.ReceiptFiles files = sendTask.getValue();
             showQrPreview(files.getQrCode());
-
-            // ── Enregistrement dans l'historique des achats ──────
-            try {
-                User currentUser = SessionManager.getInstance().getCurrentUser();
-                Long userId = Long.valueOf((currentUser != null) ? currentUser.getId() : null);
-                historiqueAchatService.enregistrerAchat(
-                        orderReference, email, items, total, userId);
-            } catch (Exception ex) {
-                System.err.println("[Checkout] Avertissement : impossible d'enregistrer l'historique : "
-                        + ex.getMessage());
-                // On ne bloque pas l'utilisateur si l'historique échoue
-            }
-            // ────────────────────────────────────────────────────
-
             panierService.clear();
             confirmButton.setDisable(true);
             stripeStarted = false;

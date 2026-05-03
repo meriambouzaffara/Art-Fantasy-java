@@ -19,7 +19,6 @@
         <TextField fx:id="searchField" promptText="🔍 Rechercher..." prefWidth="200"/>
         <ComboBox fx:id="statutFilter" prefWidth="150"/>
         <Button text="➕ Ajouter"  styleClass="btn-add" onAction="#openPopupAjout"/>
-
     </HBox>
 
     <!-- TABLE -->
@@ -29,7 +28,6 @@
             <TableColumn fx:id="colDesc" text="Description" prefWidth="250"/>
             <TableColumn fx:id="colDate" text="Date" prefWidth="120"/>
             <TableColumn fx:id="colStatut" text="Statut" prefWidth="120"/>
-            <TableColumn fx:id="colActionImg" text="Images" prefWidth="120"/>
         </columns>
     </TableView>
 

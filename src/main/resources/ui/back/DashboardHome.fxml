@@ -6,11 +6,10 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox fx:id="rootNode" spacing="30.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.DashboardHomeController">
-    <!-- Header Premium -->
-    <VBox spacing="6" style="-fx-background-color: linear-gradient(to bottom right, #241197, #6c2a90); -fx-background-radius: 20; -fx-padding: 35 40;">
-        <Label text="👑 Bienvenue sur le Dashboard" style="-fx-font-size: 32; -fx-font-weight: 800; -fx-text-fill: white;" />
-        <Label text="Gérez et supervisez la plateforme Rouh el Fann depuis votre centre de contrôle." style="-fx-font-size: 14; -fx-text-fill: rgba(255,255,255,0.75);" />
+<VBox fx:id="rootNode" spacing="40.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.rouhfan.ui.back.DashboardHomeController">
+    <VBox alignment="CENTER" spacing="10.0">
+        <Label text="👑 Dashboard Admin" style="-fx-font-size: 36; -fx-font-weight: bold; -fx-text-fill: #241197;" />
+        <Label text="Gestion complète de la plateforme Rouh el Fann" styleClass="text-subtitle" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #6c2a90;" />
     </VBox>
 
     <GridPane hgap="25.0" vgap="25.0" alignment="CENTER">
@@ -73,11 +72,5 @@
             <Label text="Statistiques Œuvres" styleClass="dash-card-title" style="-fx-text-fill: #241197;" />
             <Label text="Ventes et analyses" styleClass="dash-card-subtitle" />
         </VBox>
-        <VBox styleClass="dash-card" prefWidth="280.0" onMouseClicked="#openAIUsage" GridPane.columnIndex="3" GridPane.rowIndex="2">
-            <Label text="🤖" styleClass="dash-card-icon" style="-fx-text-fill: #6c2a90;" />
-            <Label text="AI Usage &amp; Logs" styleClass="dash-card-title" style="-fx-text-fill: #6c2a90;" />
-            <Label text="Hugging Face API &amp; Activité" styleClass="dash-card-subtitle" />
-        </VBox>
-
     </GridPane>
 </VBox>

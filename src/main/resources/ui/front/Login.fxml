@@ -5,7 +5,6 @@
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
-<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -29,8 +28,6 @@
             </ImageView>
         </HBox>
         <Region HBox.hgrow="ALWAYS" />
-        <Button text="🤖 Chatbot" mnemonicParsing="false" onAction="#openChatbot"
-                style="-fx-background-color: #f0eef5; -fx-text-fill: #241197; -fx-background-radius: 20; -fx-font-weight: bold; -fx-cursor: hand;" />
         <Button text="← Retour" mnemonicParsing="false" styleClass="btn-secondary" onAction="#goBack"
                 style="-fx-background-radius: 20; -fx-font-weight: bold;" />
     </HBox>
@@ -39,8 +36,8 @@
     <Region VBox.vgrow="ALWAYS" />
 
     <!-- Login Card -->
-    <VBox alignment="CENTER" spacing="18" maxWidth="440"
-          style="-fx-background-color: #ffffff; -fx-background-radius: 24; -fx-padding: 44 40; -fx-effect: dropshadow(three-pass-box, rgba(36, 17, 151, 0.10), 20, 0, 0, 8);">
+    <VBox alignment="CENTER" spacing="20" maxWidth="420"
+          style="-fx-background-color: #ffffff; -fx-background-radius: 24; -fx-padding: 50 40; -fx-effect: dropshadow(three-pass-box, rgba(36, 17, 151, 0.10), 20, 0, 0, 8);">
 
         <Label text="🔐" style="-fx-font-size: 48px;" />
         <Label text="Connexion" style="-fx-font-size: 28px; -fx-font-weight: 800; -fx-text-fill: #241197;" />
@@ -56,44 +53,17 @@
 
         <!-- Password -->
         <VBox spacing="6" alignment="CENTER_LEFT">
-            <HBox alignment="CENTER_LEFT" spacing="0">
-                <Label text="Mot de passe" style="-fx-font-weight: 600; -fx-text-fill: #2d1b4e;" />
-                <Region HBox.hgrow="ALWAYS" />
-                <Hyperlink text="Mot de passe oublié ?" onAction="#goForgotPassword"
-                           style="-fx-text-fill: #6c2a90; -fx-font-size: 12px;" />
-            </HBox>
+            <Label text="Mot de passe" style="-fx-font-weight: 600; -fx-text-fill: #2d1b4e;" />
             <PasswordField fx:id="passwordField" promptText="••••••••"
                            style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: rgba(36,17,151,0.15); -fx-padding: 12; -fx-font-size: 14px;" />
         </VBox>
 
-        <!-- Error label -->
+        <!-- Error label (hidden by default) -->
         <Label fx:id="errorLabel" text="" style="-fx-text-fill: #d63031; -fx-font-size: 13px; -fx-font-weight: 600;" wrapText="true" />
 
         <!-- Login button -->
         <Button text="Se connecter" mnemonicParsing="false" onAction="#handleLogin" maxWidth="Infinity"
                 style="-fx-background-color: linear-gradient(to right, #241197, #6c2a90); -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: 700; -fx-background-radius: 12; -fx-padding: 14 0; -fx-cursor: hand;" />
-
-        <!-- Separator -->
-        <HBox alignment="CENTER" spacing="10">
-            <Separator HBox.hgrow="ALWAYS" />
-            <Label text="ou continuer avec" style="-fx-text-fill: #9b8fb5; -fx-font-size: 12px;" />
-            <Separator HBox.hgrow="ALWAYS" />
-        </HBox>
-
-        <!-- Social Login Buttons -->
-        <HBox spacing="10" alignment="CENTER">
-            <Button text="🔴  Google" onAction="#handleGoogleLogin" mnemonicParsing="false"
-                    style="-fx-background-color: #fff; -fx-border-color: #4285F4; -fx-border-width: 1.5; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10 24; -fx-font-weight: 700; -fx-cursor: hand; -fx-font-size: 12px; -fx-text-fill: #4285F4;" />
-            <Button text="🔵 Facebook" onAction="#handleFacebookLogin" mnemonicParsing="false"
-                    style="-fx-background-color: #fff; -fx-border-color: #ddd; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10 20; -fx-font-weight: 600; -fx-cursor: hand; -fx-font-size: 12px;" />
-            <Button text="⚫ GitHub" onAction="#handleGithubLogin" mnemonicParsing="false"
-                    style="-fx-background-color: #fff; -fx-border-color: #ddd; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10 20; -fx-font-weight: 600; -fx-cursor: hand; -fx-font-size: 12px;" />
-        </HBox>
-
-        <!-- Face Login -->
-        <Button text="👤 Connexion par Reconnaissance Faciale" onAction="#handleFaceLogin" mnemonicParsing="false" maxWidth="Infinity"
-                style="-fx-background-color: linear-gradient(to right, #00b894, #00cec9); -fx-text-fill: white;
-                       -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 12; -fx-padding: 12 0; -fx-cursor: hand;" />
 
         <!-- Sign up link -->
         <HBox alignment="CENTER" spacing="4">

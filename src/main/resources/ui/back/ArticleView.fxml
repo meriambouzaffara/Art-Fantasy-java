@@ -70,13 +70,6 @@
                 <Label text="Titre *" style="-fx-font-weight: bold; -fx-text-fill: #2d1b4e;" />
                 <TextField fx:id="titreField" promptText="Ex: Peinture Dragon Doré" />
             </VBox>
-            <VBox spacing="5" prefWidth="160">
-                <Label text="Référence" style="-fx-font-weight: bold; -fx-text-fill: #2d1b4e;" />
-                <TextField fx:id="referenceField" promptText="Ex: ART-001 (optionnel)" />
-            </VBox>
-        </HBox>
-
-        <HBox spacing="14">
             <VBox spacing="5" prefWidth="130">
                 <Label text="Prix (DT) *" style="-fx-font-weight: bold; -fx-text-fill: #2d1b4e;" />
                 <TextField fx:id="prixField" promptText="Ex: 120.00" />
@@ -84,12 +77,6 @@
             <VBox spacing="5" prefWidth="110">
                 <Label text="Stock *" style="-fx-font-weight: bold; -fx-text-fill: #2d1b4e;" />
                 <TextField fx:id="stockField" promptText="Ex: 10" />
-            </VBox>
-            <VBox spacing="5" HBox.hgrow="ALWAYS"
-                  style="-fx-background-color: #fffbf0; -fx-background-radius: 8; -fx-padding: 8 12; -fx-border-color: #c9a849; -fx-border-radius: 8; -fx-border-width: 1;">
-                <Label text="💡 Si la référence existe déjà, le stock sera incrémenté de +1 automatiquement."
-                       wrapText="true"
-                       style="-fx-font-size: 11; -fx-text-fill: #856404;" />
             </VBox>
         </HBox>
 

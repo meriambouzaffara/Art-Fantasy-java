@@ -7,7 +7,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 public class TwilioSmsService {
     
-    private static final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+    private static final Dotenv dotenv = Dotenv.load();
 
     // Identifiants Twilio
     public static final String ACCOUNT_SID = dotenv.get("TWILIO_ACCOUNT_SID");
