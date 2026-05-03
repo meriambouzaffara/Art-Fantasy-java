@@ -37,7 +37,6 @@ public class EvenementFormDialog {
     private ImageView imagePreview;
     private String selectedImagePath = "";
     private ComboBox<String> typeCombo;
-    private ComboBox<String> statutCombo;
     private DatePicker dateEvenementPicker;
     private ComboBox<String> hourCombo;
     private ComboBox<String> minuteCombo;
@@ -138,12 +137,6 @@ public class EvenementFormDialog {
         grid.add(createLabel("Type *"), 0, 4);
         grid.add(typeCombo, 1, 4);
 
-        // Statut
-        statutCombo = new ComboBox<>();
-        statutCombo.getItems().addAll("PLANIFIÉ", "EN COURS", "ANNULÉ", "TERMINÉ");
-        grid.add(createLabel("Statut *"), 0, 5);
-        grid.add(statutCombo, 1, 5);
-
         // Date & Heure
         dateEvenementPicker = new DatePicker();
         
@@ -158,31 +151,31 @@ public class EvenementFormDialog {
         HBox dateTimeBox = new HBox(5, dateEvenementPicker, new Label(" à "), hourCombo, new Label(":"), minuteCombo);
         dateTimeBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
-        grid.add(createLabel("Date & Heure *"), 0, 6);
-        grid.add(dateTimeBox, 1, 6);
+        grid.add(createLabel("Date & Heure *"), 0, 5);
+        grid.add(dateTimeBox, 1, 5);
 
         // Lieu
         lieuField = new TextField();
         lieuField.setPromptText("Ex: Palais des congrès");
-        grid.add(createLabel("Lieu *"), 0, 7);
-        grid.add(lieuField, 1, 7);
+        grid.add(createLabel("Lieu *"), 0, 6);
+        grid.add(lieuField, 1, 6);
 
         // Capacité
         capaciteSpinner = new Spinner<>(1, 10000, 100, 10);
         capaciteSpinner.setEditable(true);
-        grid.add(createLabel("Capacité"), 0, 8);
-        grid.add(capaciteSpinner, 1, 8);
+        grid.add(createLabel("Capacité"), 0, 7);
+        grid.add(capaciteSpinner, 1, 7);
 
         // Participants
         participantsSpinner = new Spinner<>(0, 10000, 0, 1);
         participantsSpinner.setEditable(true);
-        grid.add(createLabel("Participants"), 0, 9);
-        grid.add(participantsSpinner, 1, 9);
+        grid.add(createLabel("Participants"), 0, 8);
+        grid.add(participantsSpinner, 1, 8);
 
         // Sponsor
         sponsorCombo = new ComboBox<>();
-        grid.add(createLabel("Sponsor"), 0, 11);
-        grid.add(sponsorCombo, 1, 11);
+        grid.add(createLabel("Sponsor"), 0, 9);
+        grid.add(sponsorCombo, 1, 9);
 
         // Load sponsors
         try {
@@ -195,7 +188,7 @@ public class EvenementFormDialog {
         // Error message
         errorLabel = new Label();
         errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 11;");
-        grid.add(errorLabel, 0, 12, 2, 1);
+        grid.add(errorLabel, 0, 10, 2, 1);
 
         // Populate if editing
         if (evenement != null && evenement.getId() > 0) {
@@ -233,7 +226,6 @@ public class EvenementFormDialog {
         }
 
         typeCombo.setValue(evenement.getType() != null ? evenement.getType() : null);
-        statutCombo.setValue(evenement.getStatut() != null ? evenement.getStatut() : "PLANIFIÉ");
 
         if (evenement.getDateEvent() != null) {
             java.time.LocalDateTime ldt = evenement.getDateEvent().toInstant()
@@ -275,7 +267,7 @@ public class EvenementFormDialog {
             evenement.setDescription(descriptionArea.getText());
             evenement.setImage(selectedImagePath);
             evenement.setType(typeCombo.getValue());
-            evenement.setStatut(statutCombo.getValue() != null ? statutCombo.getValue() : "PLANIFIÉ");
+            evenement.setStatut("PLANIFIÉ"); // Sera calculé dynamiquement par Evenement.getStatut()
 
             if (dateEvenementPicker.getValue() != null) {
                 java.time.LocalDate ld = dateEvenementPicker.getValue();

@@ -65,7 +65,7 @@ public class EvenementsFrontController implements Initializable {
 
     private void setupSortCombo() {
         if (sortCombo != null) {
-            sortCombo.getItems().addAll("Titre (A-Z)", "Titre (Z-A)", "Date Croissante", "Date Décroissante", "Lieu (A-Z)", "Capacité");
+            sortCombo.getItems().addAll("Titre (A-Z)", "Titre (Z-A)", "Date Croissante", "Date Décroissante", "Lieu (A-Z)", "Capacité", "Statut");
             sortCombo.setValue("Titre (A-Z)");
             sortCombo.setOnAction(e -> handleSort());
         }
@@ -153,6 +153,12 @@ public class EvenementsFrontController implements Initializable {
         creatorLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 12;");
 
         headerBox.getChildren().addAll(titleLabel, creatorLabel);
+        
+        if (event.getSponsor() != null && event.getSponsor().getNom() != null) {
+            Label sponsorLabel = new Label("🤝 Sponsor: " + event.getSponsor().getNom());
+            sponsorLabel.setStyle("-fx-text-fill: #16a085; -fx-font-size: 11; -fx-font-weight: bold; -fx-padding: 2 0 0 0;");
+            headerBox.getChildren().add(sponsorLabel);
+        }
 
         // Informations Event (Date/Lieu/Type)
         VBox infoBox = new VBox(5);
@@ -209,12 +215,18 @@ public class EvenementsFrontController implements Initializable {
         }
 
         if ("ROLE_PARTICIPANT".equals(userRole)) {
-            Button participateBtn = new Button("🎟️ Participer");
-            participateBtn.setMaxWidth(Double.MAX_VALUE);
-            HBox.setHgrow(participateBtn, Priority.ALWAYS);
-            participateBtn.setStyle("-fx-background-color: linear-gradient(to right, #00b894, #00cec9); -fx-text-fill: white; -fx-font-weight: 800; -fx-background-radius: 12; -fx-padding: 12 20; -fx-font-size: 14; -fx-cursor: hand;");
-            participateBtn.setOnAction(e -> handleParticipate(event));
-            buttonBox.getChildren().add(participateBtn);
+            if ("TERMINÉ".equals(event.getStatut())) {
+                Label termineLabel = new Label("Événement terminé");
+                termineLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-padding: 5 10; -fx-background-color: #fce4e4; -fx-background-radius: 5;");
+                buttonBox.getChildren().add(termineLabel);
+            } else {
+                Button participateBtn = new Button("🎟️ Participer");
+                participateBtn.setMaxWidth(Double.MAX_VALUE);
+                HBox.setHgrow(participateBtn, Priority.ALWAYS);
+                participateBtn.setStyle("-fx-background-color: linear-gradient(to right, #00b894, #00cec9); -fx-text-fill: white; -fx-font-weight: 800; -fx-background-radius: 12; -fx-padding: 12 20; -fx-font-size: 14; -fx-cursor: hand;");
+                participateBtn.setOnAction(e -> handleParticipate(event));
+                buttonBox.getChildren().add(participateBtn);
+            }
         }
 
         if (buttonBox.getChildren().isEmpty()) {
@@ -278,6 +290,10 @@ public class EvenementsFrontController implements Initializable {
                             evenementService.rechercherEtTrier(keyword, "capacite", true)
                     );
                     break;
+                case "Statut":
+                    results = FXCollections.observableArrayList(evenementService.rechercher(keyword));
+                    results.sort((e1, e2) -> e1.getStatut().compareToIgnoreCase(e2.getStatut()));
+                    break;
             }
 
             if (results != null) {
@@ -316,6 +332,9 @@ public class EvenementsFrontController implements Initializable {
                     for (Evenement e : myHistory) historyIds.add(e.getId());
                     eventsForAi.removeIf(e -> historyIds.contains(e.getId()));
                 }
+                
+                // Exclure les événements terminés des recommandations
+                eventsForAi.removeIf(e -> "TERMINÉ".equals(e.getStatut()));
             } catch (Exception e) {
                 e.printStackTrace();
             }
