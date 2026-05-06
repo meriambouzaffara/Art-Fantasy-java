@@ -5,13 +5,14 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.scene.control.Alert;
 import tn.rouhfan.entities.User;
 import tn.rouhfan.services.NotificationService;
 import tn.rouhfan.services.PanierService;
@@ -28,13 +29,18 @@ public class FrontBaseController {
     // Navbar buttons
     @FXML private HBox guestButtons;
     @FXML private HBox userButtons;
-    @FXML private Label welcomeLabel;
+    @FXML private Label usernameLabel;
     @FXML private Button profileBtn;
     @FXML private Button iaBtn;
+    @FXML private Button dashboardBtn;
+    @FXML private Button logoutBtn;
     @FXML private Button notifBtn;
 
     // Bouton panier flottant (Magasin)
     @FXML private Button cartButton;
+
+    // Bouton Dashboard dans le Hero (page d'accueil)
+    @FXML private Button adminHeroDashBtn;
 
     private final NotificationService notificationService = new NotificationService();
     private final PanierService panierService = PanierService.getInstance();
@@ -80,20 +86,39 @@ public class FrontBaseController {
             userButtons.setManaged(true);
 
             String role = session.getRole();
-            String roleEmoji;
             boolean isParticipant = false;
-            if (role != null && role.toUpperCase().contains("ARTISTE")) {
-                roleEmoji = "🎨";
-            } else {
-                roleEmoji = "🎭";
-                isParticipant = true;
+            boolean isAdmin = false;
+            String roleEmoji = "👤";
+
+            if (role != null) {
+                String r = role.toUpperCase();
+                if (r.contains("ADMIN")) {
+                    isAdmin = true;
+                    roleEmoji = "🛠️";
+                } else if (r.contains("ARTISTE")) {
+                    roleEmoji = "🎨";
+                } else {
+                    isParticipant = true;
+                    roleEmoji = "🎭";
+                }
             }
-            welcomeLabel.setText(roleEmoji + " " + currentUser.getPrenom() + " " + currentUser.getNom());
 
-            // Afficher le bouton IA uniquement pour les participants
-            iaBtn.setVisible(isParticipant);
-            iaBtn.setManaged(isParticipant);
+            usernameLabel.setText(roleEmoji + " " + currentUser.getPrenom());
+            
+            // Créations IA visible pour tous les utilisateurs connectés
+            iaBtn.setVisible(true);
+            iaBtn.setManaged(true);
+            
+            // Dashboard uniquement pour l'Admin
+            dashboardBtn.setVisible(isAdmin);
+            dashboardBtn.setManaged(isAdmin);
 
+            // Bouton Dashboard dans la page d'accueil (Hero)
+            if (adminHeroDashBtn != null) {
+                adminHeroDashBtn.setVisible(isAdmin);
+                adminHeroDashBtn.setManaged(isAdmin);
+            }
+            
             // Notifications
             int unread = notificationService.countUnread(currentUser.getId());
             if (unread > 0) {
@@ -191,7 +216,49 @@ public class FrontBaseController {
     @FXML
     private void goMagasin(ActionEvent event) {
         showHero(false);
-        Router.setContent(contentHost, "/ui/front/front_magasins.fxml");
+        Router.setContent(contentHost, "/ui/front/front_liste_magasins.fxml");
+    }
+
+    @FXML
+    private void goDashboard(ActionEvent event) {
+        SessionManager session = SessionManager.getInstance();
+        User currentUser = session.getCurrentUser();
+
+        // 🔐 Utilisateur non connecté
+        if (currentUser == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Accès refusé");
+            alert.setHeaderText(null);
+            alert.setContentText("Vous devez vous connecter pour accéder au tableau de bord.");
+            alert.showAndWait();
+            return;
+        }
+
+        // 🔐 Vérification du rôle Admin
+        String role = session.getRole();
+        if (role == null || !role.toUpperCase().contains("ADMIN")) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Accès refusé");
+            alert.setHeaderText("⛔ Accès refusé");
+            alert.setContentText("Seuls les administrateurs peuvent accéder au tableau de bord.");
+            alert.showAndWait();
+            return;
+        }
+
+        // ✅ Admin → Redirection vers le vrai Dashboard Admin
+        try {
+            Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+            Parent root = FXMLLoader.load(getClass().getResource("/ui/back/BackBase.fxml"));
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            System.err.println("[FrontBase] Erreur chargement AdminDashboard: " + e.getMessage());
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erreur");
+            alert.setHeaderText("Impossible de charger le tableau de bord");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+        }
     }
 
     @FXML
@@ -275,13 +342,22 @@ public class FrontBaseController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/back/ProfileView.fxml"));
             Parent root = loader.load();
+            
+            // Forcer le contenu à remplir l'espace
+            VBox.setVgrow(root, Priority.ALWAYS);
             contentHost.getChildren().add(root);
         } catch (IOException e) {
             System.err.println("[FrontBase] Erreur chargement Profil: " + e.getMessage());
             e.printStackTrace();
+            
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erreur de chargement");
+            alert.setHeaderText("Impossible d'ouvrir le profil");
+            alert.setContentText("Une erreur est survenue : " + e.getMessage());
+            alert.showAndWait();
         }
     }
-
+    
     @FXML
     private void openNotifications(ActionEvent event) {
         showHero(false);
@@ -289,7 +365,7 @@ public class FrontBaseController {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/ui/front/NotificationsFront.fxml"));
             contentHost.getChildren().add(root);
-
+            
             // Mettre à jour le compteur (réinitialiser)
             notifBtn.setText("\uD83D\uDD14");
             notifBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #fac62d; -fx-font-weight: bold; -fx-font-size: 16; -fx-cursor: hand;");
@@ -325,6 +401,33 @@ public class FrontBaseController {
             contentHost.getChildren().add(root);
         } catch (IOException e) {
             System.err.println("[FrontBase] Erreur chargement Checkout: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void openChatbot(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/front/Chatbot.fxml"));
+            Parent root = loader.load();
+            
+            Stage stage = new Stage();
+            stage.initStyle(javafx.stage.StageStyle.UNDECORATED);
+            stage.setTitle("Assistant Rouh el Fann");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.NONE); // Permet de continuer à utiliser la fenêtre principale
+            stage.setResizable(false);
+            
+            // Positionner en bas à droite
+            stage.setOnShown(e -> {
+                Stage mainStage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+                stage.setX(mainStage.getX() + mainStage.getWidth() - stage.getWidth() - 20);
+                stage.setY(mainStage.getY() + mainStage.getHeight() - stage.getHeight() - 40);
+            });
+            
+            stage.show();
+        } catch (IOException e) {
+            System.err.println("[FrontBase] Erreur ouverture Chatbot: " + e.getMessage());
             e.printStackTrace();
         }
     }

@@ -5,32 +5,31 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.*;
-import tn.rouhfan.entities.Evenement;
-import tn.rouhfan.services.EvenementService;
-
-import java.net.URL;
-import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.ResourceBundle;
-import java.util.Map;
-import java.util.stream.Collectors;
+import javafx.geometry.Insets;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
-import java.awt.Desktop;
-import java.net.URI;
+import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.geometry.Pos;
-import javafx.geometry.Insets;
-import java.time.YearMonth;
+import tn.rouhfan.entities.Evenement;
+import tn.rouhfan.services.EvenementService;
+
+import java.awt.*;
+import java.net.URI;
+import java.net.URL;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class EvenementsController implements Initializable {
 
@@ -41,6 +40,8 @@ public class EvenementsController implements Initializable {
     @FXML private TableColumn<Evenement, String> colLieu;
     @FXML private TableColumn<Evenement, String> colType;
     @FXML private TableColumn<Evenement, Integer> colCapacite;
+    @FXML private TableColumn<Evenement, String> colSponsor;
+    @FXML private TableColumn<Evenement, Integer> colNbParticipants;
     @FXML private TableColumn<Evenement, String> colStatut;
 
     @FXML private TextField searchField;
@@ -83,6 +84,12 @@ public class EvenementsController implements Initializable {
         ));
         colCapacite.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(
                 cellData.getValue().getCapacite() != null ? cellData.getValue().getCapacite() : 0
+        ).asObject());
+        colSponsor.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
+                cellData.getValue().getSponsor() != null ? cellData.getValue().getSponsor().getNom() : "Aucun"
+        ));
+        colNbParticipants.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(
+                cellData.getValue().getNbParticipants()
         ).asObject());
         colStatut.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
                 cellData.getValue().getStatut() != null ? cellData.getValue().getStatut() : ""
@@ -129,24 +136,24 @@ public class EvenementsController implements Initializable {
 
         statTotalCapacity.setText(String.valueOf(capacity));
         statTotalParticipants.setText(String.valueOf(participants));
-        
+
         // Update Charts
         if (typePieChart != null && participantsBarChart != null) {
             typePieChart.getData().clear();
             participantsBarChart.getData().clear();
-            
+
             Map<String, Long> countByType = list.stream()
-                .filter(e -> e.getType() != null)
-                .collect(Collectors.groupingBy(Evenement::getType, Collectors.counting()));
-                
+                    .filter(e -> e.getType() != null)
+                    .collect(Collectors.groupingBy(Evenement::getType, Collectors.counting()));
+
             for (Map.Entry<String, Long> entry : countByType.entrySet()) {
                 typePieChart.getData().add(new PieChart.Data(entry.getKey() + " (" + entry.getValue() + ")", entry.getValue()));
             }
-            
+
             Map<String, Integer> participantsByType = list.stream()
-                .filter(e -> e.getType() != null)
-                .collect(Collectors.groupingBy(Evenement::getType, Collectors.summingInt(Evenement::getNbParticipants)));
-                
+                    .filter(e -> e.getType() != null)
+                    .collect(Collectors.groupingBy(Evenement::getType, Collectors.summingInt(Evenement::getNbParticipants)));
+
             XYChart.Series<String, Number> series = new XYChart.Series<>();
             series.setName("Participants");
             for (Map.Entry<String, Integer> entry : participantsByType.entrySet()) {
@@ -324,20 +331,20 @@ public class EvenementsController implements Initializable {
 
     private void drawCalendar() {
         if (calendarGrid == null || monthYearLabel == null) return;
-        
+
         calendarGrid.getChildren().clear();
-        
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.FRENCH);
         String formattedMonth = currentYearMonth.format(formatter);
         monthYearLabel.setText(formattedMonth.substring(0, 1).toUpperCase() + formattedMonth.substring(1));
-        
+
         LocalDate firstOfMonth = currentYearMonth.atDay(1);
         int daysInMonth = currentYearMonth.lengthOfMonth();
         int dayOfWeek = firstOfMonth.getDayOfWeek().getValue(); // 1 = Lundi, 7 = Dimanche
-        
+
         int row = 0;
         int col = dayOfWeek - 1; // 0-indexé pour GridPane (0 = Lundi)
-        
+
         for (int day = 1; day <= daysInMonth; day++) {
             LocalDate date = currentYearMonth.atDay(day);
             VBox dayBox = new VBox(2);
@@ -345,15 +352,15 @@ public class EvenementsController implements Initializable {
             dayBox.setStyle("-fx-border-color: #e2e8f0; -fx-background-color: white;");
             dayBox.setPrefWidth(120);
             dayBox.setPrefHeight(100);
-            
+
             if (date.equals(LocalDate.now())) {
                 dayBox.setStyle("-fx-border-color: #6c2a90; -fx-background-color: #f3e5f5; -fx-border-width: 2;");
             }
-            
+
             Label dayLabel = new Label(String.valueOf(day));
             dayLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #333;");
             dayBox.getChildren().add(dayLabel);
-            
+
             // Trouver les événements pour ce jour
             if (evenementsList != null) {
                 for (Evenement e : evenementsList) {
@@ -374,9 +381,9 @@ public class EvenementsController implements Initializable {
                     }
                 }
             }
-            
+
             calendarGrid.add(dayBox, col, row);
-            
+
             col++;
             if (col > 6) {
                 col = 0;

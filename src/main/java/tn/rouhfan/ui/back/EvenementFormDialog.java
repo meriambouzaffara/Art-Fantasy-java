@@ -21,7 +21,6 @@ import java.io.File;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 public class EvenementFormDialog {
 
@@ -83,7 +82,11 @@ public class EvenementFormDialog {
         mainBox.setPadding(new Insets(10));
         mainBox.getChildren().addAll(grid, buttonBox);
 
-        Scene scene = new Scene(mainBox);
+        ScrollPane scrollPane = new ScrollPane(mainBox);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setStyle("-fx-background-color: transparent;");
+
+        Scene scene = new Scene(scrollPane);
         stage.setScene(scene);
     }
 
@@ -174,6 +177,17 @@ public class EvenementFormDialog {
 
         // Sponsor
         sponsorCombo = new ComboBox<>();
+        sponsorCombo.setConverter(new javafx.util.StringConverter<Sponsor>() {
+            @Override
+            public String toString(Sponsor sponsor) {
+                return sponsor == null ? null : sponsor.getNom();
+            }
+
+            @Override
+            public Sponsor fromString(String string) {
+                return null;
+            }
+        });
         grid.add(createLabel("Sponsor"), 0, 9);
         grid.add(sponsorCombo, 1, 9);
 

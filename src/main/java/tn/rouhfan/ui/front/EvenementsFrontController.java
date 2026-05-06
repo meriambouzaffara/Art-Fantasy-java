@@ -1,5 +1,6 @@
 package tn.rouhfan.ui.front;
-import tn.rouhfan.tools.SessionManager;
+
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -7,39 +8,31 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import tn.rouhfan.entities.Evenement;
+import tn.rouhfan.entities.User;
 import tn.rouhfan.services.EvenementService;
 import tn.rouhfan.services.GroqAiService;
+import tn.rouhfan.services.TicketEmailService;
+import tn.rouhfan.services.TicketPdfGenerator;
 import tn.rouhfan.tools.ImageUtils;
+import tn.rouhfan.tools.SessionManager;
 import tn.rouhfan.ui.back.EvenementFormDialog;
 
-import tn.rouhfan.entities.User;
-import javafx.application.Platform;
+import java.awt.*;
+import java.io.File;
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.ResourceBundle;
 import java.util.List;
-
-import com.itextpdf.text.Document;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.FontFactory;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.pdf.PdfWriter;
-import java.io.FileOutputStream;
-import java.io.File;
-import java.awt.Desktop;
-import tn.rouhfan.services.TicketPdfGenerator;
-import tn.rouhfan.services.TicketEmailService;
+import java.util.ResourceBundle;
 
 public class EvenementsFrontController implements Initializable {
 
@@ -334,12 +327,12 @@ public class EvenementsFrontController implements Initializable {
         }
         
         new Thread(() -> {
-            java.util.List<Evenement> eventsForAi = new java.util.ArrayList<>(evenementsList);
+            List<Evenement> eventsForAi = new java.util.ArrayList<>(evenementsList);
             try {
-                tn.rouhfan.entities.User currentUser = SessionManager.getInstance().getCurrentUser();
+                User currentUser = SessionManager.getInstance().getCurrentUser();
                 if (currentUser != null) {
-                    java.util.List<Evenement> myHistory = evenementService.getHistoriqueParticipations(currentUser.getId());
-                    java.util.List<Integer> historyIds = new java.util.ArrayList<>();
+                    List<Evenement> myHistory = evenementService.getHistoriqueParticipations(currentUser.getId());
+                    List<Integer> historyIds = new java.util.ArrayList<>();
                     for (Evenement e : myHistory) historyIds.add(e.getId());
                     eventsForAi.removeIf(e -> historyIds.contains(e.getId()));
                 }
@@ -386,7 +379,7 @@ public class EvenementsFrontController implements Initializable {
         dialogPane.getButtonTypes().add(ButtonType.CLOSE);
         
         VBox container = new VBox(15);
-        container.setPadding(new javafx.geometry.Insets(15));
+        container.setPadding(new Insets(15));
         
         for (GroqAiService.AiRecommendationItem item : currentAiItems) {
             Evenement evt = item.getEntity();

@@ -2,6 +2,14 @@ package tn.rouhfan.entities;
 
 import java.util.Date;
 
+/**
+ * Entité User enrichie avec :
+ * - lastLoginAt : date de dernière connexion
+ * - loginProvider : local / google / facebook / github
+ * - verificationToken : token de vérification email
+ * - resetToken : token de réinitialisation mot de passe
+ * - resetTokenExpiry : date d'expiration du token de reset
+ */
 public class User {
 
     private int id;
@@ -14,8 +22,20 @@ public class User {
     private String statut;
     private boolean isVerified;
     private String type;
+    private String photoProfile; // Chemin vers l'image de profil
+    private String faceEmbedding; // Vecteur d'embedding facial (JSON)
+    private boolean faceEnabled;  // Login facial activé
 
-    public User() {}
+    // ── Nouveaux champs ──
+    private Date lastLoginAt;
+    private String loginProvider;       // "local", "google", "facebook", "github"
+    private String verificationToken;
+    private String resetToken;
+    private Date resetTokenExpiry;
+
+    public User() {
+        this.loginProvider = "local";
+    }
 
     public User(String nom, String prenom, String email, String password, String roles, String statut, boolean isVerified, String type) {
         this.nom = nom;
@@ -26,7 +46,12 @@ public class User {
         this.statut = statut;
         this.isVerified = isVerified;
         this.type = type;
+        this.loginProvider = "local";
     }
+
+    // ═══════════════════════════════════════
+    //  Getters / Setters existants
+    // ═══════════════════════════════════════
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -57,6 +82,34 @@ public class User {
 
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
+    
+    public String getPhotoProfile() { return photoProfile; }
+    public void setPhotoProfile(String photoProfile) { this.photoProfile = photoProfile; }
+
+    public String getFaceEmbedding() { return faceEmbedding; }
+    public void setFaceEmbedding(String faceEmbedding) { this.faceEmbedding = faceEmbedding; }
+
+    public boolean isFaceEnabled() { return faceEnabled; }
+    public void setFaceEnabled(boolean faceEnabled) { this.faceEnabled = faceEnabled; }
+
+    // ═══════════════════════════════════════
+    //  Nouveaux Getters / Setters
+    // ═══════════════════════════════════════
+
+    public Date getLastLoginAt() { return lastLoginAt; }
+    public void setLastLoginAt(Date lastLoginAt) { this.lastLoginAt = lastLoginAt; }
+
+    public String getLoginProvider() { return loginProvider; }
+    public void setLoginProvider(String loginProvider) { this.loginProvider = loginProvider; }
+
+    public String getVerificationToken() { return verificationToken; }
+    public void setVerificationToken(String verificationToken) { this.verificationToken = verificationToken; }
+
+    public String getResetToken() { return resetToken; }
+    public void setResetToken(String resetToken) { this.resetToken = resetToken; }
+
+    public Date getResetTokenExpiry() { return resetTokenExpiry; }
+    public void setResetTokenExpiry(Date resetTokenExpiry) { this.resetTokenExpiry = resetTokenExpiry; }
 
     @Override
     public String toString() {
@@ -67,6 +120,7 @@ public class User {
                 ", email='" + email + '\'' +
                 ", statut='" + statut + '\'' +
                 ", type='" + type + '\'' +
+                ", provider='" + loginProvider + '\'' +
                 '}';
     }
 }

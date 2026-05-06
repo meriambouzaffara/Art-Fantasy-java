@@ -1,5 +1,6 @@
 package tn.rouhfan.services;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import tn.rouhfan.entities.Evenement;
@@ -8,17 +9,16 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.Duration;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import io.github.cdimascio.dotenv.Dotenv;
 
 public class GroqAiService {
 
-    private static final Dotenv dotenv = Dotenv.load();
+    private static final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
     private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
     private static final String API_KEY = dotenv.get("GROQ_API_KEY");
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");

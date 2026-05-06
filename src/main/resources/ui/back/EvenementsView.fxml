@@ -32,24 +32,24 @@
     </VBox>
 
     <HBox spacing="20.0" alignment="CENTER">
-        <VBox style="-fx-background-color: #fce4ec; -fx-padding: 15; -fx-background-radius: 10;" prefWidth="200" alignment="CENTER">
+        <VBox style="-fx-background-color: #fce4ec; -fx-padding: 10; -fx-background-radius: 10;" prefWidth="200" alignment="CENTER">
             <Label text="Total Événements" style="-fx-text-fill: #e91e63; -fx-font-weight: bold;"/>
             <Label fx:id="statTotalEvents" text="0" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #e91e63;"/>
         </VBox>
 
-        <VBox style="-fx-background-color: #e3f2fd; -fx-padding: 15; -fx-background-radius: 10;" prefWidth="200" alignment="CENTER">
+        <VBox style="-fx-background-color: #e3f2fd; -fx-padding: 10; -fx-background-radius: 10;" prefWidth="200" alignment="CENTER">
             <Label text="Capacité Totale" style="-fx-text-fill: #1976d2; -fx-font-weight: bold;"/>
             <Label fx:id="statTotalCapacity" text="0" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #1976d2;"/>
         </VBox>
 
-        <VBox style="-fx-background-color: #e8f5e9; -fx-padding: 15; -fx-background-radius: 10;" prefWidth="200" alignment="CENTER">
+        <VBox style="-fx-background-color: #e8f5e9; -fx-padding: 10; -fx-background-radius: 10;" prefWidth="200" alignment="CENTER">
             <Label text="Participants Inscrits" style="-fx-text-fill: #388e3c; -fx-font-weight: bold;"/>
             <Label fx:id="statTotalParticipants" text="0" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #388e3c;"/>
         </VBox>
     </HBox>
 
     <!-- Recherche + Tri -->
-    <HBox spacing="15.0" alignment="CENTER_LEFT" styleClass="surface" style="-fx-padding: 10;">
+    <HBox spacing="15.0" alignment="CENTER_LEFT" styleClass="surface" style="-fx-padding: 5;">
         <TextField fx:id="searchField" promptText="🔍 Rechercher un événement..." prefWidth="280" styleClass="text-field"/>
         <Label text="Tri:" styleClass="filter-label"/>
         <ComboBox fx:id="sortCombo" prefWidth="180" styleClass="combo-box"/>
@@ -58,7 +58,7 @@
     </HBox>
 
     <!-- Actions -->
-    <HBox spacing="15.0" alignment="CENTER_RIGHT" styleClass="surface" style="-fx-padding: 10;">
+    <HBox spacing="15.0" alignment="CENTER_RIGHT" styleClass="surface" style="-fx-padding: 5;">
         <Button text="📅Agenda" onAction="#openGoogleCalendar" styleClass="btn-view-reflet"/>
 
         <Button onAction="#addEvenement" styleClass="btn-add">
@@ -86,8 +86,10 @@
                             <TableColumn fx:id="colTitre" text="Titre" prefWidth="180"/>
                             <TableColumn fx:id="colDate" text="Date" prefWidth="120"/>
                             <TableColumn fx:id="colLieu" text="Lieu" prefWidth="150"/>
+                            <TableColumn fx:id="colSponsor" text="Sponsor" prefWidth="120"/>
                             <TableColumn fx:id="colType" text="Type" prefWidth="100"/>
                             <TableColumn fx:id="colCapacite" text="Capacité" prefWidth="80"/>
+                            <TableColumn fx:id="colNbParticipants" text="Participants" prefWidth="90"/>
                             <TableColumn fx:id="colStatut" text="Statut" prefWidth="100"/>
                         </columns>
                     </TableView>
@@ -136,7 +138,7 @@
                         <Label fx:id="monthYearLabel" text="Mois Année" style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" prefWidth="250" alignment="CENTER"/>
                         <Button text="Suivant ▶" onAction="#nextMonth" styleClass="btn-secondary"/>
                     </HBox>
-                    
+
                     <!-- En-têtes des jours -->
                     <GridPane alignment="CENTER" hgap="5" vgap="5">
                         <Label text="Lun" GridPane.columnIndex="0" style="-fx-font-weight: bold; -fx-alignment: center;" prefWidth="120"/>
@@ -147,7 +149,7 @@
                         <Label text="Sam" GridPane.columnIndex="5" style="-fx-font-weight: bold; -fx-alignment: center;" prefWidth="120"/>
                         <Label text="Dim" GridPane.columnIndex="6" style="-fx-font-weight: bold; -fx-alignment: center;" prefWidth="120"/>
                     </GridPane>
-                    
+
                     <!-- Grille du calendrier -->
                     <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;">
                         <GridPane fx:id="calendarGrid" hgap="5" vgap="5" alignment="CENTER" style="-fx-background-color: white; -fx-padding: 10; -fx-border-color: #e0e0e0; -fx-border-radius: 5;">
