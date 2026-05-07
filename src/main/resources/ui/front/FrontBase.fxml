@@ -48,42 +48,77 @@
 
             <Region HBox.hgrow="ALWAYS" />
 
-            <!-- Boutons NON connecté : Sign Up + Login -->
+            <!-- Boutons NON connecté -->
             <HBox fx:id="guestButtons" alignment="CENTER" spacing="12.0">
                 <Button text="Sign up" mnemonicParsing="false" styleClass="btn-primary" onAction="#signup" style="-fx-background-color: #241197; -fx-background-radius: 20; -fx-font-weight: bold;" />
                 <Button text="Login" mnemonicParsing="false" styleClass="btn-secondary" onAction="#login" style="-fx-background-radius: 20; -fx-font-weight: bold; -fx-text-fill: #241197;" />
             </HBox>
 
-            <!-- Boutons CONNECTÉ : Bienvenue + Profil + Déconnexion -->
+            <!-- Boutons CONNECTÉ -->
             <HBox fx:id="userButtons" alignment="CENTER" spacing="12.0" visible="false" managed="false">
-                <Label fx:id="welcomeLabel" text="Bienvenue" style="-fx-text-fill: #241197; -fx-font-weight: bold; -fx-font-size: 14;" />
-                
-                <!-- Notification Bell -->
-                <Button fx:id="notifBtn" text="🔔 (0)" mnemonicParsing="false" onAction="#openNotifications" style="-fx-background-color: transparent; -fx-text-fill: #6c2a90; -fx-font-weight: bold; -fx-font-size: 16; -fx-cursor: hand;" />
-                
-                <Button fx:id="profileBtn" text="👤 Mon Profil" mnemonicParsing="false" onAction="#openProfile" style="-fx-background-color: #6c2a90; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold;" />
-                <Button fx:id="iaBtn" text="✨ Créations IA" mnemonicParsing="false" onAction="#goIA" style="-fx-background-color: #241197; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold;" />
-                <Button text="🚪 Déconnexion" mnemonicParsing="false" onAction="#logout" style="-fx-background-color: #d63031; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold;" />
+                <Label fx:id="usernameLabel" text="Bienvenue"
+                       style="-fx-text-fill: #241197; -fx-font-weight: bold; -fx-font-size: 14;" />
+
+                <Button fx:id="notifBtn" text="🔔" mnemonicParsing="false" onAction="#openNotifications"
+                        style="-fx-background-color: transparent; -fx-text-fill: #fac62d; -fx-font-weight: bold; -fx-font-size: 16; -fx-cursor: hand;" />
+
+                <Button fx:id="profileBtn" text="👤 Mon Profil" mnemonicParsing="false" onAction="#openProfile"
+                        style="-fx-background-color: #6c2a90; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold;" />
+
+                <Button fx:id="iaBtn" text="✨ Créations IA" mnemonicParsing="false" onAction="#goIA"
+                        style="-fx-background-color: #241197; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold;" />
+
+                <Button fx:id="dashboardBtn" text="📊 Dashboard" mnemonicParsing="false" onAction="#goDashboard"
+                        style="-fx-background-color: #c9a849; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold;" />
+
+                <Button fx:id="logoutBtn" text="🚪 Déconnexion" mnemonicParsing="false" onAction="#logout"
+                        style="-fx-background-color: #d63031; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold;" />
             </HBox>
         </HBox>
     </top>
 
     <center>
-        <VBox spacing="0.0" fillWidth="true">
-            <VBox fx:id="heroSection" spacing="0.0" styleClass="hero-front" VBox.vgrow="ALWAYS">
-                <Label text="Rouh el Fann" styleClass="hero-front-title" />
-                <Label text="L'Âme de l'Art" styleClass="hero-front-subtitle" />
-
-                <Label text="Découvrez une collection époustouflante d'œuvres d'art fantasy, de dragons majestueux aux royaumes enchantés. Art &amp; Fantaisie à chaque regard."
-                       styleClass="hero-front-description" wrapText="true" />
-
-                <HBox spacing="20.0" alignment="CENTER" style="-fx-padding: 40 0 0 0;">
-                    <Button text="✨ Explorer la galerie" mnemonicParsing="false" styleClass="btn-front-primary" onAction="#goOeuvres" />
-                    <Button text="📖 En savoir plus" mnemonicParsing="false" styleClass="btn-front-secondary" onAction="#goAbout" />
-                </HBox>
+        <StackPane>
+            <VBox spacing="0.0" fillWidth="true" VBox.vgrow="ALWAYS">
+                <VBox fx:id="heroSection" spacing="0.0" styleClass="hero-front" VBox.vgrow="ALWAYS">
+                    <Label text="Rouh el Fann" styleClass="hero-front-title" />
+                    <Label text="L'Âme de l'Art" styleClass="hero-front-subtitle" />
+                    <Label text="Découvrez une collection époustouflante d'œuvres d'art fantasy."
+                           styleClass="hero-front-description" wrapText="true" />
+                    <HBox spacing="20.0" alignment="CENTER" style="-fx-padding: 40 0 0 0;">
+                        <Button text="✨ Explorer la galerie" onAction="#goOeuvres" styleClass="btn-front-primary" />
+                        <Button text="📖 En savoir plus" mnemonicParsing="false" styleClass="btn-front-secondary" onAction="#goAbout" />
+                    </HBox>
+                    <!-- Bouton Dashboard Admin (caché par défaut, affiché si Admin) -->
+                    <HBox alignment="CENTER" style="-fx-padding: 20 0 0 0;">
+                        <Button fx:id="adminHeroDashBtn" text="📊 Accéder au Tableau de Bord Admin" mnemonicParsing="false"
+                                onAction="#goDashboard" visible="false" managed="false"
+                                style="-fx-background-color: linear-gradient(to right, #c9a849, #e4c76a);
+                                       -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 15px;
+                                       -fx-background-radius: 25; -fx-padding: 14 30;
+                                       -fx-effect: dropshadow(three-pass-box, rgba(201, 168, 73, 0.4), 12, 0, 0, 4);
+                                       -fx-cursor: hand;" />
+                    </HBox>
+                </VBox>
+                <VBox fx:id="contentHost" spacing="20.0" styleClass="content" VBox.vgrow="ALWAYS" />
             </VBox>
 
-            <VBox fx:id="contentHost" spacing="20.0" styleClass="content" />
-        </VBox>
+            <Button fx:id="cartButton" text="Panier (0)" onAction="#openCart"
+                    StackPane.alignment="TOP_RIGHT"
+                    style="-fx-background-color: #c9a849; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 22; -fx-padding: 11 18;">
+                <StackPane.margin>
+                    <Insets top="22.0" right="26.0" />
+                </StackPane.margin>
+            </Button>
+
+            <Button fx:id="chatbotButton" text="🤖" onAction="#openChatbot"
+                    StackPane.alignment="BOTTOM_RIGHT"
+                    style="-fx-background-color: #241197; -fx-text-fill: white; -fx-font-size: 24px;
+                           -fx-background-radius: 40; -fx-min-width: 64; -fx-min-height: 64;">
+                <StackPane.margin>
+                    <Insets bottom="30.0" right="30.0" />
+                </StackPane.margin>
+            </Button>
+        </StackPane>
     </center>
 </BorderPane>

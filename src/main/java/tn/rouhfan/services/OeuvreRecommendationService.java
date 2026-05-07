@@ -32,7 +32,7 @@ public class OeuvreRecommendationService {
         this.oeuvreService = new OeuvreService();
         this.favorisService = new FavorisService();
         this.httpClient = HttpClient.newHttpClient();
-        Dotenv dotenv = Dotenv.load();
+        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
         this.API_KEY = dotenv.get("GROQ_API_KEY");
     }
 
